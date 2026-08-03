@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌮 Nacho Bowl: Language Practice</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="screen">
+    <div class="login-card">
+      <div class="login-logo">🌮</div>
+      <h1>Nacho Bowl</h1>
+      <p class="subtitle">Sign in to start practicing</p>
+      <form id="loginForm">
+        <input id="usernameInput" type="text" placeholder="Username" autocomplete="username" required />
+        <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password" required />
+        <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+        <p id="loginError" class="error-msg hidden"></p>
+      </form>
+      <p id="loadingMsg" class="loading-msg">Loading accounts...</p>
+    </div>
+  </div>
+
+  <!-- PRACTICE SCREEN -->
+  <div id="practiceScreen" class="screen hidden">
+
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <span class="logo-small">🌮</span>
+        <span id="welcomeName" class="welcome-name"></span>
+      </div>
+      <button id="signOutBtn" class="btn btn-ghost">Sign Out</button>
+      </header>
+    <main class="practice-main">
+
+      <!-- FILTER PANEL -->
+      <section id="filterPanel" class="panel">
+        <h2>Choose What to Practice</h2>
+
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label>Level</label>
+            <div id="levelOptions" class="chip-group"></div>
+          </div>
+          <div class="filter-group">
+            <label>Unit</label>
+            <div id="unitOptions" class="chip-group">
+              <span class="filter-hint">Select a level first</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Study Set</label>
+            <div id="setOptions" class="chip-group">
+              <span class="filter-hint">Select a unit first</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-footer">
+          <div class="mode-row">
+            <label for="modeSelect">Practice Mode:</label>
+            <select id="modeSelect">
+              <option value="spanish-english">Spanish → English</option>
+              <option value="english-spanish">English → Spanish</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </div>
+          <div class="filter-footer-bottom">
+            <span id="cardCountPreview" class="card-count-preview">No cards selected</span>
+            <button id="startPracticeBtn" class="btn btn-primary" disabled>Start Practice</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRACTICE PANEL -->
+      <section id="practicePanel" class="panel hidden">
+
+        <div class="practice-header">
+          <div class="practice-meta">
+            <span id="practiceSetLabel" class="set-label"></span>
+            <span id="practiceProgress" class="progress-label"></span>
+          </div>
+          <button id="endPracticeBtn" class="btn btn-danger">End Practice</button>
+        </div>
+
+        <div class="card-area">
+          <div id="promptCard" class="prompt-card">
+            <p id="promptText" class="prompt-text"></p>
+            <div id="responseDisplay" class="response-display hidden">
+              <span id="responseIcon" class="response-icon"></span>
+              <span id="responseText" class="response-text"></span>
+            </div>
+            <p id="correctAnswerDisplay" class="correct-answer-display hidden"></p>
+            <p id="directionLabel" class="direction-label"></p>
+          </div>
+
+          <div class="answer-area">
+            <input id="answerInput" type="text" placeholder="Type your answer..." autocomplete="off" />
+            <div class="accent-legend">
+              <span class="legend-label">Shortcuts:</span>
+              <span>A=á</span><span>E=é</span><span>I=í</span><span>O=ó</span><span>U=ú</span><span>N=ñ</span><span>Y=ü</span>
+            </div>
+            <div class="answer-actions">
+              <button id="checkBtn" class="btn btn-primary">Check</button>
+            </div>
+            <p id="feedbackText" class="feedback-text"></p>
+            <p id="hintText" class="hint-text"></p>
+          </div>
+
+          <div class="practice-controls">
+            <div class="stats-row">
+              <span class="stat correct">✓ <span id="statCorrect">0</span></span>
+              <span class="stat hinted">💡 <span id="statHinted">0</span></span>
+              <span class="stat incorrect">✗ <span id="statIncorrect">0</span></span>
+              <span class="stat total">📚 <span id="statTotal">0</span></span>
+            </div>
+            <button id="nextBtn" class="btn btn-secondary">Next Card →</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RESULTS PANEL -->
+      <section id="resultsPanel" class="panel hidden">
+        <div class="celebration-header">
+          <div id="celebrationIcon" class="celebration-icon"></div>
+          <h2 id="celebrationTitle" class="celebration-title"></h2>
+          <p id="celebrationMessage" class="celebration-message"></p>
+        </div>
+        <div id="resultsSummary" class="results-summary"></div>
+        <div class="nacho-counter-box">
+          <span class="nacho-counter-label">🌮 Your Nacho Bowl</span>
+          <span id="nachoCountDisplay" class="nacho-count"></span>
+        </div>
+        <div class="results-actions">
+          <button id="practiceAgainBtn" class="btn btn-primary">Practice Again with Same Settings</button>
+          <button id="newPracticeBtn" class="btn btn-secondary">Choose New Settings</button>
+        </div>
+      </section>
+
+      <!-- ATTEMPT HISTORY -->
+      <section class="panel history-panel">
+        <h2>Attempt History</h2>
+        <p class="history-notice">⚠️ Your history is only saved on this browser and device. It will be lost if you clear your browsing data or use a different computer.</p>
+        <ul id="attemptHistoryList" class="attempt-list">
+          <li class="no-history">No attempts yet.</li>
+        </ul>
+      </section>
+
+    </main>
+
+    <footer class="nacho-footer">
+      🌮 <strong id="footerNachoName"></strong>'s Nacho Bowl:
+      <span id="footerNachoCount" class="footer-nacho-count">0 nachos</span>
+    </footer>
+
+  </div>
+
+  <!-- CONFIRM END DIALOG -->
+  <div id="confirmDialog" class="dialog-overlay hidden">
+    <div class="dialog-box">
+      <h3>End Practice?</h3>
+      <p id="confirmMsg">You still have unanswered cards. Your progress so far will be recorded.</p>
+      <div class="dialog-actions">
+        <button id="confirmEndBtn" class="btn btn-danger">Yes, End Practice</button>
+        <button id="cancelEndBtn" class="btn btn-ghost">Keep Practicing</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=10"></script>
+</body>
+</html>
