@@ -825,8 +825,8 @@ historyToggle.addEventListener("click", () => {
   historyContent.classList.toggle("hidden");
 
   historyToggle.textContent = historyContent.classList.contains("hidden")
-    ? "Attempt History ▼"
-    : "Attempt History ▲";
+    ? "Attempt History ▸"
+    : "Attempt History ▾";
 });
 
 // ============================================================
