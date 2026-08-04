@@ -498,6 +498,24 @@ body {
    ============================================================ */
 .history-panel { margin-top: 0; }
 
+.history-toggle {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-family);
+}
+
+.history-toggle:hover {
+  color: var(--color-primary);
+}
+
 .history-notice {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
