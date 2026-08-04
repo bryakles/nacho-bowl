@@ -152,12 +152,14 @@
 
       <!-- ATTEMPT HISTORY -->
       <section class="panel history-panel">
-        <h2 id="historyToggle">Attempt History ▼</h2>
-        <div id="historyContent">
+        <button id="historyToggle" class="history-toggle">
+          Attempt History ▼
+        </button>
+        
+        <div id="historyContent" class="hidden">
           <p class="history-notice">⚠️ Your history is only saved on this browser and device. It will be lost if you clear your browsing data or use a different computer.</p>
 
           <ul id="attemptHistoryList" class="attempt-list">
-        
           <li class="no-history">No attempts yet.</li>
         </ul>
        </div>
