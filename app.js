@@ -127,6 +127,7 @@ const feedbackText     = document.getElementById("feedbackText");
 const hintText         = document.getElementById("hintText");
 const nextBtn          = document.getElementById("nextBtn");
 const modeSelect       = document.getElementById("modeSelect");
+const cardCountSelect  = document.getElementById("cardCountSelect");
 
 const statCorrect      = document.getElementById("statCorrect");
 const statHinted       = document.getElementById("statHinted");
@@ -417,6 +418,8 @@ function shuffleArray(arr) {
 }
 
 function beginPractice(filtered) {
+  maxCardsPerSession = Number(cardCountSelect.value);
+  
   practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
   resetPracticeState();
   practiceActive = true;
