@@ -274,6 +274,26 @@ async function loadData() {
   }
 }
 
+function getRandomBoredCard() {
+  if (!boredCards.length) return null;
+
+  const totalWeight = boredCards.reduce((sum, card) => {
+    return sum + card.weight;
+  }, 0);
+
+  let random = Math.random() * totalWeight;
+
+  for (const card of boredCards) {
+    random -= card.weight;
+
+    if (random <= 0) {
+      return card;
+    }
+  }
+
+  return boredCards[0];
+}
+
 // ============================================================
 // AUTH
 // ============================================================
@@ -299,6 +319,14 @@ signOutBtn.addEventListener("click", () => {
   practiceScreen.classList.add("hidden");
   loginScreen.classList.remove("hidden");
   resetPracticeState();
+});
+
+boredBtn.addEventListener("click", () => {
+  const card = getRandomBoredCard();
+
+  if (!card) return;
+
+  boredDisplay.textContent = `${card.emoji} ${card.content}`;
 });
 
 // ============================================================
