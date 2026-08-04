@@ -143,6 +143,10 @@ const celebrationMsg   = document.getElementById("celebrationMessage");
 const nachoCountDisplay = document.getElementById("nachoCountDisplay");
 const footerNachoName  = document.getElementById("footerNachoName");
 const footerNachoCount = document.getElementById("footerNachoCount");
+
+const boredBtn = document.getElementById("boredBtn");
+const boredDisplay = document.getElementById("boredDisplay");
+
 const practiceAgainBtn = document.getElementById("practiceAgainBtn");
 const newPracticeBtn   = document.getElementById("newPracticeBtn");
 
