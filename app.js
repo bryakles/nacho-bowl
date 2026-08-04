@@ -159,6 +159,9 @@ const attemptHistoryList = document.getElementById("attemptHistoryList");
 const historyToggle = document.getElementById("historyToggle");
 const historyContent = document.getElementById("historyContent");
 
+const boredEmoji = document.getElementById("boredEmoji");
+const boredWord = document.getElementById("boredWord");
+
 // ============================================================
 // CSV PARSING
 // ============================================================
@@ -326,7 +329,8 @@ boredBtn.addEventListener("click", () => {
 
   if (!card) return;
 
-  boredDisplay.textContent = `${card.emoji} ${card.content}`;
+  boredEmoji.textContent = card.emoji;
+  boredWord.textContent = card.content;
 });
 
 // ============================================================
