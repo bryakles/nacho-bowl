@@ -655,4 +655,27 @@ body {
   .prompt-text { font-size: var(--font-size-xl); }
   .answer-actions { flex-direction: column; }
   .filter-footer { flex-direction: column; align-items: flex-start; }
+
+   .nacho-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .footer-left {
+    justify-content: center;
+  }
+
+  .bored-area {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  #boredEmoji {
+    font-size: 1.75rem;
+  }
+
+  #boredWord {
+    font-size: var(--font-size-lg);
+  }
 }
