@@ -679,13 +679,3 @@ body {
     font-size: var(--font-size-lg);
   }
 }
-
-@media (max-width: 480px) {
-  .nacho-footer {
-    background: red;
-  }
-}
-
-body {
-  background: purple;
-}
