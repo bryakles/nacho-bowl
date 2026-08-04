@@ -5,7 +5,7 @@ const CARDS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlCOUR8
 const ACCOUNTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOW8Q53UWa4lEsH1Sk9P_8KmWatSJCqjoCVpTA_uJ-XHH0HGsNzAaqyeuL-sBCNatAC4uAMhhlB6o3/pub?output=csv";
 const HISTORY_STORAGE_KEY = "spanish-practice-history-v1";
 const NACHO_STORAGE_KEY   = "nacho-bowl-count-v1";
-const MAX_CARDS_PER_SESSION = 25;
+let maxCardsPerSession = 25;
 
 // ============================================================
 // NACHO TIERS
@@ -386,7 +386,7 @@ function updateCardCountPreview() {
     cardCountPreview.className = "card-count-preview";
     startPracticeBtn.disabled = true;
   } else {
-    const shown = Math.min(count, MAX_CARDS_PER_SESSION);
+    const shown = Math.min(count, maxCardsPerSession);
     cardCountPreview.textContent = `${count} card${count !== 1 ? "s" : ""} available — ${shown} will be selected randomly`;
     cardCountPreview.className = "card-count-preview has-cards";
     startPracticeBtn.disabled = false;
@@ -417,7 +417,7 @@ function shuffleArray(arr) {
 }
 
 function beginPractice(filtered) {
-  practiceCards = shuffleArray(filtered).slice(0, MAX_CARDS_PER_SESSION);
+  practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
   resetPracticeState();
   practiceActive = true;
 
