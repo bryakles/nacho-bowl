@@ -248,10 +248,6 @@ async function loadData() {
       boredRes.text(),
     ]);
     
-    [cardsText, accountsText] = await Promise.all([
-      cardsRes.text(),
-      accountsRes.text(),
-    ]);
     // Save fresh data to cache
     localStorage.setItem(CARDS_CACHE_KEY, cardsText);
     localStorage.setItem(ACCOUNTS_CACHE_KEY, accountsText);
@@ -260,6 +256,8 @@ async function loadData() {
     // Network failed — try cache
     cardsText    = localStorage.getItem(CARDS_CACHE_KEY);
     accountsText = localStorage.getItem(ACCOUNTS_CACHE_KEY);
+    boredText    = localStorage.getItem(BORED_CACHE_KEY);
+    
     if (cardsText && accountsText) {
       loadingMsg.textContent = "⚠️ Offline — using last saved data.";
     } else {
