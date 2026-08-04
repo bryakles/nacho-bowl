@@ -627,8 +627,18 @@ body {
 }
 
 #boredDisplay {
-  font-size: var(--font-size-xl);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-weight: 700;
+}
+
+#boredEmoji {
+  font-size: 2rem;
+}
+
+#boredWord {
+  font-size: var(--font-size-xl);
 }
 
 .footer-nacho-count {
