@@ -500,20 +500,8 @@ body {
 
 .history-toggle {
   width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text);
-  cursor: pointer;
-  padding: 0;
+  justify-content: space-between;
   margin-bottom: 1.25rem;
-  font-family: var(--font-family);
-}
-
-.history-toggle:hover {
-  color: var(--color-primary);
 }
 
 .history-notice {
