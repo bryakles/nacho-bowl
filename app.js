@@ -531,16 +531,29 @@ function stripAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
+function getAcceptedAnswers(answerString) {
+  // Remove teacher notes in parentheses
+  const withoutNotes = answerString.replace(/\([^)]*\)/g, "");
+
+  // Split alternatives inside brackets
+  return withoutNotes
+    .replace("[", "|")
+    .replace("]", "")
+    .split("|")
+    .map(a => normalizeAnswer(a))
+    .filter(Boolean);
+}
+
 function checkAnswer() {
   if (currentCardIndex < 0 || currentCardState === "done") return;
 
   const card = practiceCards[currentCardIndex];
-  const expected = getExpectedAnswer(card);
+  const expectedAnswers = getAcceptedAnswers(getExpectedAnswer(card));
   const student = answerInput.value;
 
   if (!student.trim()) return;
 
-  const isCorrect = normalizeAnswer(student) === normalizeAnswer(expected);
+  const isCorrect = expectedAnswers.includes(normalizeAnswer(student));
 
   if (currentCardState === "fresh") {
     if (isCorrect) {
@@ -562,7 +575,7 @@ function checkAnswer() {
       currentCardFirstWrongAnswer = student;
       feedbackText.textContent = "✗ Not quite — try again!";
       feedbackText.className = "feedback-text incorrect";
-      hintText.textContent = getHint(student, expected);
+      hintText.textContent = getHint(student, expectedAnswers[0]);
       answerInput.value = "";
       answerInput.focus();
     }
@@ -591,7 +604,7 @@ function checkAnswer() {
       responseIcon.textContent = "✗";
       responseText.textContent = currentCardFirstWrongAnswer;
       responseDisplay.className = "response-display incorrect";
-      correctAnswerDisplay.textContent = expected;
+      correctAnswerDisplay.textContent = expectedAnswers.join(" / ");
       correctAnswerDisplay.className = "correct-answer-display";
       directionLabel.textContent = "Press Enter for the next card.";
       feedbackText.textContent = "";
