@@ -608,10 +608,27 @@ body {
   padding: 0.6rem 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   font-size: var(--font-size-sm);
   color: #92400e;
   z-index: 10;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+}
+
+.bored-area {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#boredDisplay {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
 }
 
 .footer-nacho-count {
