@@ -3,6 +3,7 @@
 // ============================================================
 const CARDS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlCOUR8nLtmiCUgissCCNAnnpn5hbMM1dLjEKHO0OohmbdvbTldfI__y3TGA39DPb-ZYeVPHCD_Fb/pub?output=csv";
 const ACCOUNTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOW8Q53UWa4lEsH1Sk9P_8KmWatSJCqjoCVpTA_uJ-XHH0HGsNzAaqyeuL-sBCNatAC4uAMhhlB6o3/pub?output=csv";
+const BORED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJaLVNNtFXTgvxl_BVwGz4efup2RNkgyjdOBcW_DNS7Erg9slS40p8u95XN2p5j0M3iIDoPCswGQMv/pub?output=csv";
 const HISTORY_STORAGE_KEY = "spanish-practice-history-v1";
 const NACHO_STORAGE_KEY   = "nacho-bowl-count-v1";
 let maxCardsPerSession = 25;
@@ -68,6 +69,7 @@ function randomMessage(tier) {
 // ============================================================
 let allCards = [];       // All cards loaded from Google Sheet
 let allAccounts = [];    // All accounts loaded from Google Sheet
+let boredCards = [];     // Bored button emoji cards
 let currentUser = null;  // Logged-in student { name, username, password }
 
 let selectedLevels = new Set();
@@ -201,11 +203,25 @@ function parseAccounts(csvText) {
     }));
 }
 
+function parseBoredCards(csvText) {
+  const rows = parseCSV(csvText);
+
+  return rows
+    .filter(r => r.emoji && r.content)
+    .map(r => ({
+      emoji: r.emoji,
+      content: r.content,
+      category: r.category || "",
+      weight: Number(r.weight) || 1,
+    }));
+}
+
 // ============================================================
 // DATA LOADING
 // ============================================================
 const CARDS_CACHE_KEY    = "spanish-cards-cache-v1";
 const ACCOUNTS_CACHE_KEY = "spanish-accounts-cache-v1";
+const BORED_CACHE_KEY = "spanish-bored-cache-v1";
 
 async function loadData() {
   loadingMsg.classList.remove("hidden");
@@ -213,12 +229,21 @@ async function loadData() {
   // Try loading from network first, fall back to cache
   let cardsText    = null;
   let accountsText = null;
+  let boredText    = null;
 
   try {
-    const [cardsRes, accountsRes] = await Promise.all([
+    const [cardsRes, accountsRes, boredRes] = await Promise.all([
       fetch(CARDS_CSV_URL),
       fetch(ACCOUNTS_CSV_URL),
+      fetch(BORED_CSV_URL),
     ]);
+
+    [cardsText, accountsText, boredText] = await Promise.all([
+      cardsRes.text(),
+      accountsRes.text(),
+      boredRes.text(),
+    ]);
+    
     [cardsText, accountsText] = await Promise.all([
       cardsRes.text(),
       accountsRes.text(),
@@ -226,6 +251,7 @@ async function loadData() {
     // Save fresh data to cache
     localStorage.setItem(CARDS_CACHE_KEY, cardsText);
     localStorage.setItem(ACCOUNTS_CACHE_KEY, accountsText);
+    localStorage.setItem(BORED_CACHE_KEY, boredText);
   } catch (err) {
     // Network failed — try cache
     cardsText    = localStorage.getItem(CARDS_CACHE_KEY);
@@ -240,6 +266,7 @@ async function loadData() {
 
   allCards    = parseCards(cardsText);
   allAccounts = parseAccounts(accountsText);
+  boredCards  = parseBoredCards(boredText);
   if (!loadingMsg.textContent.startsWith("⚠️")) {
     loadingMsg.textContent = "";
   }
