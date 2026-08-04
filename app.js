@@ -150,6 +150,8 @@ const confirmEndBtn    = document.getElementById("confirmEndBtn");
 const cancelEndBtn     = document.getElementById("cancelEndBtn");
 
 const attemptHistoryList = document.getElementById("attemptHistoryList");
+const historyToggle = document.getElementById("historyToggle");
+const historyContent = document.getElementById("historyContent");
 
 // ============================================================
 // CSV PARSING
