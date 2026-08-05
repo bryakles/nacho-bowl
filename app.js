@@ -506,6 +506,7 @@ function beginPractice(filtered) {
     "spanish-english": "Spanish→English",
     "english-spanish": "English→Spanish",
     "mixed": "Mixed",
+    "multiple-choice": "Multiple Choice",
   };
   sessionModeLabel = modeLabels[practiceMode] || practiceMode;
 
