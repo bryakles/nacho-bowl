@@ -953,9 +953,15 @@ function endPractice(early) {
 
   saveAttemptHistory(entry);
 
-  // Add correct answers to nacho count
-  const totalNachos = addNachos(correctCount);
-  updateFooterNachos();
+  // Add nachos
+let nachosEarned = correctCount;
+
+if (sessionStartMode === "multiple-choice") {
+  nachosEarned = sessionStartLength === 25 ? 3 : 1;
+}
+
+const totalNachos = addNachos(nachosEarned);
+updateFooterNachos();
 
   // Pick celebration tier
   const tier = getTier(pct);
