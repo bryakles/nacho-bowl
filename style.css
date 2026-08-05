@@ -155,9 +155,8 @@ body {
 .practice-main {
   max-width: 760px;
   width: 100%;
-  flex: 1;
   margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  padding: 1.5rem 1rem 5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -693,7 +692,10 @@ body {
 .dialog-actions { display: flex; gap: 0.75rem; }
 
 .nacho-footer {
-  margin-top: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   background: linear-gradient(135deg, #fef3c7, #fde68a);
   border-top: 2px solid #f59e0b;
   padding: 0.6rem 1.5rem;
@@ -702,7 +704,7 @@ body {
   gap: 1rem;
   font-size: var(--font-size-sm);
   color: #92400e;
-  z-index: 10;
+  z-index: 100;
 }
 
 .footer-left {
