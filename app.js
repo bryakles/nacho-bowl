@@ -906,6 +906,28 @@ function formatPromptText(text) {
     .replaceAll("|", "<br>");
 }
 
+function launchNachoConfetti() {
+  const container = document.getElementById("nachoConfetti");
+
+  container.innerHTML = "";
+
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement("div");
+
+    piece.className = "nacho-piece";
+    piece.textContent = "🌮";
+
+    piece.style.left = Math.random() * 100 + "%";
+    piece.style.animationDuration = (2 + Math.random() * 2) + "s";
+
+    container.appendChild(piece);
+  }
+
+  setTimeout(() => {
+    container.innerHTML = "";
+  }, 4500);
+}
+
 // ============================================================
 // END PRACTICE
 // ============================================================
