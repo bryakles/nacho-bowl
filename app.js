@@ -555,7 +555,7 @@ function showNextCard() {
   if (mode === "spanish-english" || mode === "answer") {
     currentCardPromptWord = card.spanish;
     promptText.innerHTML = card.spanish.replaceAll("|", "<br>");
-    directionLabel.textContent = mode === "answer" ? "Answer" : "Spanish → English";
+    directionLabel.textContent = mode === "answer" ? "" : "Spanish → English";
     answerInput.placeholder = "Type the English meaning...";
   } else {
     currentCardPromptWord = card.english;
