@@ -981,6 +981,10 @@ if (sessionStartMode === "multiple-choice") {
 const totalNachos = addNachos(nachosEarned);
 updateFooterNachos();
 
+nachoEarnedMessage.textContent = nachosEarned > 0
+  ? `+${nachosEarned} nacho${nachosEarned !== 1 ? "s" : ""} earned!`
+  : "No nachos earned this session.";
+
   // Pick celebration tier
   const tier = getTier(pct);
   celebrationIcon.textContent = tier.icon;
