@@ -554,14 +554,15 @@ function showNextCard() {
 
   if (mode === "spanish-english" || mode === "answer") {
     currentCardPromptWord = card.spanish;
-    promptText.innerHTML = card.spanish.replaceAll("|", "<br>");
+    promptText.innerHTML = formatPromptText(card.spanish);
     directionLabel.textContent = mode === "answer" ? "" : "Spanish → English";
     answerInput.placeholder = "Type the English meaning...";
   } else {
     currentCardPromptWord = card.english;
-    promptText.innerHTML = card.english.replaceAll("|", "<br>");
+    promptText.innerHTML = formatPromptText(card.english);
     directionLabel.textContent = "English → Spanish";
     answerInput.placeholder = "Type the Spanish word...";
+  }
   }
 
   // Store the expected answer on the card temporarily
@@ -783,7 +784,14 @@ function advanceCard() {
     // Card skipped via Next button — mark as attempted (unanswered)
     attemptedIndices.add(currentCardIndex);
   }
+
   showNextCard();
+}
+
+function formatPromptText(text) {
+  return text
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+    .replaceAll("|", "<br>");
 }
 
 // ============================================================
