@@ -645,7 +645,13 @@ function createMultipleChoiceOptions(card, mode) {
     correctChoice = correctAnswer;
   }
   
-  choices = shuffleArray(choices);
+  // Shuffle everything except "None of these"
+  choices = shuffleArray(
+    choices.filter(choice => choice !== "None of these")
+  );
+  
+  // Always put it last
+  choices.push("None of these");
 
   multipleChoiceOptions.innerHTML = "";
 
