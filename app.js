@@ -554,17 +554,28 @@ function showNextCard() {
     ? (Math.random() < 0.5 ? "spanish-english" : "english-spanish")
     : practiceMode;
 
-  if (mode === "spanish-english" || mode === "answer") {
-    currentCardPromptWord = card.spanish;
-    promptText.innerHTML = formatPromptText(card.spanish);
-    directionLabel.textContent = mode === "answer" ? "" : "Spanish → English";
-    answerInput.placeholder = "Type the English meaning...";
-  } else {
-    currentCardPromptWord = card.english;
-    promptText.innerHTML = formatPromptText(card.english);
-    directionLabel.textContent = "English → Spanish";
-    answerInput.placeholder = "Type the Spanish word...";
-  }
+if (mode === "spanish-english" || mode === "answer") {
+  currentCardPromptWord = card.spanish;
+  promptText.innerHTML = formatPromptText(card.spanish);
+  directionLabel.textContent = mode === "answer" ? "" : "Spanish → English";
+  answerInput.placeholder = "Type the English meaning...";
+} else {
+  currentCardPromptWord = card.english;
+  promptText.innerHTML = formatPromptText(card.english);
+  directionLabel.textContent = "English → Spanish";
+  answerInput.placeholder = "Type the Spanish word...";
+}
+
+if (practiceMode === "multiple-choice") {
+  answerInput.classList.add("hidden");
+  checkBtn.classList.add("hidden");
+  multipleChoiceOptions.classList.remove("hidden");
+  createMultipleChoiceOptions(card, mode);
+} else {
+  answerInput.classList.remove("hidden");
+  checkBtn.classList.remove("hidden");
+  multipleChoiceOptions.classList.add("hidden");
+}
 
   // Store the expected answer on the card temporarily
   card._mode = mode;
