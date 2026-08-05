@@ -595,6 +595,37 @@ function getExpectedAnswer(card) {
     : card.spanish;
 }
 
+function createMultipleChoiceOptions(card, mode) {
+  const correctAnswer = mode === "spanish-english" ? card.english : card.spanish;
+  const answerPool = practiceCards
+    .map(c => mode === "spanish-english" ? c.english : c.spanish)
+    .filter(a => a !== correctAnswer);
+
+  const distractors = shuffleArray(answerPool).slice(0, 3);
+
+  let choices = [
+    correctAnswer,
+    ...distractors,
+    "None of these"
+  ];
+
+  choices = shuffleArray(choices);
+
+  multipleChoiceOptions.innerHTML = "";
+
+  choices.forEach((choice, index) => {
+    const button = document.createElement("button");
+    button.className = "mode-chip";
+    button.textContent = `${String.fromCharCode(65 + index)}. ${choice}`;
+
+    button.addEventListener("click", () => {
+      checkMultipleChoiceAnswer(choice, correctAnswer);
+    });
+
+    multipleChoiceOptions.appendChild(button);
+  });
+}
+
 function normalizeAnswer(str) {
   return str
     .trim()
