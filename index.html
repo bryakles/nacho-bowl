@@ -79,11 +79,15 @@
           </div>
           
           <div class="mode-row">
-            <label for="cardCountSelect">Session Length:</label>
-            <select id="cardCountSelect">
-              <option value="10">Quick Practice (10 cards)</option>
-              <option value="25" selected>Standard Practice (25 cards)</option>
-            </select>
+            <label>Session Length:</label>
+            <div class="session-chips">
+              <button class="session-chip" data-count="10">
+                Quick (10)
+              </button>
+              <button class="session-chip active" data-count="25">
+                Standard (25)
+              </button>
+            </div>
           </div>
           
           <div class="filter-footer-bottom">
