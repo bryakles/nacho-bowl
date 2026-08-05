@@ -499,6 +499,31 @@ body {
 /* ============================================================
    RESULTS / CELEBRATION
    ============================================================ */
+#nachoConfetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 500;
+}
+
+.nacho-piece {
+  position: absolute;
+  top: -60px;
+  font-size: 2rem;
+  animation: nachoFall linear forwards;
+}
+
+@keyframes nachoFall {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  to {
+    transform: translateY(110vh) rotate(720deg);
+  }
+}
+
 .celebration-header {
   text-align: center;
   margin-bottom: 1.25rem;
