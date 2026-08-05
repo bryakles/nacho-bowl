@@ -1002,8 +1002,17 @@ function endPractice(early) {
   const unanswered = practiceCards.length - attemptedIndices.size;
   const total = practiceCards.length;
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
-  if (pct === 100) {
-  launchNachoConfetti();
+
+ let perfectSessions = getPerfectSessionCount();
+
+if (pct === 100) {
+  perfectSessions = addPerfectSession();
+
+  if (perfectSessions % 10 === 0) {
+    launchGiantTaco();
+  } else {
+    launchNachoConfetti();
+  }
 }
 
   // Build set name label
