@@ -143,6 +143,7 @@ const celebrationIcon  = document.getElementById("celebrationIcon");
 const celebrationTitle = document.getElementById("celebrationTitle");
 const celebrationMsg   = document.getElementById("celebrationMessage");
 const nachoCountDisplay = document.getElementById("nachoCountDisplay");
+const nachoEarnedMessage = document.getElementById("nachoEarnedMessage");
 const footerNachoName  = document.getElementById("footerNachoName");
 const footerNachoCount = document.getElementById("footerNachoCount");
 
