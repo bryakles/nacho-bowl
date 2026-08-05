@@ -629,7 +629,7 @@ function createMultipleChoiceOptions(card, mode) {
 
   choices.forEach((choice, index) => {
     const button = document.createElement("button");
-    button.className = "mode-chip";
+    button.className = "multiple-choice-btn";
     button.textContent = `${String.fromCharCode(65 + index)}. ${choice}`;
 
     button.addEventListener("click", () => {
