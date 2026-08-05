@@ -461,6 +461,35 @@ body {
   border-color: var(--color-mode-chip-active);
 }
 
+.session-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.session-chip {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+  user-select: none;
+}
+
+.session-chip:hover {
+  border-color: #ef4444;
+}
+
+.session-chip.active {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
 /* ============================================================
    RESULTS PANEL
    ============================================================ */
