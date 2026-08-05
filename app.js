@@ -918,12 +918,14 @@ function launchGiantTaco() {
   void taco.offsetWidth;
   
   taco.classList.add("taco-drop");
-
-  setTimeout(() => {
-    taco.classList.add("hidden");
-    taco.classList.remove("taco-drop");
-  }, 3000);
 }
+
+document.getElementById("giantTaco").addEventListener("click", () => {
+  const taco = document.getElementById("giantTaco");
+
+  taco.classList.add("hidden");
+  taco.classList.remove("taco-drop");
+});
 
 function launchNachoConfetti() {
   const container = document.getElementById("nachoConfetti");
