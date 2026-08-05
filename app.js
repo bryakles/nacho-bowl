@@ -669,23 +669,31 @@ function getAcceptedAnswers(answerString) {
 function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer) {
   if (currentCardIndex < 0 || currentCardState === "done") return;
 
+  const buttons = document.querySelectorAll("#multipleChoiceOptions button");
+
+  buttons.forEach(btn => {
+    btn.disabled = true;
+
+    const text = btn.textContent.replace(/^[A-E]\.\s/, "");
+
+    if (text === correctAnswer) {
+      btn.style.borderColor = "var(--color-success)";
+      btn.style.background = "#dcfce7";
+    }
+
+    if (text === selectedAnswer && selectedAnswer !== correctAnswer) {
+      btn.style.borderColor = "var(--color-danger)";
+      btn.style.background = "#fee2e2";
+    }
+  });
+
   if (selectedAnswer === correctAnswer) {
     correctCount++;
-    currentCardState = "done";
-    attemptedIndices.add(currentCardIndex);
-
     responseIcon.textContent = "✓";
     responseText.textContent = selectedAnswer;
     responseDisplay.className = "response-display correct";
-
-    feedbackText.textContent = "";
-    hintText.textContent = "";
-
   } else {
     incorrectCount++;
-    currentCardState = "done";
-    attemptedIndices.add(currentCardIndex);
-
     responseIcon.textContent = "✗";
     responseText.textContent = selectedAnswer;
     responseDisplay.className = "response-display incorrect";
@@ -694,11 +702,8 @@ function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer) {
     correctAnswerDisplay.className = "correct-answer-display";
   }
 
-  multipleChoiceOptions.classList.add("hidden");
-
-  document.querySelectorAll("#multipleChoiceOptions button").forEach(btn => {
-    btn.disabled = true;
-  });
+  currentCardState = "done";
+  attemptedIndices.add(currentCardIndex);
 
   directionLabel.textContent = "Press Enter for the next card.";
 
