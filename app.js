@@ -542,12 +542,12 @@ function showNextCard() {
 
   if (mode === "spanish-english") {
     currentCardPromptWord = card.spanish;
-    promptText.textContent = card.spanish;
+    promptText.innerHTML = card.spanish.replaceAll("|", "<br>");
     directionLabel.textContent = "Spanish → English";
     answerInput.placeholder = "Type the English meaning...";
   } else {
     currentCardPromptWord = card.english;
-    promptText.textContent = card.english;
+    promptText.innerHTML = card.english.replaceAll("|", "<br>");
     directionLabel.textContent = "English → Spanish";
     answerInput.placeholder = "Type the Spanish word...";
   }
