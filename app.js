@@ -6,6 +6,8 @@ const ACCOUNTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOW8Q
 const BORED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJaLVNNtFXTgvxl_BVwGz4efup2RNkgyjdOBcW_DNS7Erg9slS40p8u95XN2p5j0M3iIDoPCswGQMv/pub?output=csv";
 const HISTORY_STORAGE_KEY = "spanish-practice-history-v1";
 const NACHO_STORAGE_KEY   = "nacho-bowl-count-v1";
+const PERFECT_STORAGE_KEY = "nacho-perfect-sessions-v1";
+
 let maxCardsPerSession = 25;
 
 // ============================================================
@@ -906,6 +908,23 @@ function formatPromptText(text) {
     .replaceAll("|", "<br>");
 }
 
+function launchGiantTaco() {
+  const taco = document.getElementById("giantTaco");
+
+  taco.classList.remove("hidden");
+  
+  // Restart animation if it has already happened before
+  taco.classList.remove("taco-drop");
+  void taco.offsetWidth;
+  
+  taco.classList.add("taco-drop");
+
+  setTimeout(() => {
+    taco.classList.add("hidden");
+    taco.classList.remove("taco-drop");
+  }, 3000);
+}
+
 function launchNachoConfetti() {
   const container = document.getElementById("nachoConfetti");
 
@@ -962,6 +981,18 @@ function getNachoCount() {
 function addNachos(n) {
   const key = `${NACHO_STORAGE_KEY}-${currentUser?.username || "guest"}`;
   const total = getNachoCount() + n;
+  localStorage.setItem(key, total);
+  return total;
+}
+
+function getPerfectSessionCount() {
+  const key = `${PERFECT_STORAGE_KEY}-${currentUser?.username || "guest"}`;
+  return parseInt(localStorage.getItem(key) || "0", 10);
+}
+
+function addPerfectSession() {
+  const key = `${PERFECT_STORAGE_KEY}-${currentUser?.username || "guest"}`;
+  const total = getPerfectSessionCount() + 1;
   localStorage.setItem(key, total);
   return total;
 }
