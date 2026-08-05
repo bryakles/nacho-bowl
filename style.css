@@ -517,6 +517,32 @@ body {
   pointer-events: none;
 }
 
+#giantTaco.taco-drop {
+  animation: tacoDrop 2s ease-out forwards;
+}
+
+@keyframes tacoDrop {
+  0% {
+    top: -200px;
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  70% {
+    top: 45%;
+    transform: translateX(-50%) rotate(360deg);
+  }
+
+  85% {
+    top: 38%;
+    transform: translateX(-50%) rotate(390deg);
+  }
+
+  100% {
+    top: 42%;
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
 .nacho-piece {
   position: absolute;
   top: -60px;
