@@ -663,6 +663,45 @@ function getAcceptedAnswers(answerString) {
     .filter(Boolean);
 }
 
+function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer) {
+  if (currentCardIndex < 0 || currentCardState === "done") return;
+
+  if (selectedAnswer === correctAnswer) {
+    correctCount++;
+    currentCardState = "done";
+    attemptedIndices.add(currentCardIndex);
+
+    responseIcon.textContent = "✓";
+    responseText.textContent = selectedAnswer;
+    responseDisplay.className = "response-display correct";
+
+    feedbackText.textContent = "";
+    hintText.textContent = "";
+
+  } else {
+    incorrectCount++;
+    currentCardState = "done";
+    attemptedIndices.add(currentCardIndex);
+
+    responseIcon.textContent = "✗";
+    responseText.textContent = selectedAnswer;
+    responseDisplay.className = "response-display incorrect";
+
+    correctAnswerDisplay.textContent = correctAnswer;
+    correctAnswerDisplay.className = "correct-answer-display";
+  }
+
+  multipleChoiceOptions.classList.add("hidden");
+
+  document.querySelectorAll("#multipleChoiceOptions button").forEach(btn => {
+    btn.disabled = true;
+  });
+
+  directionLabel.textContent = "Press Enter for the next card.";
+
+  updateStats();
+}
+
 function checkAnswer() {
   if (currentCardIndex < 0 || currentCardState === "done") return;
 
