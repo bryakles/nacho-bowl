@@ -507,6 +507,16 @@ body {
   z-index: 500;
 }
 
+#giantTaco {
+  position: fixed;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8rem;
+  z-index: 600;
+  pointer-events: none;
+}
+
 .nacho-piece {
   position: absolute;
   top: -60px;
