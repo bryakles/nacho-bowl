@@ -789,7 +789,9 @@ function advanceCard() {
 
 function formatPromptText(text) {
   return text
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (match, label, url) => {
+      return `<a href="${url.replace(/&/g, "&amp;")}" target="_blank">${label}</a>`;
+    })
     .replaceAll("|", "<br>");
 }
 
