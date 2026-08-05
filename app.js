@@ -128,7 +128,7 @@ const checkBtn         = document.getElementById("checkBtn");
 const feedbackText     = document.getElementById("feedbackText");
 const hintText         = document.getElementById("hintText");
 const nextBtn          = document.getElementById("nextBtn");
-const cardCountSelect  = document.getElementById("cardCountSelect");
+let selectedCardCount = 25;
 
 const statCorrect      = document.getElementById("statCorrect");
 const statHinted       = document.getElementById("statHinted");
@@ -468,6 +468,21 @@ startPracticeBtn.addEventListener("click", () => {
 });
 
 // ============================================================
+// SESSION LENGTH CHIPS
+// ============================================================
+document.querySelectorAll(".session-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    selectedCardCount = Number(chip.dataset.count);
+
+    document.querySelectorAll(".session-chip").forEach(c => {
+      c.classList.remove("active");
+    });
+
+    chip.classList.add("active");
+  });
+});
+
+// ============================================================
 // PRACTICE SESSION
 // ============================================================
 function shuffleArray(arr) {
@@ -480,7 +495,7 @@ function shuffleArray(arr) {
 }
 
 function beginPractice(filtered) {
-  maxCardsPerSession = Number(cardCountSelect.value);
+  maxCardsPerSession = selectedCardCount;
   
   practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
   resetPracticeState();
