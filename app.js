@@ -549,7 +549,7 @@ function showNextCard() {
   currentCardPromptWord = "";
 
   const card = practiceCards[currentCardIndex];
-  const mode = practiceMode === "mixed"
+  const mode = (practiceMode === "mixed" || practiceMode === "multiple-choice")
     ? (Math.random() < 0.5 ? "spanish-english" : "english-spanish")
     : practiceMode;
 
