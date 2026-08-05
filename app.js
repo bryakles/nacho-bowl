@@ -622,14 +622,26 @@ function createMultipleChoiceOptions(card, mode) {
 
   const distractors = shuffleArray(answerPool)
     .filter((value, index, self) => self.indexOf(value) === index)
-    .slice(0, 3);
-
-  let choices = [
-    correctAnswer,
-    ...distractors,
-    "None of these"
-  ];
-
+    .slice(0, 4);
+  
+  let choices;
+  let correctChoice;
+  
+  if (Math.random() < 0.2) {
+    choices = [
+      ...distractors,
+      "None of these"
+    ];
+    correctChoice = "None of these";
+  } else {
+    choices = [
+      correctAnswer,
+      ...distractors.slice(0, 3),
+      "None of these"
+    ];
+    correctChoice = correctAnswer;
+  }
+  
   choices = shuffleArray(choices);
 
   multipleChoiceOptions.innerHTML = "";
@@ -640,7 +652,7 @@ function createMultipleChoiceOptions(card, mode) {
     button.textContent = `${String.fromCharCode(65 + index)}. ${choice}`;
 
     button.addEventListener("click", () => {
-      checkMultipleChoiceAnswer(choice, correctAnswer);
+      checkMultipleChoiceAnswer(choice, correctChoice);
     });
 
     multipleChoiceOptions.appendChild(button);
