@@ -497,6 +497,9 @@ function shuffleArray(arr) {
 
 function beginPractice(filtered) {
   maxCardsPerSession = selectedCardCount;
+
+  sessionStartMode = practiceMode;
+  sessionStartLength = maxCardsPerSession;
   
   practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
   resetPracticeState();
