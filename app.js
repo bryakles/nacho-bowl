@@ -971,6 +971,9 @@ function endPractice(early) {
   const unanswered = practiceCards.length - attemptedIndices.size;
   const total = practiceCards.length;
   const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  if (pct === 100) {
+  launchNachoConfetti();
+}
 
   // Build set name label
   const setNames = [...new Set(practiceCards.map(c => c.setName))].join(", ");
