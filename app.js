@@ -124,6 +124,7 @@ const responseText     = document.getElementById("responseText");
 const correctAnswerDisplay = document.getElementById("correctAnswerDisplay");
 const directionLabel   = document.getElementById("directionLabel");
 const answerInput      = document.getElementById("answerInput");
+const multipleChoiceOptions = document.getElementById("multipleChoiceOptions");
 const checkBtn         = document.getElementById("checkBtn");
 const feedbackText     = document.getElementById("feedbackText");
 const hintText         = document.getElementById("hintText");
