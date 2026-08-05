@@ -563,7 +563,6 @@ function showNextCard() {
     directionLabel.textContent = "English → Spanish";
     answerInput.placeholder = "Type the Spanish word...";
   }
-  }
 
   // Store the expected answer on the card temporarily
   card._mode = mode;
