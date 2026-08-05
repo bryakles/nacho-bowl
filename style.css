@@ -18,6 +18,11 @@
   --color-chip-text: #4f46e5;
   --color-chip-active: #4f46e5;
   --color-chip-active-text: #ffffff;
+   
+  --color-mode-chip: #e0f2fe;
+  --color-mode-chip-text: #0369a1;
+  --color-mode-chip-active: var(--color-secondary);
+  --color-mode-chip-active-text: #ffffff;
 
   --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-size-sm: 0.875rem;
@@ -425,6 +430,35 @@ body {
   font-size: var(--font-size-sm);
   font-family: var(--font-family);
   outline: none;
+}
+
+.mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mode-chip {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  background: var(--color-mode-chip);
+  color: var(--color-mode-chip-text);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+  user-select: none;
+}
+
+.mode-chip:hover {
+  border-color: var(--color-secondary);
+}
+
+.mode-chip.active {
+  background: var(--color-mode-chip-active);
+  color: var(--color-mode-chip-active-text);
+  border-color: var(--color-mode-chip-active);
 }
 
 /* ============================================================
