@@ -128,7 +128,6 @@ const checkBtn         = document.getElementById("checkBtn");
 const feedbackText     = document.getElementById("feedbackText");
 const hintText         = document.getElementById("hintText");
 const nextBtn          = document.getElementById("nextBtn");
-const modeSelect       = document.getElementById("modeSelect");
 const cardCountSelect  = document.getElementById("cardCountSelect");
 
 const statCorrect      = document.getElementById("statCorrect");
@@ -488,7 +487,6 @@ function beginPractice(filtered) {
   practiceActive = true;
 
   // Lock mode for this session
-  practiceMode = modeSelect.value;
   const modeLabels = {
     "spanish-english": "Spanish→English",
     "english-spanish": "English→Spanish",
@@ -502,7 +500,6 @@ function beginPractice(filtered) {
 
   const setNames = [...new Set(practiceCards.map(c => c.setName))].join(", ");
   practiceSetLabel.textContent = setNames;
-  practiceMode = modeSelect.value;
 
   updateStats();
   showNextCard();
@@ -734,7 +731,18 @@ answerInput.addEventListener("input", () => {
   }
 });
 
-modeSelect.addEventListener("change", () => { practiceMode = modeSelect.value; });
+document.querySelectorAll(".mode-chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    practiceMode = chip.dataset.mode;
+
+    document.querySelectorAll(".mode-chip").forEach(c => {
+      c.classList.remove("active");
+    });
+
+    chip.classList.add("active");
+  });
+});
+
 checkBtn.addEventListener("click", checkAnswer);
 nextBtn.addEventListener("click", advanceCard);
 answerInput.addEventListener("keydown", e => {
