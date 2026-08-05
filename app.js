@@ -88,6 +88,8 @@ let currentCardPromptWord = "";  // the prompt word shown on the current card
 let wrongAnswers = [];          // [{ prompt, studentAnswer }] for history
 let practiceMode = "spanish-english";
 let sessionModeLabel = "Spanish→English"; // Locked at start of session
+let sessionStartMode = "";
+let sessionStartLength = 0;
 let practiceActive = false;
 let lastFilterSettings = null;  // For "practice again" button
 
