@@ -61,12 +61,21 @@
 
         <div class="filter-footer">
           <div class="mode-row">
-            <label for="modeSelect">Practice Mode:</label>
-            <select id="modeSelect">
-              <option value="spanish-english">Spanish → English</option>
-              <option value="english-spanish">English → Spanish</option>
-              <option value="mixed">Mixed</option>
-            </select>
+            <label>Practice Mode:</label>
+            <div class="mode-chips">
+              <button class="mode-chip active" data-mode="spanish-english">
+                Spanish → English
+              </button>
+              <button class="mode-chip" data-mode="english-spanish">
+                English → Spanish
+              </button>
+              <button class="mode-chip" data-mode="mixed">
+                Mixed
+              </button>
+              <button class="mode-chip" data-mode="answer">
+                Answer
+              </button>
+            </div>
           </div>
           
           <div class="mode-row">
