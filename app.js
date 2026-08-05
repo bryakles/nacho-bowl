@@ -570,11 +570,13 @@ if (practiceMode === "multiple-choice") {
   answerInput.classList.add("hidden");
   checkBtn.classList.add("hidden");
   multipleChoiceOptions.classList.remove("hidden");
+  document.querySelector(".accent-legend").classList.add("hidden");
   createMultipleChoiceOptions(card, mode);
 } else {
   answerInput.classList.remove("hidden");
   checkBtn.classList.remove("hidden");
   multipleChoiceOptions.classList.add("hidden");
+  document.querySelector(".accent-legend").classList.remove("hidden");
 }
 
   // Store the expected answer on the card temporarily
