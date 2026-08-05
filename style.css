@@ -512,34 +512,46 @@ body {
   top: -200px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 8rem;
+  font-size: 16rem;
   z-index: 600;
   pointer-events: none;
 }
 
 #giantTaco.taco-drop {
-  animation: tacoDrop 2s ease-out forwards;
+  animation: tacoDrop 2s ease-out forwards,
+             tacoDance 1s ease-in-out infinite;
+  animation-delay: 0s, 2s;
 }
 
 @keyframes tacoDrop {
   0% {
     top: -200px;
-    transform: translateX(-50%) rotate(0deg);
+    transform: translateX(-50%) rotate(0deg) scale(0.5);
   }
 
-  70% {
-    top: 45%;
-    transform: translateX(-50%) rotate(360deg);
+  55% {
+    top: 40%;
+    transform: translateX(-50%) rotate(360deg) scale(1.2);
+  }
+
+  65% {
+    top: 35%;
+    transform: translateX(-50%) rotate(390deg) scale(1.2);
+  }
+
+  75% {
+    top: 40%;
+    transform: translateX(-50%) rotate(360deg) scale(1.2);
   }
 
   85% {
     top: 38%;
-    transform: translateX(-50%) rotate(390deg);
+    transform: translateX(-50%) rotate(375deg) scale(1.2);
   }
 
   100% {
-    top: 42%;
-    transform: translateX(-50%) rotate(360deg);
+    top: 40%;
+    transform: translateX(-50%) rotate(360deg) scale(1);
   }
 }
 
