@@ -959,7 +959,11 @@ function endPractice(early) {
 let nachosEarned = correctCount;
 
 if (sessionStartMode === "multiple-choice") {
-  nachosEarned = sessionStartLength === 25 ? 3 : 1;
+  const completedSession = unanswered === 0 && !early;
+
+  nachosEarned = completedSession
+    ? (sessionStartLength === 25 ? 3 : 1)
+    : 0;
 }
 
 const totalNachos = addNachos(nachosEarned);
