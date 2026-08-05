@@ -608,11 +608,14 @@ function getExpectedAnswer(card) {
 
 function createMultipleChoiceOptions(card, mode) {
   const correctAnswer = mode === "spanish-english" ? card.english : card.spanish;
-  const answerPool = practiceCards
-    .map(c => mode === "spanish-english" ? c.english : c.spanish)
-    .filter(a => a !== correctAnswer);
 
-  const distractors = shuffleArray(answerPool).slice(0, 3);
+  const answerPool = getFilteredCards()
+    .map(c => mode === "spanish-english" ? c.english : c.spanish)
+    .filter(a => a && a !== correctAnswer);
+
+  const distractors = shuffleArray(answerPool)
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .slice(0, 3);
 
   let choices = [
     correctAnswer,
