@@ -154,6 +154,8 @@ body {
    ============================================================ */
 .practice-main {
   max-width: 760px;
+  width: 100%;
+  flex: 1;
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
   display: flex;
@@ -691,8 +693,7 @@ body {
 .dialog-actions { display: flex; gap: 0.75rem; }
 
 .nacho-footer {
-  position: sticky;
-  bottom: 0;
+  margin-top: auto;
   background: linear-gradient(135deg, #fef3c7, #fde68a);
   border-top: 2px solid #f59e0b;
   padding: 0.6rem 1.5rem;
