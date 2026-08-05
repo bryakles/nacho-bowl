@@ -555,6 +555,24 @@ body {
   }
 }
 
+@keyframes tacoDance {
+  0%, 100% {
+    transform: translateX(-50%) rotate(360deg) scale(1);
+  }
+
+  25% {
+    transform: translateX(-52%) rotate(370deg) scale(1.05);
+  }
+
+  50% {
+    transform: translateX(-48%) rotate(350deg) scale(1);
+  }
+
+  75% {
+    transform: translateX(-52%) rotate(370deg) scale(1.05);
+  }
+}
+
 .nacho-piece {
   position: absolute;
   top: -60px;
