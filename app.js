@@ -552,10 +552,10 @@ function showNextCard() {
     ? (Math.random() < 0.5 ? "spanish-english" : "english-spanish")
     : practiceMode;
 
-  if (mode === "spanish-english") {
+  if (mode === "spanish-english" || mode === "answer") {
     currentCardPromptWord = card.spanish;
     promptText.innerHTML = card.spanish.replaceAll("|", "<br>");
-    directionLabel.textContent = "Spanish → English";
+    directionLabel.textContent = mode === "answer" ? "Answer" : "Spanish → English";
     answerInput.placeholder = "Type the English meaning...";
   } else {
     currentCardPromptWord = card.english;
@@ -588,7 +588,9 @@ function showNextCard() {
 
 function getExpectedAnswer(card) {
   const mode = card._mode || "spanish-english";
-  return mode === "spanish-english" ? card.english : card.spanish;
+  return (mode === "spanish-english" || mode === "answer")
+    ? card.english
+    : card.spanish;
 }
 
 function normalizeAnswer(str) {
