@@ -920,6 +920,12 @@ document.querySelectorAll(".mode-chip").forEach(chip => {
 
 checkBtn.addEventListener("click", checkAnswer);
 nextBtn.addEventListener("click", advanceCard);
+
+backFromStudySet.addEventListener("click", () => {
+  studySetPanel.classList.add("hidden");
+  filterPanel.classList.remove("hidden");
+});
+
 answerInput.addEventListener("keydown", e => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -928,6 +934,7 @@ answerInput.addEventListener("keydown", e => {
     else checkAnswer();
   }
 });
+
 // Also listen on document so Enter works even when input is disabled
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && currentCardState === "done" && practiceActive) {
