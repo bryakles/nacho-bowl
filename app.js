@@ -549,9 +549,10 @@ function showStudySet(cards) {
     tbody.appendChild(row);
   });
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
+  // Move the user to the Study Set panel
+  studySetPanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
   });
 }
 
