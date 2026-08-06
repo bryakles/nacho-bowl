@@ -465,11 +465,18 @@ function updateCardCountPreview() {
 startPracticeBtn.addEventListener("click", () => {
   const filtered = getFilteredCards();
   if (!filtered.length) return;
+
   lastFilterSettings = {
     levels: new Set(selectedLevels),
     units: new Set(selectedUnits),
     sets: new Set(selectedSets),
   };
+
+  if (practiceMode === "study-set") {
+    showStudySet(filtered);
+    return;
+  }
+
   beginPractice(filtered);
 });
 
