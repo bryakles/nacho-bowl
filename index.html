@@ -39,18 +39,20 @@
       <!-- FILTER PANEL -->
       <section id="filterPanel" class="panel">
         <h2>Choose What to Practice</h2>
-
+      
         <div class="filter-grid">
           <div class="filter-group">
             <label>Level</label>
             <div id="levelOptions" class="chip-group"></div>
           </div>
+      
           <div class="filter-group">
             <label>Unit</label>
             <div id="unitOptions" class="chip-group">
               <span class="filter-hint">Select a level first</span>
             </div>
           </div>
+      
           <div class="filter-group">
             <label>Study Set</label>
             <div id="setOptions" class="chip-group">
@@ -58,27 +60,32 @@
             </div>
           </div>
         </div>
-
-      <div class="mode-chips">
-        <button class="mode-chip active" data-mode="spanish-english">
-          Spanish → English
-        </button>
-        <button class="mode-chip" data-mode="english-spanish">
-          English → Spanish
-        </button>
-        <button class="mode-chip" data-mode="mixed">
-          Mixed
-        </button>
-        <button class="mode-chip" data-mode="answer">
-          Answer
-        </button>
-        <button class="mode-chip" data-mode="multiple-choice">
-          Multiple Choice
-        </button>
-        <button class="mode-chip" data-mode="study-set">
-          📚 Study Set
-        </button>
-      </div>
+      
+        <div class="mode-chips">
+          <button class="mode-chip active" data-mode="spanish-english">
+            Spanish → English
+          </button>
+      
+          <button class="mode-chip" data-mode="english-spanish">
+            English → Spanish
+          </button>
+      
+          <button class="mode-chip" data-mode="mixed">
+            Mixed
+          </button>
+      
+          <button class="mode-chip" data-mode="answer">
+            Answer
+          </button>
+      
+          <button class="mode-chip" data-mode="multiple-choice">
+            Multiple Choice
+          </button>
+      
+          <button class="mode-chip" data-mode="study-set">
+            📚 Study Set
+          </button>
+        </div>
           
           <div class="mode-row">
             <label>Session Length:</label>
@@ -96,7 +103,7 @@
             <span id="cardCountPreview" class="card-count-preview">No cards selected</span>
             <button id="startPracticeBtn" class="btn btn-primary" disabled>Start Practice</button>
           </div>
-        </div>
+      
       </section>
 
       <!-- PRACTICE PANEL -->
