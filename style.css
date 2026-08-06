@@ -496,29 +496,37 @@ body {
 /* ============================================================
    STUDY SET PANEL
    ============================================================ */
+
 #studySetContainer {
-  display: flex;
-  flex-direction: column;
+  margin-top: 1rem;
 }
 
-.study-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid #ddd;
-  font-size: 1.15rem;
+.study-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.1rem;
 }
 
-.study-row span {
-  flex: 1;
-}
-
-.study-row span:first-child {
+.study-table th {
+  background: #ef4444;
+  color: #fff;
+  padding: 0.9rem 1rem;
+  text-align: left;
   font-weight: 700;
 }
 
+.study-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.study-table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.study-table tbody tr:hover {
+  background: #fef2f2;
+}
 /* ============================================================
    RESULTS PANEL
    ============================================================ */
