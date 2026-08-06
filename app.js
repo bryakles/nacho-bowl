@@ -129,6 +129,11 @@ const correctAnswerDisplay = document.getElementById("correctAnswerDisplay");
 const directionLabel   = document.getElementById("directionLabel");
 const answerInput      = document.getElementById("answerInput");
 const multipleChoiceOptions = document.getElementById("multipleChoiceOptions");
+
+const studySetPanel = document.getElementById("studySetPanel");
+const studySetContainer = document.getElementById("studySetContainer");
+const backFromStudySet = document.getElementById("backFromStudySet");
+
 const checkBtn         = document.getElementById("checkBtn");
 const feedbackText     = document.getElementById("feedbackText");
 const hintText         = document.getElementById("hintText");
@@ -505,6 +510,33 @@ function shuffleArray(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+function showStudySet(cards) {
+  filterPanel.classList.add("hidden");
+  practicePanel.classList.add("hidden");
+  resultsPanel.classList.add("hidden");
+
+  studySetPanel.classList.remove("hidden");
+
+  studySetContainer.innerHTML = "";
+
+   const sortedCards = [...cards].sort((a, b) =>
+    (a.spanish || "").localeCompare(b.spanish || "")
+  );
+
+  sortedCards.forEach(card => {
+    const row = document.createElement("div");
+
+    row.className = "study-row";
+
+    row.innerHTML = `
+      <span>${card.spanish}</span>
+      <span>${card.english}</span>
+    `;
+
+    studySetContainer.appendChild(row);
+  });
 }
 
 function beginPractice(filtered) {
