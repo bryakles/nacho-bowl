@@ -513,8 +513,6 @@ function shuffleArray(arr) {
 }
 
 function showStudySet(cards) {
-
-  alert("This is the NEW Study Set!");
   
   filterPanel.classList.add("hidden");
   practicePanel.classList.add("hidden");
