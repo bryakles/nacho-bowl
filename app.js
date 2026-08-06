@@ -521,7 +521,7 @@ function showStudySet(cards) {
 
   studySetContainer.innerHTML = "";
 
-   const sortedCards = [...cards].sort((a, b) =>
+  const sortedCards = [...cards].sort((a, b) =>
     (a.spanish || "").localeCompare(b.spanish || "")
   );
 
@@ -537,6 +537,8 @@ function showStudySet(cards) {
 
     studySetContainer.appendChild(row);
   });
+
+  window.scrollTo(0, 0);
 }
 
 function beginPractice(filtered) {
