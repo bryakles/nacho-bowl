@@ -519,26 +519,39 @@ function showStudySet(cards) {
 
   studySetPanel.classList.remove("hidden");
 
-  studySetContainer.innerHTML = "";
+  studySetContainer.innerHTML = `
+    <table class="study-table">
+      <thead>
+        <tr>
+          <th>Spanish</th>
+          <th>English</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `;
+
+  const tbody = studySetContainer.querySelector("tbody");
 
   const sortedCards = [...cards].sort((a, b) =>
     (a.spanish || "").localeCompare(b.spanish || "")
   );
 
   sortedCards.forEach(card => {
-    const row = document.createElement("div");
-
-    row.className = "study-row";
+    const row = document.createElement("tr");
 
     row.innerHTML = `
-      <span>${card.spanish}</span>
-      <span>${card.english}</span>
+      <td>${card.spanish}</td>
+      <td>${card.english}</td>
     `;
 
-    studySetContainer.appendChild(row);
+    tbody.appendChild(row);
   });
 
-  window.scrollTo(0, 0);
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 function beginPractice(filtered) {
