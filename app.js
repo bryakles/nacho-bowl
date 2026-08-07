@@ -148,7 +148,7 @@ const practiceModes = {
   "study-set": "📚 Study Set"
 };
 
-const TEACHER_PASSWORD = "nachoch33s3";
+const TEACHER_PASSWORD = "nacho5";
 const TEACHER_SETTINGS_KEY = "nachoBowlTeacherSettings";
 
 function loadTeacherSettings() {
@@ -175,6 +175,16 @@ function saveTeacherSettings() {
   localStorage.setItem(
     TEACHER_SETTINGS_KEY,
     JSON.stringify(settings)
+  );
+}
+
+function updateTeacherLockIndicator() {
+  const anyLocked = Object.values(PRACTICE_MODES)
+    .some(mode => !mode.enabled);
+
+  document.body.classList.toggle(
+    "teacher-lock-active",
+    anyLocked
   );
 }
 
