@@ -873,11 +873,22 @@ body.teacher-lock-active {
   margin-top: 2rem;
 }
 
-/* Bowl emoji */
+/* Bowl progress */
 .nacho-bowl-progress {
-  font-size: 4rem;
   text-align: center;
+  min-height: 5rem;
+}
+
+.nacho-bowl-emoji {
+  font-size: 4rem;
   line-height: 1;
+}
+
+.nacho-bowl-label {
+  margin-top: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 /* Hidden word */
