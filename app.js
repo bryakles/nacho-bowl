@@ -1674,6 +1674,13 @@ function guessNachoBuilderLetter(letter, button) {
 
 }
 
+function showNachoBuilderMessage(message) {
+
+  nachoGameMessage.textContent = message;
+  nachoGameMessage.classList.remove("hidden");
+
+}
+
 function checkNachoBuilderGameStatus() {
 
   const solved = nachoBuilderWord
