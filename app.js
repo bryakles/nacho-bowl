@@ -138,6 +138,16 @@ let lastFilterSettings = null;  // For "practice again" button
 let studySetSortColumn = "spanish";
 let studySetSortDirection = "asc";
 
+const practiceModes = {
+  "spanish-english": "🇪🇸 Spanish → English",
+  "english-spanish": "🇺🇸 English → Spanish",
+  "mixed": "🔄 SP ⇄ EN Mixed",
+  "answer": "🎲 Answer: Shuffled",
+  "ordered-answer": "📋 Answer: Ordered",
+  "multiple-choice": "🔢 Multiple Choice",
+  "study-set": "📚 Study Set"
+};
+
 let teacherSettings = {
   "spanish-english": true,
   "english-spanish": true,
@@ -149,16 +159,22 @@ let teacherSettings = {
 };
 
 const TEACHER_PASSWORD = "nachoch33s3";
+const TEACHER_SETTINGS_KEY = "nachoBowlTeacherSettings";
 
-const practiceModes = {
-  "spanish-english": "🇪🇸 Spanish → English",
-  "english-spanish": "🇺🇸 English → Spanish",
-  "mixed": "🔄 SP ⇄ EN Mixed",
-  "answer": "🎲 Answer: Shuffled",
-  "ordered-answer": "📋 Answer: Ordered",
-  "multiple-choice": "🔢 Multiple Choice",
-  "study-set": "📚 Study Set"
-};
+function loadTeacherSettings() {
+  const saved = localStorage.getItem(TEACHER_SETTINGS_KEY);
+
+  if (saved) {
+    teacherSettings = JSON.parse(saved);
+  }
+}
+
+function saveTeacherSettings() {
+  localStorage.setItem(
+    TEACHER_SETTINGS_KEY,
+    JSON.stringify(teacherSettings)
+  );
+}
 
 // ============================================================
 // DOM REFERENCES
@@ -187,6 +203,10 @@ const cardCountPreview = document.getElementById("cardCountPreview");
 const startPracticeBtn = document.getElementById("startPracticeBtn");
 
 const teacherModeBtn = document.getElementById("teacherModeBtn");
+
+const teacherDialog = document.getElementById("teacherDialog");
+const teacherModeList = document.getElementById("teacherModeList");
+const closeTeacherBtn = document.getElementById("closeTeacherBtn");
 
 const practiceSetLabel = document.getElementById("practiceSetLabel");
 const practiceProgress = document.getElementById("practiceProgress");
@@ -424,6 +444,10 @@ teacherModeBtn.addEventListener("click", () => {
   openTeacherSettings();
 });
 
+closeTeacherBtn.addEventListener("click", () => {
+  teacherDialog.classList.add("hidden");
+});
+
 // ============================================================
 // SCREEN TRANSITIONS
 // ============================================================
@@ -592,6 +616,55 @@ startPracticeBtn.addEventListener("click", () => {
 
   beginPractice(filtered);
 });
+
+function openTeacherSettings() {
+  teacherModeList.innerHTML = "";
+
+  Object.keys(practiceModes).forEach(mode => {
+    const row = document.createElement("div");
+    row.className = "teacher-toggle-row";
+
+    const label = document.createElement("span");
+    label.textContent = practiceModes[mode];
+
+    const button = document.createElement("button");
+    button.className = teacherSettings[mode]
+      ? "toggle-on"
+      : "toggle-off";
+
+    button.textContent = teacherSettings[mode]
+      ? "ON"
+      : "OFF";
+
+    button.addEventListener("click", () => {
+      teacherSettings[mode] = !teacherSettings[mode];
+    
+      saveTeacherSettings();
+    
+      if (!teacherSettings[mode] && practiceMode === mode) {
+        practiceMode = Object.keys(teacherSettings)
+          .find(m => teacherSettings[m]);
+      }
+      
+      button.className = teacherSettings[mode]
+        ? "toggle-on"
+        : "toggle-off";
+
+      button.textContent = teacherSettings[mode]
+        ? "ON"
+        : "OFF";
+
+      renderModeChips();
+    });
+
+    row.appendChild(label);
+    row.appendChild(button);
+
+    teacherModeList.appendChild(row);
+  });
+
+  teacherDialog.classList.remove("hidden");
+}
 
 // ============================================================
 // SESSION LENGTH CHIPS
@@ -1361,4 +1434,5 @@ function cleanSortText(word, language) {
 // ============================================================
 // INIT
 // ============================================================
+loadTeacherSettings();
 loadData();
