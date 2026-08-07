@@ -210,6 +210,12 @@ const teacherDialog = document.getElementById("teacherDialog");
 const teacherModeList = document.getElementById("teacherModeList");
 const closeTeacherBtn = document.getElementById("closeTeacherBtn");
 
+const teacherPasswordDialog = document.getElementById("teacherPasswordDialog");
+const teacherPasswordInput = document.getElementById("teacherPasswordInput");
+const teacherPasswordSubmit = document.getElementById("teacherPasswordSubmit");
+const teacherPasswordCancel = document.getElementById("teacherPasswordCancel");
+const teacherPasswordError = document.getElementById("teacherPasswordError");
+
 const practiceSetLabel = document.getElementById("practiceSetLabel");
 const practiceProgress = document.getElementById("practiceProgress");
 const endPracticeBtn   = document.getElementById("endPracticeBtn");
@@ -436,14 +442,34 @@ boredBtn.addEventListener("click", () => {
 });
 
 teacherModeBtn.addEventListener("click", () => {
-  const password = prompt("Enter teacher password:");
+  teacherPasswordInput.value = "";
+  teacherPasswordError.classList.add("hidden");
+  teacherPasswordDialog.classList.remove("hidden");
+  teacherPasswordInput.focus();
+});
+
+
+teacherPasswordSubmit.addEventListener("click", () => {
+  const password = teacherPasswordInput.value.trim();
 
   if (password !== TEACHER_PASSWORD) {
-    alert("Incorrect password.");
+    teacherPasswordError.classList.remove("hidden");
     return;
   }
 
+  teacherPasswordDialog.classList.add("hidden");
+  teacherPasswordInput.value = "";
   openTeacherSettings();
+});
+
+teacherPasswordInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    teacherPasswordSubmit.click();
+  }
+});
+
+teacherPasswordCancel.addEventListener("click", () => {
+  teacherPasswordDialog.classList.add("hidden");
 });
 
 closeTeacherBtn.addEventListener("click", () => {
