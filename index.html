@@ -228,6 +228,34 @@
     </div>
   </div>
 
+  <!-- TEACHER PASSWORD DIALOG -->
+  <div id="teacherPasswordDialog" class="dialog-overlay hidden">
+    <div class="dialog-box">
+      <h3>👩‍🏫 Teacher Access</h3>
+  
+      <input 
+        id="teacherPasswordInput" 
+        type="password" 
+        placeholder="Enter teacher password"
+        autocomplete="off"
+      />
+  
+      <p id="teacherPasswordError" class="error-msg hidden">
+        Incorrect password.
+      </p>
+  
+      <div class="dialog-actions">
+        <button id="teacherPasswordSubmit" class="btn btn-primary">
+          Enter
+        </button>
+  
+        <button id="teacherPasswordCancel" class="btn btn-ghost">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+  
   <div id="teacherDialog" class="teacher-dialog hidden">
     <div class="teacher-box">
       <h2>👩‍🏫 Teacher Settings</h2>
