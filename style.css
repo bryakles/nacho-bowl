@@ -858,6 +858,16 @@ body.teacher-lock-active {
   color: var(--color-text-muted);
 }
 
+.nacho-letter-btn.correct {
+  background: #d4edda;
+  border-color: #28a745;
+}
+
+.nacho-letter-btn.wrong {
+  background: #f8d7da;
+  border-color: #dc3545;
+}
+
 /* ============================================================
    CONFIRM DIALOG
    ============================================================ */
