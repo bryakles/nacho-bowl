@@ -818,6 +818,50 @@ body.teacher-lock-active {
 }
 
 /* ============================================================
+   NACHO BUILDER INTRO
+   ============================================================ */
+
+.mode-intro {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.mode-intro h2 {
+  font-size: var(--font-size-xl);
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.mode-intro p {
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+.how-to-play {
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: 1px solid var(--color-border);
+}
+
+.how-to-play summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.how-to-play div {
+  margin-top: 0.75rem;
+}
+
+.how-to-play p {
+  margin-bottom: 0.75rem;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================================
    NACHO BUILDER KEYBOARD
    ============================================================ */
 
