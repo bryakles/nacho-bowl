@@ -528,11 +528,11 @@ function showStudySet(cards) {
       <thead>
         <tr>
           <th id="sortSpanish" class="sortable">
-            Spanish
+            Spanish <span id="spanishArrow">↕</span>
           </th>
   
           <th id="sortEnglish" class="sortable">
-            English
+            English <span id="englishArrow">↕</span>
           </th>
         </tr>
       </thead>
