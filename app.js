@@ -474,17 +474,6 @@ function renderModeChips() {
   });
 }
 
-function openTeacherSettings() {
-  const choice = confirm(
-    "Toggle Multiple Choice?\n\nOK = Turn OFF\nCancel = Leave unchanged"
-  );
-
-  if (choice) {
-    teacherSettings["multiple-choice"] = false;
-    renderModeChips();
-  }
-}
-
 function renderLevelChips() {
   const levels = [...new Set(allCards.map(c => c.level).filter(Boolean))].sort();
   levelOptions.innerHTML = "";
