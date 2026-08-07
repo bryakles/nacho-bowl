@@ -821,6 +821,13 @@ body.teacher-lock-active {
    NACHO BUILDER KEYBOARD
    ============================================================ */
 
+.nacho-keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .nacho-letter-btn {
   display: flex;
   flex-direction: column;
