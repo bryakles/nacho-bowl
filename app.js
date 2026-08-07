@@ -1227,13 +1227,8 @@ function sortStudySet(cards, column) {
   }
 
   const sortedCards = [...cards].sort((a, b) => {
-  const aText = column === "spanish"
-    ? removeSpanishArticle(a[column] || "")
-    : (a[column] || "");
-
-  const bText = column === "spanish"
-    ? removeSpanishArticle(b[column] || "")
-    : (b[column] || "");
+  const aText = cleanSortText(a[column] || "", column);
+  const bText = cleanSortText(b[column] || "", column);
 
   return aText.localeCompare(bText);
 });
@@ -1245,10 +1240,18 @@ function sortStudySet(cards, column) {
   showStudySet(sortedCards);
 }
 
-function removeSpanishArticle(word) {
-  return word
-    .replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, "")
-    .trim();
+function cleanSortText(word, language) {
+  let text = word.trim();
+
+  if (language === "spanish") {
+    text = text.replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, "");
+  }
+
+  if (language === "english") {
+    text = text.replace(/^(the|a|an|to)\s+/i, "");
+  }
+
+  return text;
 }
 
 // ============================================================
