@@ -1586,6 +1586,15 @@ function removeSpanishArticle(word) {
   return word.replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, "");
 }
 
+function normalizeLetter(letter) {
+
+  return letter
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+}
+
 function renderNachoBuilderWord() {
 
   const display = nachoBuilderWord
@@ -1595,7 +1604,7 @@ function renderNachoBuilderWord() {
         return " ";
       }
 
-      if (nachoBuilderGuessedLetters.has(letter)) {
+      if (nachoBuilderGuessedLetters.has(normalizeLetter(letter))) {
         return letter;
       }
 
@@ -1659,15 +1668,17 @@ function guessNachoBuilderLetter(letter, button) {
 
   nachoBuilderGuessedLetters.add(guessedLetter);
 
-  // Correct guess
-  if (nachoBuilderWord.includes(guessedLetter)) {
-
+   // Correct guess
+  const normalizedWord = normalizeLetter(nachoBuilderWord);
+  
+  if (normalizedWord.includes(guessedLetter)) {
+  
     button.classList.add("correct");
     button.disabled = true;
-
+  
     renderNachoBuilderWord();
-
-  } 
+  
+  }
   
   // Wrong guess
   else {
@@ -1711,7 +1722,7 @@ function checkNachoBuilderGameStatus() {
     .split("")
     .every(letter => {
       return letter === " " ||
-        nachoBuilderGuessedLetters.has(letter.toLowerCase());
+        nachoBuilderGuessedLetters.has(normalizeLetter(letter));
     });
 
   if (solved) {
