@@ -247,6 +247,14 @@ const answerInput      = document.getElementById("answerInput");
 const multipleChoiceOptions = document.getElementById("multipleChoiceOptions");
 
 const studySetPanel = document.getElementById("studySetPanel");
+
+const nachoBuilderPanel = document.getElementById("nachoBuilderPanel");
+const nachoBowlProgress = document.getElementById("nachoBowlProgress");
+const nachoWordDisplay = document.getElementById("nachoWordDisplay");
+const nachoGuessedLetters = document.getElementById("nachoGuessedLetters");
+const nachoStrikes = document.getElementById("nachoStrikes");
+const nachoKeyboard = document.getElementById("nachoKeyboard");
+
 const studySetContainer = document.getElementById("studySetContainer");
 const backFromStudySet = document.getElementById("backFromStudySet");
 
