@@ -1593,7 +1593,10 @@ function normalizeLetter(letter) {
 
   return letter
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, (mark) => {
+      // Keep the tilde for ñ
+      return mark === "\u0303" ? mark : "";
+    })
     .toLowerCase();
 
 }
