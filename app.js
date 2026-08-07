@@ -1679,6 +1679,8 @@ function showNachoBuilderMessage(message) {
   nachoGameMessage.textContent = message;
   nachoGameMessage.classList.remove("hidden");
 
+  nachoNextWordBtn.classList.remove("hidden");
+
 }
 
 function checkNachoBuilderGameStatus() {
@@ -1691,12 +1693,12 @@ function checkNachoBuilderGameStatus() {
     });
 
   if (solved) {
-    alert("🎉 Bowl complete! +1 🧀");
+    showNachoBuilderMessage("🎉 Bowl complete! +1 🧀");
     return;
   }
-
+  
   if (nachoBuilderWrongGuesses >= nachoBuilderMaxWrongGuesses) {
-    alert("💥 Spill! Try another word!");
+    showNachoBuilderMessage("💥 Spill! Try another word!");
     return;
   }
 
