@@ -165,7 +165,10 @@ function loadTeacherSettings() {
   const saved = localStorage.getItem(TEACHER_SETTINGS_KEY);
 
   if (saved) {
-    teacherSettings = JSON.parse(saved);
+    teacherSettings = {
+      ...teacherSettings,
+      ...JSON.parse(saved)
+    };
   }
 }
 
@@ -655,6 +658,7 @@ function openTeacherSettings() {
         : "OFF";
 
       renderModeChips();
+      updateCardCountPreview();
     });
 
     row.appendChild(label);
