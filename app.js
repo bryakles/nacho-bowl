@@ -1509,6 +1509,39 @@ function cleanSortText(word, language) {
 // NACHO BUILDER FUNCTIONS
 // ============================================================
 
+const spanishKeyboard = [
+  ["A", "a"],
+  ["B", "be"],
+  ["C", "ce"],
+  ["D", "de"],
+  ["E", "e"],
+  ["F", "efe"],
+  ["G", "ge"],
+
+  ["H", "hache"],
+  ["I", "i"],
+  ["J", "jota"],
+  ["K", "ka"],
+  ["L", "ele"],
+  ["M", "eme"],
+  ["N", "ene"],
+
+  ["Ñ", "eñe"],
+  ["O", "o"],
+  ["P", "pe"],
+  ["Q", "cu"],
+  ["R", "ere"],
+  ["S", "ese"],
+  ["T", "te"],
+
+  ["U", "u"],
+  ["V", "uve / ve"],
+  ["W", "uve doble / doble ve"],
+  ["X", "equis"],
+  ["Y", "i griega"],
+  ["Z", "zeta"]
+];
+
 function startNachoBuilder(cards) {
 
   filterPanel.classList.add("hidden");
@@ -1559,6 +1592,21 @@ function renderNachoBuilderWord() {
     .join(" ");
 
   nachoWordDisplay.textContent = display;
+}
+
+function updateNachoBuilderBowl() {
+
+  const stages = [
+    "🥣",
+    "🥣🫘",
+    "🥣🫘🥩",
+    "🥣🫘🥩🧀",
+    "🥣🫘🥩🧀🥬",
+    "🥣🫘🥩🧀🥬🌮"
+  ];
+
+  nachoBowlProgress.textContent =
+    stages[nachoBuilderWrongGuesses];
 }
 
 // ============================================================
