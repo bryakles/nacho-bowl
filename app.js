@@ -575,14 +575,7 @@ function beginPractice(filtered) {
   practiceActive = true;
 
   // Lock mode for this session
-  const modeLabels = {
-  "spanish-english": "Spanish→English",
-  "english-spanish": "English→Spanish",
-  "mixed": "Mixed",
-  "answer": "Answer: Shuffled",
-  "ordered-answer": "Answer: Ordered",
-  "multiple-choice": "Multiple Choice",
-};
+sessionModeLabel = PRACTICE_MODES[practiceMode]?.label || practiceMode;
 
 sessionModeLabel = modeLabels[practiceMode] || practiceMode;
 
