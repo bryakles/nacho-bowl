@@ -530,13 +530,13 @@ function showStudySet(cards) {
           <th id="sortSpanish" class="sortable">
             Spanish
           </th>
-
+  
           <th id="sortEnglish" class="sortable">
             English
           </th>
         </tr>
       </thead>
-
+  
       <tbody></tbody>
     </table>
   `;
@@ -550,9 +550,7 @@ function showStudySet(cards) {
     sortStudySet(cards, "english");
   };
 
-  const sortedCards = [...cards].sort((a, b) =>
-    (a.spanish || "").localeCompare(b.spanish || "")
-  );
+  const sortedCards = [...cards];
 
   sortedCards.forEach(card => {
     const row = document.createElement("tr");
