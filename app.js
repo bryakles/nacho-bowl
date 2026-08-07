@@ -1556,7 +1556,7 @@ function startNachoBuilder(cards) {
 
   const randomCard = cards[Math.floor(Math.random() * cards.length)];
 
-  nachoBuilderWord = removeSpanishArticle(randomCard.Spanish);
+  nachoBuilderWord = removeSpanishArticle(randomCard.spanish);
 
   renderNachoBuilderWord();
   console.log("Rendering Nacho Keyboard");
