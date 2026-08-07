@@ -673,6 +673,11 @@ startPracticeBtn.addEventListener("click", () => {
     sets: new Set(selectedSets),
   };
 
+  if (practiceMode === "nacho-builder") {
+    startNachoBuilder(filtered);
+    return;
+  }
+  
   if (practiceMode === "study-set") {
     showStudySet(filtered);
     return;
@@ -1498,6 +1503,55 @@ function cleanSortText(word, language) {
   }
 
   return text;
+}
+
+// ============================================================
+// NACHO BUILDER FUNCTIONS
+// ============================================================
+
+function startNachoBuilder(cards) {
+
+  practicePanel.classList.add("hidden");
+  studySetPanel.classList.add("hidden");
+  resultsPanel.classList.add("hidden");
+
+  nachoBuilderPanel.classList.remove("hidden");
+
+  nachoBuilderGuessedLetters.clear();
+  nachoBuilderWrongGuesses = 0;
+
+  const randomCard = cards[Math.floor(Math.random() * cards.length)];
+
+  nachoBuilderWord = removeSpanishArticle(randomCard.Spanish);
+
+  renderNachoBuilderWord();
+  renderNachoBuilderKeyboard();
+  updateNachoBuilderBowl();
+
+}
+
+function removeSpanishArticle(word) {
+  return word.replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, "");
+}
+
+function renderNachoBuilderWord() {
+
+  const display = nachoBuilderWord
+    .split("")
+    .map(letter => {
+      if (letter === " ") {
+        return " ";
+      }
+
+      if (nachoBuilderGuessedLetters.has(letter)) {
+        return letter;
+      }
+
+      return "_";
+    })
+    .join(" ");
+
+  nachoWordDisplay.textContent = display;
 }
 
 // ============================================================
