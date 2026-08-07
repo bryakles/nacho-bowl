@@ -1635,17 +1635,21 @@ function renderNachoBuilderKeyboard() {
 
 function guessNachoBuilderLetter(letter, button) {
 
+  // Convert keyboard letter to lowercase
+  const guessedLetter = letter.toLowerCase();
+
   // Don't allow guessing the same letter twice
-  if (nachoBuilderGuessedLetters.has(letter)) {
+  if (nachoBuilderGuessedLetters.has(guessedLetter)) {
     return;
   }
 
-  nachoBuilderGuessedLetters.add(letter);
+  nachoBuilderGuessedLetters.add(guessedLetter);
 
   // Correct guess
-  if (nachoBuilderWord.includes(letter)) {
+  if (nachoBuilderWord.includes(guessedLetter)) {
 
     button.classList.add("correct");
+    button.disabled = true;
 
     renderNachoBuilderWord();
 
@@ -1655,6 +1659,7 @@ function guessNachoBuilderLetter(letter, button) {
   else {
 
     button.classList.add("wrong");
+    button.disabled = true;
 
     nachoBuilderWrongGuesses++;
 
@@ -1662,9 +1667,9 @@ function guessNachoBuilderLetter(letter, button) {
     updateNachoBuilderStrikes();
 
   }
-  
+
   checkNachoBuilderGameStatus();
-  
+
 }
 
 function checkNachoBuilderGameStatus() {
@@ -1673,7 +1678,7 @@ function checkNachoBuilderGameStatus() {
     .split("")
     .every(letter => {
       return letter === " " ||
-        nachoBuilderGuessedLetters.has(letter);
+        nachoBuilderGuessedLetters.has(letter.toLowerCase());
     });
 
   if (solved) {
