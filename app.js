@@ -1551,12 +1551,6 @@ function startNachoBuilder(cards) {
 
   nachoBuilderPanel.classList.remove("hidden");
 
-  practicePanel.classList.add("hidden");
-  studySetPanel.classList.add("hidden");
-  resultsPanel.classList.add("hidden");
-
-  nachoBuilderPanel.classList.remove("hidden");
-
   nachoBuilderGuessedLetters.clear();
   nachoBuilderWrongGuesses = 0;
 
@@ -1607,6 +1601,29 @@ function updateNachoBuilderBowl() {
 
   nachoBowlProgress.textContent =
     stages[nachoBuilderWrongGuesses];
+}
+
+function renderNachoBuilderKeyboard() {
+
+  nachoKeyboard.innerHTML = "";
+
+  spanishKeyboard.forEach(([letter, sound]) => {
+
+    const button = document.createElement("button");
+
+    button.className = "nacho-letter-btn";
+
+    button.innerHTML = `
+      <strong>${letter}</strong>
+      <span>${sound}</span>
+    `;
+
+    button.addEventListener("click", () => {
+      guessNachoBuilderLetter(letter);
+    });
+
+    nachoKeyboard.appendChild(button);
+  });
 }
 
 // ============================================================
