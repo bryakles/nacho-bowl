@@ -644,8 +644,12 @@ function openTeacherSettings() {
       saveTeacherSettings();
     
       if (!PRACTICE_MODES[mode].enabled && practiceMode === mode) {
-        practiceMode = Object.keys(PRACTICE_MODES)
+        const nextMode = Object.keys(PRACTICE_MODES)
           .find(m => PRACTICE_MODES[m].enabled);
+      
+        if (nextMode) {
+          practiceMode = nextMode;
+        }
       }
       
       button.className = PRACTICE_MODES[mode].enabled
