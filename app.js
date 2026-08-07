@@ -532,12 +532,15 @@ function beginPractice(filtered) {
 
   // Lock mode for this session
   const modeLabels = {
-    "spanish-english": "Spanish→English",
-    "english-spanish": "English→Spanish",
-    "mixed": "Mixed",
-    "multiple-choice": "Multiple Choice",
-  };
-  sessionModeLabel = modeLabels[practiceMode] || practiceMode;
+  "spanish-english": "Spanish→English",
+  "english-spanish": "English→Spanish",
+  "mixed": "Mixed",
+  "answer": "Answer: Shuffled",
+  "ordered-answer": "Answer: Ordered",
+  "multiple-choice": "Multiple Choice",
+};
+
+sessionModeLabel = modeLabels[practiceMode] || practiceMode;
 
   filterPanel.classList.add("hidden");
   practicePanel.classList.remove("hidden");
