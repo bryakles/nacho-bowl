@@ -1,5 +1,3 @@
-alert("APP JS NOT NOT LOADED");
-
 // ============================================================
 // CONFIGURATION
 // ============================================================
@@ -96,6 +94,9 @@ let sessionStartMode = "";
 let sessionStartLength = 0;
 let practiceActive = false;
 let lastFilterSettings = null;  // For "practice again" button
+
+let studySetSortColumn = "spanish";
+let studySetSortDirection = "asc";
 
 // ============================================================
 // DOM REFERENCES
@@ -515,7 +516,7 @@ function shuffleArray(arr) {
 }
 
 function showStudySet(cards) {
-  
+
   filterPanel.classList.add("hidden");
   practicePanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
@@ -526,15 +527,28 @@ function showStudySet(cards) {
     <table class="study-table">
       <thead>
         <tr>
-          <th>Spanish</th>
-          <th>English</th>
+          <th id="sortSpanish" class="sortable">
+            Spanish
+          </th>
+
+          <th id="sortEnglish" class="sortable">
+            English
+          </th>
         </tr>
       </thead>
+
       <tbody></tbody>
     </table>
   `;
 
   const tbody = studySetContainer.querySelector("tbody");
+  document.getElementById("sortSpanish").onclick = () => {
+    sortStudySet(cards, "spanish");
+  };
+  
+  document.getElementById("sortEnglish").onclick = () => {
+    sortStudySet(cards, "english");
+  };
 
   const sortedCards = [...cards].sort((a, b) =>
     (a.spanish || "").localeCompare(b.spanish || "")
@@ -1018,6 +1032,31 @@ function launchNachoConfetti() {
   setTimeout(() => {
     container.innerHTML = "";
   }, 4500);
+}
+
+// ============================================================
+// STUDY SET FUNCTIONS
+// ============================================================
+
+function sortStudySet(cards, column) {
+
+  if (studySetSortColumn === column) {
+    studySetSortDirection =
+      studySetSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    studySetSortColumn = column;
+    studySetSortDirection = "asc";
+  }
+
+  const sortedCards = [...cards].sort((a, b) => {
+    return (a[column] || "").localeCompare(b[column] || "");
+  });
+
+  if (studySetSortDirection === "desc") {
+    sortedCards.reverse();
+  }
+
+  showStudySet(sortedCards);
 }
 
 // ============================================================
