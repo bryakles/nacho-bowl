@@ -205,6 +205,13 @@ body {
   align-items: center;
 }
 
+.set-chip-group {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+}
+
 .chip {
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-full);
