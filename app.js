@@ -138,6 +138,26 @@ let lastFilterSettings = null;  // For "practice again" button
 let studySetSortColumn = "spanish";
 let studySetSortDirection = "asc";
 
+let teacherSettings = {
+  "spanish-english": true,
+  "english-spanish": true,
+  "mixed": true,
+  "answer": true,
+  "ordered-answer": true,
+  "multiple-choice": true,
+  "study-set": true
+};
+
+const practiceModes = {
+  "spanish-english": "🇪🇸 Spanish → English",
+  "english-spanish": "🇺🇸 English → Spanish",
+  "mixed": "🔄 SP ⇄ EN Mixed",
+  "answer": "🎲 Answer: Shuffled",
+  "ordered-answer": "📋 Answer: Ordered",
+  "multiple-choice": "🔢 Multiple Choice",
+  "study-set": "📚 Study Set"
+};
+
 // ============================================================
 // DOM REFERENCES
 // ============================================================
@@ -158,8 +178,13 @@ const resultsPanel     = document.getElementById("resultsPanel");
 const levelOptions     = document.getElementById("levelOptions");
 const unitOptions      = document.getElementById("unitOptions");
 const setOptions       = document.getElementById("setOptions");
+
+const modeOptions = document.getElementById("modeOptions");
+
 const cardCountPreview = document.getElementById("cardCountPreview");
 const startPracticeBtn = document.getElementById("startPracticeBtn");
+
+const teacherModeBtn = document.getElementById("teacherModeBtn");
 
 const practiceSetLabel = document.getElementById("practiceSetLabel");
 const practiceProgress = document.getElementById("practiceProgress");
@@ -394,6 +419,7 @@ function showPracticeScreen() {
   practiceScreen.classList.remove("hidden");
   welcomeName.textContent = currentUser.name;
   showFilterPanel();
+  renderModeChips();
   renderAttemptHistory();
   updateFooterNachos();
 }
@@ -409,6 +435,32 @@ function showFilterPanel() {
 // ============================================================
 // FILTER CHIPS
 // ============================================================
+function renderModeChips() {
+  modeOptions.innerHTML = "";
+
+  Object.keys(practiceModes).forEach(mode => {
+    if (!teacherSettings[mode]) return;
+
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "mode-chip" + (practiceMode === mode ? " active" : "");
+    chip.dataset.mode = mode;
+    chip.textContent = practiceModes[mode];
+
+    chip.addEventListener("click", () => {
+      practiceMode = mode;
+
+      document.querySelectorAll(".mode-chip").forEach(c => {
+        c.classList.remove("active");
+      });
+
+      chip.classList.add("active");
+    });
+
+    modeOptions.appendChild(chip);
+  });
+}
+
 function renderLevelChips() {
   const levels = [...new Set(allCards.map(c => c.level).filter(Boolean))].sort();
   levelOptions.innerHTML = "";
@@ -931,18 +983,6 @@ answerInput.addEventListener("input", () => {
     answerInput.value = converted;
     answerInput.setSelectionRange(pos, pos);
   }
-});
-
-document.querySelectorAll(".mode-chip").forEach(chip => {
-  chip.addEventListener("click", () => {
-    practiceMode = chip.dataset.mode;
-
-    document.querySelectorAll(".mode-chip").forEach(c => {
-      c.classList.remove("active");
-    });
-
-    chip.classList.add("active");
-  });
 });
 
 checkBtn.addEventListener("click", checkAnswer);
