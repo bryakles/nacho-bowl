@@ -163,6 +163,8 @@ function loadTeacherSettings() {
       }
     });
   }
+
+  updateTeacherLockIndicator();
 }
 
 function saveTeacherSettings() {
@@ -678,6 +680,7 @@ function openTeacherSettings() {
       PRACTICE_MODES[mode].enabled = !PRACTICE_MODES[mode].enabled;
     
       saveTeacherSettings();
+      updateTeacherLockIndicator();
     
       if (!PRACTICE_MODES[mode].enabled && practiceMode === mode) {
         const nextMode = Object.keys(PRACTICE_MODES)
