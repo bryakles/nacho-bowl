@@ -517,6 +517,7 @@ function shuffleArray(arr) {
 
 function beginPractice(filtered) {
   console.log("MODE:", practiceMode);
+  console.log("FIRST 5 BEFORE:", filtered.slice(0, 5));
   
   maxCardsPerSession = selectedCardCount;
 
