@@ -1621,43 +1621,46 @@ function renderNachoBuilderWord() {
 function updateNachoBuilderBowl() {
 
   const stages = [
-    {
-      emoji: "🥣",
-      text: "tazón vacío"
+    { 
+      emoji: "🥣🍚🌽🫘🥩🧀🥑🌶️🌮", 
+      label: "Nachos con todo 🎉" 
     },
-    {
-      emoji: "🥣🌽",
-      text: "chips de maíz"
+    { 
+      emoji: "🥣🍚🌽🫘🥩🧀🥑🌶️", 
+      label: "chile" 
     },
-    {
-      emoji: "🥣🌽🧀",
-      text: "chips de maíz + queso"
+    { 
+      emoji: "🥣🍚🌽🫘🥩🧀🥑", 
+      label: "aguacate" 
     },
-    {
-      emoji: "🥣🌽🧀🫘",
-      text: "chips de maíz + queso + frijoles"
+    { 
+      emoji: "🥣🍚🌽🫘🥩🧀", 
+      label: "queso" 
     },
-    {
-      emoji: "🥣🌽🧀🫘🥩",
-      text: "chips de maíz + queso + frijoles + carne"
+    { 
+      emoji: "🥣🍚🌽🫘🥩", 
+      label: "carne" 
     },
-    {
-      emoji: "🥣🌽🧀🫘🥩🌶️",
-      text: "chips de maíz + queso + frijoles + carne + chile"
+    { 
+      emoji: "🥣🍚🌽🫘", 
+      label: "frijoles" 
     },
-    {
-      emoji: "🥣🌽🧀🫘🥩🌶️🥑",
-      text: "chips de maíz + queso + frijoles + carne + chile + aguacate"
+    { 
+      emoji: "🥣🍚🌽", 
+      label: "maíz" 
     },
-    {
-      emoji: "🥣🌽🧀🫘🥩🌶️🥑🍅",
-      text: "¡Nachos completos! + tomate 🎉"
+    { 
+      emoji: "🥣🍚", 
+      label: "arroz" 
+    },
+    { 
+      emoji: "🥣", 
+      label: "tazón vacío" 
     }
   ];
-
-  const index = Math.max(
-    0,
-    stages.length - 1 - nachoBuilderWrongGuesses
+  const index = Math.min(
+    nachoBuilderWrongGuesses,
+    stages.length - 1
   );
 
   nachoBowlProgress.innerHTML = `
@@ -1665,7 +1668,7 @@ function updateNachoBuilderBowl() {
       ${stages[index].emoji}
     </div>
     <div class="nacho-bowl-label">
-      ${stages[index].text}
+      ${stages[index].label}
     </div>
   `;
 
