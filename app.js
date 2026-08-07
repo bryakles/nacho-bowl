@@ -264,6 +264,8 @@ const nachoWordDisplay = document.getElementById("nachoWordDisplay");
 const nachoGuessedLetters = document.getElementById("nachoGuessedLetters");
 const nachoStrikes = document.getElementById("nachoStrikes");
 const nachoKeyboard = document.getElementById("nachoKeyboard");
+const nachoGameMessage = document.getElementById("nachoGameMessage");
+const nachoNextWordBtn = document.getElementById("nachoNextWordBtn");
 
 const studySetContainer = document.getElementById("studySetContainer");
 const backFromStudySet = document.getElementById("backFromStudySet");
