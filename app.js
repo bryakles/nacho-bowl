@@ -1556,8 +1556,8 @@ function startNachoBuilder(cards) {
 
   const randomCard = cards[Math.floor(Math.random() * cards.length)];
 
-  nachoBuilderWord = removeSpanishArticle(randomCard.spanish);
-
+nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
+  
   console.log("Nacho Builder word:", nachoBuilderWord);
   console.log("Original card:", randomCard);
 
@@ -1631,6 +1631,8 @@ function renderNachoBuilderKeyboard() {
 }
 
 function guessNachoBuilderLetter(letter) {
+
+  letter = letter.toLowerCase();
 
   // Don't allow guessing the same letter twice
   if (nachoBuilderGuessedLetters.has(letter)) {
