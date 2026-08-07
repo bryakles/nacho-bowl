@@ -148,6 +148,8 @@ let teacherSettings = {
   "study-set": true
 };
 
+const TEACHER_PASSWORD = "nachoch33s3";
+
 const practiceModes = {
   "spanish-english": "🇪🇸 Spanish → English",
   "english-spanish": "🇺🇸 English → Spanish",
@@ -411,6 +413,17 @@ boredBtn.addEventListener("click", () => {
   boredWord.textContent = card.content;
 });
 
+teacherModeBtn.addEventListener("click", () => {
+  const password = prompt("Enter teacher password:");
+
+  if (password !== TEACHER_PASSWORD) {
+    alert("Incorrect password.");
+    return;
+  }
+
+  openTeacherSettings();
+});
+
 // ============================================================
 // SCREEN TRANSITIONS
 // ============================================================
@@ -459,6 +472,17 @@ function renderModeChips() {
 
     modeOptions.appendChild(chip);
   });
+}
+
+function openTeacherSettings() {
+  const choice = confirm(
+    "Toggle Multiple Choice?\n\nOK = Turn OFF\nCancel = Leave unchanged"
+  );
+
+  if (choice) {
+    teacherSettings["multiple-choice"] = false;
+    renderModeChips();
+  }
 }
 
 function renderLevelChips() {
