@@ -1606,8 +1606,9 @@ function renderNachoBuilderWord() {
   const display = nachoBuilderWord
     .split("")
     .map(letter => {
+
       if (letter === " ") {
-        return " ";
+        return "\u00A0\u00A0\u00A0";
       }
 
       if (nachoBuilderGuessedLetters.has(normalizeLetter(letter))) {
