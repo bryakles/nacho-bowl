@@ -516,6 +516,8 @@ function shuffleArray(arr) {
 }
 
 function beginPractice(filtered) {
+  console.log("MODE:", practiceMode);
+  
   maxCardsPerSession = selectedCardCount;
 
   sessionStartMode = practiceMode;
