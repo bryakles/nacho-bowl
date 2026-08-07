@@ -103,8 +103,13 @@ const PRACTICE_MODES = {
   "study-set": {
     label: "📚 Study Set",
     enabled: true
+  },
+  
+  "nacho-builder": {
+    label: "🌮 Nacho Builder",
+    enabled: true
   }
-};
+  };
 
 // ============================================================
 // STATE
@@ -145,7 +150,8 @@ const practiceModes = {
   "answer": "🎲 Answer: Shuffled",
   "ordered-answer": "📋 Answer: Ordered",
   "multiple-choice": "🔢 Multiple Choice",
-  "study-set": "📚 Study Set"
+  "study-set": "📚 Study Set",
+  "nacho-builder": "🌮 Nacho Builder"
 };
 
 const TEACHER_PASSWORD = "nacho5";
