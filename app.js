@@ -520,8 +520,13 @@ function beginPractice(filtered) {
 
   sessionStartMode = practiceMode;
   sessionStartLength = maxCardsPerSession;
-  
-  practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
+
+  if (practiceMode === "ordered-answer") {
+    practiceCards = [...filtered].slice(0, maxCardsPerSession);
+  } else {
+    practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
+  }
+
   resetPracticeState();
   practiceActive = true;
 
