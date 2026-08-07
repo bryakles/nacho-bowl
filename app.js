@@ -204,7 +204,7 @@ let nachoBuilderWord = "";
 let nachoBuilderDisplay = [];
 let nachoBuilderGuessedLetters = new Set();
 let nachoBuilderWrongGuesses = 0;
-let nachoBuilderMaxWrongGuesses = 6;
+let nachoBuilderMaxWrongGuesses = 8;
 
 // ============================================================
 // DOM REFERENCES
@@ -1596,11 +1596,14 @@ function updateNachoBuilderBowl() {
 
   const stages = [
     "🥣",
-    "🥣🫘",
-    "🥣🫘🥩",
-    "🥣🫘🥩🧀",
-    "🥣🫘🥩🧀🥬",
-    "🥣🫘🥩🧀🥬🌮"
+    "🥣🍚",
+    "🥣🍚🫘",
+    "🥣🍚🫘🥩",
+    "🥣🍚🫘🥩🧀",
+    "🥣🍚🫘🥩🧀🥑",
+    "🥣🍚🫘🥩🧀🥑🌶️",
+    "🥣🍚🫘🥩🧀🥑🌶️🌮",
+    "💥 Spill!"
   ];
 
   nachoBowlProgress.textContent =
@@ -1623,16 +1626,14 @@ function renderNachoBuilderKeyboard() {
     `;
 
     button.addEventListener("click", () => {
-      guessNachoBuilderLetter(letter);
+      guessNachoBuilderLetter(letter, button);
     });
 
     nachoKeyboard.appendChild(button);
   });
 }
 
-function guessNachoBuilderLetter(letter) {
-
-  letter = letter.toLowerCase();
+function guessNachoBuilderLetter(letter, button) {
 
   // Don't allow guessing the same letter twice
   if (nachoBuilderGuessedLetters.has(letter)) {
@@ -1641,18 +1642,48 @@ function guessNachoBuilderLetter(letter) {
 
   nachoBuilderGuessedLetters.add(letter);
 
-  // Check if the word contains the letter
+  // Correct guess
   if (nachoBuilderWord.includes(letter)) {
+
+    button.classList.add("correct");
 
     renderNachoBuilderWord();
 
-  } else {
+  } 
+  
+  // Wrong guess
+  else {
+
+    button.classList.add("wrong");
 
     nachoBuilderWrongGuesses++;
 
     updateNachoBuilderBowl();
     updateNachoBuilderStrikes();
 
+  }
+  
+  checkNachoBuilderGameStatus();
+  
+}
+
+function checkNachoBuilderGameStatus() {
+
+  const solved = nachoBuilderWord
+    .split("")
+    .every(letter => {
+      return letter === " " ||
+        nachoBuilderGuessedLetters.has(letter);
+    });
+
+  if (solved) {
+    alert("🎉 Bowl complete! +1 🧀");
+    return;
+  }
+
+  if (nachoBuilderWrongGuesses >= nachoBuilderMaxWrongGuesses) {
+    alert("💥 Spill! Try another word!");
+    return;
   }
 
 }
