@@ -58,6 +58,10 @@ body {
   flex-direction: column;
 }
 
+body.teacher-lock-active {
+  background: var(--color-primary);
+}
+
 /* ============================================================
    SCREENS
    ============================================================ */
