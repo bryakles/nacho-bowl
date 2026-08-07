@@ -67,6 +67,46 @@ function randomMessage(tier) {
 }
 
 // ============================================================
+// PRACTICE MODE SETTINGS
+// ============================================================
+const PRACTICE_MODES = {
+  "spanish-english": {
+    label: "🇪🇸 Spanish → English",
+    enabled: true
+  },
+
+  "english-spanish": {
+    label: "🇺🇸 English → Spanish",
+    enabled: true
+  },
+
+  "mixed": {
+    label: "↔️ Mixed",
+    enabled: true
+  },
+
+  "answer": {
+    label: "📝 Answer: Shuffled",
+    enabled: true
+  },
+
+  "ordered-answer": {
+    label: "📋 Answer: Ordered",
+    enabled: true
+  },
+
+  "multiple-choice": {
+    label: "🎯 Multiple Choice",
+    enabled: true
+  },
+
+  "study-set": {
+    label: "📚 Study Set",
+    enabled: true
+  }
+};
+
+// ============================================================
 // STATE
 // ============================================================
 let allCards = [];       // All cards loaded from Google Sheet
