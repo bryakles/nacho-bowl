@@ -515,61 +515,6 @@ function shuffleArray(arr) {
   return a;
 }
 
-function showStudySet(cards) {
-
-  filterPanel.classList.add("hidden");
-  practicePanel.classList.add("hidden");
-  resultsPanel.classList.add("hidden");
-
-  studySetPanel.classList.remove("hidden");
-
-  studySetContainer.innerHTML = `
-    <table class="study-table">
-      <thead>
-        <tr>
-          <th id="sortSpanish" class="sortable">
-            Spanish <span id="spanishArrow">↕</span>
-          </th>
-  
-          <th id="sortEnglish" class="sortable">
-            English <span id="englishArrow">↕</span>
-          </th>
-        </tr>
-      </thead>
-  
-      <tbody></tbody>
-    </table>
-  `;
-
-  const tbody = studySetContainer.querySelector("tbody");
-  document.getElementById("sortSpanish").onclick = () => {
-    sortStudySet(cards, "spanish");
-  };
-  
-  document.getElementById("sortEnglish").onclick = () => {
-    sortStudySet(cards, "english");
-  };
-
-  const sortedCards = [...cards];
-
-  sortedCards.forEach(card => {
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-      <td>${card.spanish}</td>
-      <td>${card.english}</td>
-    `;
-
-    tbody.appendChild(row);
-  });
-
-  // Move the user to the Study Set panel
-  studySetPanel.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-
 function beginPractice(filtered) {
   maxCardsPerSession = selectedCardCount;
 
@@ -1033,31 +978,6 @@ function launchNachoConfetti() {
 }
 
 // ============================================================
-// STUDY SET FUNCTIONS
-// ============================================================
-
-function sortStudySet(cards, column) {
-
-  if (studySetSortColumn === column) {
-    studySetSortDirection =
-      studySetSortDirection === "asc" ? "desc" : "asc";
-  } else {
-    studySetSortColumn = column;
-    studySetSortDirection = "asc";
-  }
-
-  const sortedCards = [...cards].sort((a, b) => {
-    return (a[column] || "").localeCompare(b[column] || "");
-  });
-
-  if (studySetSortDirection === "desc") {
-    sortedCards.reverse();
-  }
-
-  showStudySet(sortedCards);
-}
-
-// ============================================================
 // END PRACTICE
 // ============================================================
 endPracticeBtn.addEventListener("click", () => {
@@ -1236,6 +1156,100 @@ historyToggle.addEventListener("click", () => {
     ? "Attempt History ▸"
     : "Attempt History ▾";
 });
+
+// ============================================================
+// STUDY SET FUNCTIONS
+// ============================================================
+
+function showStudySet(cards) {
+
+  filterPanel.classList.add("hidden");
+  practicePanel.classList.add("hidden");
+  resultsPanel.classList.add("hidden");
+
+  studySetPanel.classList.remove("hidden");
+
+  studySetContainer.innerHTML = `
+    <table class="study-table">
+      <thead>
+        <tr>
+          <th id="sortSpanish" class="sortable">
+            Spanish <span id="spanishArrow">↕</span>
+          </th>
+  
+          <th id="sortEnglish" class="sortable">
+            English <span id="englishArrow">↕</span>
+          </th>
+        </tr>
+      </thead>
+  
+      <tbody></tbody>
+    </table>
+  `;
+
+  const tbody = studySetContainer.querySelector("tbody");
+  document.getElementById("sortSpanish").onclick = () => {
+    sortStudySet(cards, "spanish");
+  };
+  
+  document.getElementById("sortEnglish").onclick = () => {
+    sortStudySet(cards, "english");
+  };
+
+  const sortedCards = [...cards];
+
+  sortedCards.forEach(card => {
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${card.spanish}</td>
+      <td>${card.english}</td>
+    `;
+
+    tbody.appendChild(row);
+  });
+
+  // Move the user to the Study Set panel
+  studySetPanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+function sortStudySet(cards, column) {
+
+  if (studySetSortColumn === column) {
+    studySetSortDirection =
+      studySetSortDirection === "asc" ? "desc" : "asc";
+  } else {
+    studySetSortColumn = column;
+    studySetSortDirection = "asc";
+  }
+
+  const sortedCards = [...cards].sort((a, b) => {
+  const aText = column === "spanish"
+    ? removeSpanishArticle(a[column] || "")
+    : (a[column] || "");
+
+  const bText = column === "spanish"
+    ? removeSpanishArticle(b[column] || "")
+    : (b[column] || "");
+
+  return aText.localeCompare(bText);
+});
+
+  if (studySetSortDirection === "desc") {
+    sortedCards.reverse();
+  }
+
+  showStudySet(sortedCards);
+}
+
+function removeSpanishArticle(word) {
+  return word
+    .replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, "")
+    .trim();
+}
 
 // ============================================================
 // INIT
