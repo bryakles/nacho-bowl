@@ -688,6 +688,18 @@ startPracticeBtn.addEventListener("click", () => {
   beginPractice(filtered);
 });
 
+nachoNextWordBtn.addEventListener("click", () => {
+
+  nachoGameMessage.classList.add("hidden");
+  nachoNextWordBtn.classList.add("hidden");
+
+  nachoBuilderGuessedLetters.clear();
+  nachoBuilderWrongGuesses = 0;
+
+  startNachoBuilder(getFilteredCards());
+
+});
+
 function openTeacherSettings() {
   teacherModeList.innerHTML = "";
 
