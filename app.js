@@ -1511,6 +1511,13 @@ function cleanSortText(word, language) {
 
 function startNachoBuilder(cards) {
 
+  filterPanel.classList.add("hidden");
+  practicePanel.classList.add("hidden");
+  studySetPanel.classList.add("hidden");
+  resultsPanel.classList.add("hidden");
+
+  nachoBuilderPanel.classList.remove("hidden");
+
   practicePanel.classList.add("hidden");
   studySetPanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
