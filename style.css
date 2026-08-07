@@ -818,6 +818,40 @@ body.teacher-lock-active {
 }
 
 /* ============================================================
+   NACHO BUILDER KEYBOARD
+   ============================================================ */
+
+.nacho-letter-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 55px;
+  height: 55px;
+
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+
+  background: var(--color-surface);
+  color: var(--color-text);
+
+  cursor: pointer;
+  font-family: var(--font-family);
+
+  transition: all var(--transition);
+}
+
+.nacho-letter-btn strong {
+  font-size: 1.2rem;
+}
+
+.nacho-letter-btn span {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
    CONFIRM DIALOG
    ============================================================ */
 .dialog-overlay {
