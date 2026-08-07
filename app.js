@@ -197,6 +197,16 @@ function updateTeacherLockIndicator() {
 }
 
 // ============================================================
+// NACHO BUILDER GAME STATE
+// ============================================================
+
+let nachoBuilderWord = "";
+let nachoBuilderDisplay = [];
+let nachoBuilderGuessedLetters = new Set();
+let nachoBuilderWrongGuesses = 0;
+let nachoBuilderMaxWrongGuesses = 6;
+
+// ============================================================
 // DOM REFERENCES
 // ============================================================
 const loginScreen      = document.getElementById("loginScreen");
