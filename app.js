@@ -1686,6 +1686,16 @@ function guessNachoBuilderLetter(letter, button) {
 
 }
 
+function lockNachoBuilderKeyboard() {
+
+  const buttons = nachoKeyboard.querySelectorAll("button");
+
+  buttons.forEach(button => {
+    button.disabled = true;
+  });
+
+}
+
 function showNachoBuilderMessage(message) {
 
   nachoGameMessage.textContent = message;
@@ -1705,15 +1715,29 @@ function checkNachoBuilderGameStatus() {
     });
 
   if (solved) {
+  
+    renderNachoBuilderWord();
+  
     showNachoBuilderMessage("🎉 Bowl complete! +1 🧀");
+  
+    lockNachoBuilderKeyboard();
+  
     return;
+  
   }
   
   if (nachoBuilderWrongGuesses >= nachoBuilderMaxWrongGuesses) {
-    showNachoBuilderMessage("💥 Spill! Try another word!");
+
+    renderNachoBuilderWord();
+  
+    showNachoBuilderMessage(
+      `💥 Spill! The word was "${nachoBuilderWord}".`
+    );
+  
+    lockNachoBuilderKeyboard();
+  
     return;
   }
-
 }
 
 function updateNachoBuilderStrikes() {
