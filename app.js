@@ -1627,37 +1627,38 @@ function updateNachoBuilderBowl() {
     },
     { 
       emoji: "🥣🍚🌽🫘🥩🧀🥑🌶️", 
-      label: "chile" 
+      label: "Chile" 
     },
     { 
       emoji: "🥣🍚🌽🫘🥩🧀🥑", 
-      label: "aguacate" 
+      label: "Aguacate" 
     },
     { 
       emoji: "🥣🍚🌽🫘🥩🧀", 
-      label: "queso" 
+      label: "Queso" 
     },
     { 
       emoji: "🥣🍚🌽🫘🥩", 
-      label: "carne" 
+      label: "Carne" 
     },
     { 
       emoji: "🥣🍚🌽🫘", 
-      label: "frijoles" 
+      label: "Frijoles" 
     },
     { 
       emoji: "🥣🍚🌽", 
-      label: "maíz" 
+      label: "Maíz" 
     },
     { 
       emoji: "🥣🍚", 
-      label: "arroz" 
+      label: "Arroz" 
     },
     { 
       emoji: "🥣", 
-      label: "tazón vacío" 
+      label: "Tazón vacío" 
     }
   ];
+  
   const index = Math.min(
     nachoBuilderWrongGuesses,
     stages.length - 1
@@ -1700,7 +1701,7 @@ function renderNachoBuilderKeyboard() {
 function guessNachoBuilderLetter(letter, button) {
 
   // Convert keyboard letter to lowercase
-  const guessedLetter = letter.toLowerCase();
+  const guessedLetter = normalizeLetter(letter);
 
   // Don't allow guessing the same letter twice
   if (nachoBuilderGuessedLetters.has(guessedLetter)) {
@@ -1783,7 +1784,7 @@ function checkNachoBuilderGameStatus() {
     renderNachoBuilderWord();
   
     showNachoBuilderMessage(
-      `💥 Spill! The word was "${nachoBuilderWord}".`
+      `💥 ¡Se derramó el tazón! The word was "${nachoBuilderWord}".`
     );
   
     lockNachoBuilderKeyboard();
