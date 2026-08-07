@@ -148,16 +148,6 @@ const practiceModes = {
   "study-set": "📚 Study Set"
 };
 
-let teacherSettings = {
-  "spanish-english": true,
-  "english-spanish": true,
-  "mixed": true,
-  "answer": true,
-  "ordered-answer": true,
-  "multiple-choice": true,
-  "study-set": true
-};
-
 const TEACHER_PASSWORD = "nachoch33s3";
 const TEACHER_SETTINGS_KEY = "nachoBowlTeacherSettings";
 
@@ -165,17 +155,26 @@ function loadTeacherSettings() {
   const saved = localStorage.getItem(TEACHER_SETTINGS_KEY);
 
   if (saved) {
-    teacherSettings = {
-      ...teacherSettings,
-      ...JSON.parse(saved)
-    };
+    const settings = JSON.parse(saved);
+
+    Object.keys(settings).forEach(mode => {
+      if (PRACTICE_MODES[mode]) {
+        PRACTICE_MODES[mode].enabled = settings[mode];
+      }
+    });
   }
 }
 
 function saveTeacherSettings() {
+  const settings = {};
+
+  Object.keys(PRACTICE_MODES).forEach(mode => {
+    settings[mode] = PRACTICE_MODES[mode].enabled;
+  });
+
   localStorage.setItem(
     TEACHER_SETTINGS_KEY,
-    JSON.stringify(teacherSettings)
+    JSON.stringify(settings)
   );
 }
 
@@ -478,14 +477,14 @@ function showFilterPanel() {
 function renderModeChips() {
   modeOptions.innerHTML = "";
 
-  Object.keys(practiceModes).forEach(mode => {
-    if (!teacherSettings[mode]) return;
+  Object.keys(PRACTICE_MODES).forEach(mode => {
+    if (!PRACTICE_MODES[mode].enabled) return;
 
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "mode-chip" + (practiceMode === mode ? " active" : "");
     chip.dataset.mode = mode;
-    chip.textContent = practiceModes[mode];
+    chip.textContent = PRACTICE_MODES[mode].label;
 
     chip.addEventListener("click", () => {
       practiceMode = mode;
@@ -623,37 +622,37 @@ startPracticeBtn.addEventListener("click", () => {
 function openTeacherSettings() {
   teacherModeList.innerHTML = "";
 
-  Object.keys(practiceModes).forEach(mode => {
+  Object.keys(PRACTICE_MODES).forEach(mode => {
     const row = document.createElement("div");
     row.className = "teacher-toggle-row";
 
     const label = document.createElement("span");
-    label.textContent = practiceModes[mode];
+    label.textContent = PRACTICE_MODES[mode].label;
 
     const button = document.createElement("button");
-    button.className = teacherSettings[mode]
+    button.className = PRACTICE_MODES[mode].enabled
       ? "toggle-on"
       : "toggle-off";
 
-    button.textContent = teacherSettings[mode]
+    button.textContent = PRACTICE_MODES[mode].enabled
       ? "ON"
       : "OFF";
 
     button.addEventListener("click", () => {
-      teacherSettings[mode] = !teacherSettings[mode];
+      PRACTICE_MODES[mode].enabled = !PRACTICE_MODES[mode].enabled;
     
       saveTeacherSettings();
     
-      if (!teacherSettings[mode] && practiceMode === mode) {
-        practiceMode = Object.keys(teacherSettings)
-          .find(m => teacherSettings[m]);
+      if (!PRACTICE_MODES[mode].enabled && practiceMode === mode) {
+        practiceMode = Object.keys(PRACTICE_MODES)
+          .find(m => PRACTICE_MODES[m].enabled);
       }
       
-      button.className = teacherSettings[mode]
+      button.className = PRACTICE_MODES[mode].enabled
         ? "toggle-on"
         : "toggle-off";
 
-      button.textContent = teacherSettings[mode]
+      button.textContent = PRACTICE_MODES[mode].enabled
         ? "ON"
         : "OFF";
 
@@ -718,8 +717,6 @@ function beginPractice(filtered) {
 
   // Lock mode for this session
 sessionModeLabel = PRACTICE_MODES[practiceMode]?.label || practiceMode;
-
-sessionModeLabel = modeLabels[practiceMode] || practiceMode;
 
   filterPanel.classList.add("hidden");
   practicePanel.classList.remove("hidden");
