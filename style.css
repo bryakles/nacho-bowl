@@ -922,7 +922,10 @@ body {
   }
 }
 
-/* TEMP TEST: Teacher Settings */
+/* ============================================================
+   TEACHER SETTINGS DIALOG
+   ============================================================ */
+
 .teacher-dialog {
   position: fixed;
   inset: 0;
@@ -931,16 +934,18 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  padding: 1rem;
 }
 
 .teacher-box {
-  background: white;
+  background: var(--color-surface);
+  border-radius: var(--color-radius-lg);
   padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
+  width: 100%;
   max-width: 400px;
   max-height: 80vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-lg);
 }
 
 .teacher-toggle-row {
@@ -948,5 +953,20 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.toggle-on,
+.toggle-off {
+  min-width: 60px;
+}
+
+.toggle-on {
+  background: var(--color-success);
+  color: white;
+}
+
+.toggle-off {
+  background: var(--color-border);
+  color: var(--color-text-muted);
 }
