@@ -575,14 +575,20 @@ function showNextCard() {
     return;
   }
 
-  // Find an unattempted card index
+  // Find next card index
   let next;
-  const remaining = practiceCards.map((_, i) => i).filter(i => !attemptedIndices.has(i));
-  next = remaining[Math.floor(Math.random() * remaining.length)];
+  
+  if (practiceMode === "ordered-answer") {
+    next = attemptedIndices.size;
+  } else {
+    const remaining = practiceCards.map((_, i) => i).filter(i => !attemptedIndices.has(i));
+    next = remaining[Math.floor(Math.random() * remaining.length)];
+  }
+  
   currentCardIndex = next;
-  currentCardState = "fresh";
-  currentCardFirstWrongAnswer = "";
-  currentCardPromptWord = "";
+    currentCardState = "fresh";
+    currentCardFirstWrongAnswer = "";
+    currentCardPromptWord = "";
 
   const card = practiceCards[currentCardIndex];
   const mode = (practiceMode === "mixed" || practiceMode === "multiple-choice")
