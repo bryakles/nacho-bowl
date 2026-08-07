@@ -1626,6 +1626,38 @@ function renderNachoBuilderKeyboard() {
   });
 }
 
+function guessNachoBuilderLetter(letter) {
+
+  // Don't allow guessing the same letter twice
+  if (nachoBuilderGuessedLetters.has(letter)) {
+    return;
+  }
+
+  nachoBuilderGuessedLetters.add(letter);
+
+  // Check if the word contains the letter
+  if (nachoBuilderWord.includes(letter)) {
+
+    renderNachoBuilderWord();
+
+  } else {
+
+    nachoBuilderWrongGuesses++;
+
+    updateNachoBuilderBowl();
+    updateNachoBuilderStrikes();
+
+  }
+
+}
+
+function updateNachoBuilderStrikes() {
+
+  nachoStrikes.textContent =
+    `${nachoBuilderWrongGuesses} ❌`;
+
+}
+
 // ============================================================
 // INIT
 // ============================================================
