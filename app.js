@@ -1568,6 +1568,9 @@ function startNachoBuilder(cards) {
   nachoBuilderGuessedLetters.clear();
   nachoBuilderWrongGuesses = 0;
 
+  updateNachoBuilderBowl();
+  updateNachoBuilderStrikes();
+
   const randomCard = cards[Math.floor(Math.random() * cards.length)];
 
 nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
@@ -1618,19 +1621,54 @@ function renderNachoBuilderWord() {
 function updateNachoBuilderBowl() {
 
   const stages = [
-    "🥣",
-    "🥣🍚",
-    "🥣🍚🫘",
-    "🥣🍚🫘🥩",
-    "🥣🍚🫘🥩🧀",
-    "🥣🍚🫘🥩🧀🥑",
-    "🥣🍚🫘🥩🧀🥑🌶️",
-    "🥣🍚🫘🥩🧀🥑🌶️🌮",
-    "💥 Spill!"
+    {
+      emoji: "🥣",
+      text: "tazón vacío"
+    },
+    {
+      emoji: "🥣🌽",
+      text: "chips de maíz"
+    },
+    {
+      emoji: "🥣🌽🧀",
+      text: "chips de maíz + queso"
+    },
+    {
+      emoji: "🥣🌽🧀🫘",
+      text: "chips de maíz + queso + frijoles"
+    },
+    {
+      emoji: "🥣🌽🧀🫘🥩",
+      text: "chips de maíz + queso + frijoles + carne"
+    },
+    {
+      emoji: "🥣🌽🧀🫘🥩🌶️",
+      text: "chips de maíz + queso + frijoles + carne + chile"
+    },
+    {
+      emoji: "🥣🌽🧀🫘🥩🌶️🥑",
+      text: "chips de maíz + queso + frijoles + carne + chile + aguacate"
+    },
+    {
+      emoji: "🥣🌽🧀🫘🥩🌶️🥑🍅",
+      text: "¡Nachos completos! + tomate 🎉"
+    }
   ];
 
-  nachoBowlProgress.textContent =
-    stages[nachoBuilderWrongGuesses];
+  const index = Math.max(
+    0,
+    stages.length - 1 - nachoBuilderWrongGuesses
+  );
+
+  nachoBowlProgress.innerHTML = `
+    <div class="nacho-bowl-emoji">
+      ${stages[index].emoji}
+    </div>
+    <div class="nacho-bowl-label">
+      ${stages[index].text}
+    </div>
+  `;
+
 }
 
 function renderNachoBuilderKeyboard() {
