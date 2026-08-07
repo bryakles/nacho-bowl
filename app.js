@@ -1558,6 +1558,9 @@ function startNachoBuilder(cards) {
 
   nachoBuilderWord = removeSpanishArticle(randomCard.spanish);
 
+  console.log("Nacho Builder word:", nachoBuilderWord);
+  console.log("Original card:", randomCard);
+
   renderNachoBuilderWord();
   console.log("Rendering Nacho Keyboard");
   renderNachoBuilderKeyboard();
