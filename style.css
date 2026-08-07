@@ -915,7 +915,7 @@ body.teacher-lock-active {
   align-items: center;
   justify-content: center;
 
-  width: 55px;
+  width: 75px;
   height: 55px;
 
   border: 2px solid var(--color-border);
