@@ -667,6 +667,7 @@ function openTeacherSettings() {
     row.appendChild(label);
     row.appendChild(button);
 
+    console.log("Adding teacher row:", PRACTICE_MODES[mode].label);
     teacherModeList.appendChild(row);
   });
 
