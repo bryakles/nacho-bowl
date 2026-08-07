@@ -862,6 +862,43 @@ body.teacher-lock-active {
 }
 
 /* ============================================================
+   NACHO BUILDER GAME LAYOUT
+   ============================================================ */
+
+.nacho-builder-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Bowl emoji */
+.nacho-bowl-progress {
+  font-size: 4rem;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Hidden word */
+.nacho-word-display {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.5rem;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+/* Guessed letters area */
+.nacho-guesses {
+  text-align: center;
+}
+
+.nacho-guesses h3 {
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================================
    NACHO BUILDER KEYBOARD
    ============================================================ */
 
