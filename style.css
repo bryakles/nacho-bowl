@@ -528,6 +528,15 @@ body {
   background: #fef2f2;
 }
 
+.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable:hover {
+  text-decoration: underline;
+}
+
 /* ============================================================
    RESULTS PANEL
    ============================================================ */
