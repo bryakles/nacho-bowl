@@ -1,4 +1,4 @@
-alert("APP JS NOT LOADED");
+alert("APP JS NOT NOT LOADED");
 
 // ============================================================
 // CONFIGURATION
