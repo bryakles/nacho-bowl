@@ -266,6 +266,7 @@ const nachoStrikes = document.getElementById("nachoStrikes");
 const nachoKeyboard = document.getElementById("nachoKeyboard");
 const nachoGameMessage = document.getElementById("nachoGameMessage");
 const nachoNextWordBtn = document.getElementById("nachoNextWordBtn");
+const backFromNachoBuilder = document.getElementById("backFromNachoBuilder");
 
 const studySetContainer = document.getElementById("studySetContainer");
 const backFromStudySet = document.getElementById("backFromStudySet");
@@ -689,15 +690,21 @@ startPracticeBtn.addEventListener("click", () => {
 });
 
 nachoNextWordBtn.addEventListener("click", () => {
-
   nachoGameMessage.classList.add("hidden");
   nachoNextWordBtn.classList.add("hidden");
 
   nachoBuilderGuessedLetters.clear();
   nachoBuilderWrongGuesses = 0;
 
-  startNachoBuilder(getFilteredCards());
+  updateNachoBuilderBowl();
+  updateNachoBuilderStrikes();
 
+  startNachoBuilder(getFilteredCards());
+});
+
+nachoBackBtn.addEventListener("click", () => {
+  nachoBuilderPanel.classList.add("hidden");
+  filterPanel.classList.remove("hidden");
 });
 
 function openTeacherSettings() {
