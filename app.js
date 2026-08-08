@@ -1897,6 +1897,7 @@ function checkNachoBuilderGameStatus() {
 
   return;
 }
+}
 
 function updateNachoBuilderStrikes() {
 
