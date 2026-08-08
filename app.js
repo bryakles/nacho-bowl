@@ -465,6 +465,8 @@ loginForm.addEventListener("submit", (e) => {
 
 signOutBtn.addEventListener("click", () => {
   currentUser = null;
+  localStorage.removeItem("nachoCurrentUser");
+
   usernameInput.value = "";
   passwordInput.value = "";
   practiceScreen.classList.add("hidden");
