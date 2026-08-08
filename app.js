@@ -1780,7 +1780,7 @@ function guessNachoBuilderLetter(letter, button) {
     ñ: "eñe",
     o: "o",
     p: "pe",
-    q: "cu",
+    q: "ku",
     r: "erre",
     s: "ese",
     t: "te",
