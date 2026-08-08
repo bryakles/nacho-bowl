@@ -1119,43 +1119,34 @@ function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer) {
 
     } else {
       // First attempt wrong:
-      // Turn selected answer RED, but DO NOT reveal the answer.
+      // Turn selected answer RED and allow exactly one retry.
       currentCardState = "hint_shown";
-
+    
       buttons.forEach(btn => {
         const text = btn.textContent.replace(/^[A-E]\.\s/, "");
-
+    
         if (text === selectedAnswer) {
           btn.style.borderColor = "var(--color-danger)";
           btn.style.background = "#fee2e2";
           btn.classList.add("mc-wrong-first");
+    
+          // Add feedback directly inside the button
+          btn.textContent = `${btn.textContent} — Try again!`;
+    
+          // Prevent selecting the same wrong answer again
+          btn.disabled = true;
+        } else {
+          // Other choices remain available
+          btn.disabled = false;
         }
       });
-
-      // Allow one more choice, but prevent the student
-      // from selecting the same wrong answer again.
-      buttons.forEach(btn => {
-        btn.disabled = false;
-      });
-
-      responseIcon.textContent = "✗";
-      responseText.textContent = "Not quite — try again.";
-      responseDisplay.className = "response-display incorrect";
-
+    
+      // Remove the extra feedback underneath the prompt
       feedbackText.textContent = "";
       hintText.textContent = "";
-      directionLabel.textContent = "Try one more time.";
-
-      // Keep the first wrong button disabled so it cannot be selected again
-      buttons.forEach(btn => {
-        const text = btn.textContent.replace(/^[A-E]\.\s/, "");
-
-        if (text === selectedAnswer) {
-          btn.disabled = true;
-        }
-      });
+      responseDisplay.className = "response-display hidden";
+      directionLabel.textContent = "";
     }
-
     updateStats();
     return;
   }
