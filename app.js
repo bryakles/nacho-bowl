@@ -2174,7 +2174,6 @@ historyToggle.addEventListener("click", () => {
 
 // Cards currently selected by the student.
 // Uses the actual card objects so selections survive sorting.
-const selectedStudyCards = new Set();
 
 
 // ============================================================
