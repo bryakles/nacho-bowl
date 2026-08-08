@@ -1883,16 +1883,19 @@ function checkNachoBuilderGameStatus() {
   
   if (nachoBuilderWrongGuesses >= nachoBuilderMaxWrongGuesses) {
 
-    renderNachoBuilderWord();
-  
-    showNachoBuilderMessage(
-      `💥 ¡Se derramó el tazón! The word was "${nachoBuilderWord}".`
-    );
-  
-    lockNachoBuilderKeyboard();
-  
-    return;
-  }
+  renderNachoBuilderWord();
+
+  showNachoBuilderMessage(
+    `💥 ¡Se derramó el tazón! The word was "${nachoBuilderWord}".`
+  );
+
+  saveAttemptHistory(
+    `${nachoBuilderCurrentSet} — Nacho Bowl — 💥 Se derramó — ${nachoBuilderCurrentSpanish} — ${currentUser.name} (${currentUser.username}) — ${new Date().toLocaleString()}`
+  );
+
+  lockNachoBuilderKeyboard();
+
+  return;
 }
 
 function updateNachoBuilderStrikes() {
