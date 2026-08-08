@@ -1722,12 +1722,12 @@ function guessNachoBuilderLetter(letter, button) {
   // Play Spanish letter name
   const letterNames = {
     a: "a",
-    b: "be",
+    b: "ve",
     c: "ce",
     d: "de",
     e: "e",
     f: "efe",
-    g: "ge",
+    g: "je",
     h: "hache",
     i: "i",
     j: "jota",
@@ -1738,7 +1738,7 @@ function guessNachoBuilderLetter(letter, button) {
     ñ: "eñe",
     o: "o",
     p: "pe",
-    q: "cu",
+    q: "ku",
     r: "erre",
     s: "ese",
     t: "te",
