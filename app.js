@@ -1615,7 +1615,7 @@ function renderNachoBuilderWord() {
     .map(letter => {
 
       if (letter === " ") {
-        return "\u00A0\u00A0\u00A0";
+        return "\u00A0\u00A0";
       }
 
       if (nachoBuilderGuessedLetters.has(normalizeLetter(letter))) {
