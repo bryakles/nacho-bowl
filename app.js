@@ -1746,6 +1746,11 @@ function getHint(
 }
 
 
+// ============================================================
+// PRACTICE UI & CONTROLS
+// ============================================================
+
+
 // ------------------------------------------------------------
 // PRACTICE STATS
 // ------------------------------------------------------------
@@ -1763,42 +1768,162 @@ function updateStats() {
     `${attemptedIndices.size} done · ${remaining} remaining`;
 }
 
-// Auto-convert capital letters to accented characters
-const ACCENT_MAP = { 'A': 'á', 'E': 'é', 'I': 'í', 'O': 'ó', 'U': 'ú', 'N': 'ñ', 'Y': 'ü' };
+
+// ------------------------------------------------------------
+// TEXT INPUT: AUTO-ACCENTS
+// ------------------------------------------------------------
+
+// Automatically convert capital letters into accented characters
+const ACCENT_MAP = {
+  "A": "á",
+  "E": "é",
+  "I": "í",
+  "O": "ó",
+  "U": "ú",
+  "N": "ñ",
+  "Y": "ü"
+};
+
 answerInput.addEventListener("input", () => {
   const pos = answerInput.selectionStart;
   const original = answerInput.value;
-  const converted = original.replace(/[AEIOUNY]/g, ch => ACCENT_MAP[ch]);
+
+  const converted =
+    original.replace(
+      /[AEIOUNY]/g,
+      ch => ACCENT_MAP[ch]
+    );
+
   if (converted !== original) {
     answerInput.value = converted;
     answerInput.setSelectionRange(pos, pos);
   }
 });
 
-checkBtn.addEventListener("click", checkAnswer);
-nextBtn.addEventListener("click", advanceCard);
 
-backFromStudySet.addEventListener("click", () => {
-  studySetPanel.classList.add("hidden");
-  filterPanel.classList.remove("hidden");
-});
+// ------------------------------------------------------------
+// BUTTON EVENTS
+// ------------------------------------------------------------
 
-answerInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    e.stopPropagation(); // Prevent the document listener from also firing on this same keypress
-    if (currentCardState === "done") advanceCard();
-    else checkAnswer();
+// Check typed answer
+checkBtn.addEventListener(
+  "click",
+  checkAnswer
+);
+
+// Advance to next card
+nextBtn.addEventListener(
+  "click",
+  advanceCard
+);
+
+// Return from study set
+backFromStudySet.addEventListener(
+  "click",
+  () => {
+    studySetPanel.classList.add("hidden");
+    filterPanel.classList.remove("hidden");
   }
-});
+);
 
-// Also listen on document so Enter works even when input is disabled
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter" && currentCardState === "done" && practiceActive) {
-    e.preventDefault();
-    advanceCard();
+
+// ------------------------------------------------------------
+// KEYBOARD: TYPED ANSWERS
+// ------------------------------------------------------------
+
+// Enter while answering a typed-response question
+answerInput.addEventListener(
+  "keydown",
+  e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (currentCardState === "done") {
+        advanceCard();
+      } else {
+        checkAnswer();
+      }
+    }
   }
-});
+);
+
+
+// ------------------------------------------------------------
+// KEYBOARD: MULTIPLE CHOICE
+// ------------------------------------------------------------
+
+// A–E selects multiple-choice answers
+document.addEventListener(
+  "keydown",
+  e => {
+    if (
+      practiceMode !== "multiple-choice" ||
+      !practiceActive ||
+      currentCardIndex < 0 ||
+      currentCardState === "done"
+    ) {
+      return;
+    }
+
+    // Don't trigger A–E while typing in an input
+    if (
+      e.target.tagName === "INPUT" ||
+      e.target.tagName === "TEXTAREA"
+    ) {
+      return;
+    }
+
+    const key =
+      e.key.toUpperCase();
+
+    if (
+      !["A", "B", "C", "D", "E"].includes(key)
+    ) {
+      return;
+    }
+
+    const index =
+      key.charCodeAt(0) -
+      "A".charCodeAt(0);
+
+    const buttons =
+      document.querySelectorAll(
+        "#multipleChoiceOptions button"
+      );
+
+    const button =
+      buttons[index];
+
+    // Ignore disabled choices
+    if (!button || button.disabled) {
+      return;
+    }
+
+    e.preventDefault();
+    button.click();
+  }
+);
+
+
+// ------------------------------------------------------------
+// KEYBOARD: NEXT CARD
+// ------------------------------------------------------------
+
+// Enter advances after an answer is complete
+document.addEventListener(
+  "keydown",
+  e => {
+    if (
+      e.key === "Enter" &&
+      currentCardState === "done" &&
+      practiceActive
+    ) {
+      e.preventDefault();
+      advanceCard();
+    }
+  }
+);
 
 function advanceCard() {
   if (currentCardIndex >= 0 && currentCardState !== "done") {
