@@ -266,7 +266,7 @@ const nachoStrikes = document.getElementById("nachoStrikes");
 const nachoKeyboard = document.getElementById("nachoKeyboard");
 const nachoGameMessage = document.getElementById("nachoGameMessage");
 const nachoNextWordBtn = document.getElementById("nachoNextWordBtn");
-const backFromNachoBuilder = document.getElementById("backFromNachoBuilder");
+const nachoBackBtn = document.getElementById("nachoBackBtn");
 
 const studySetContainer = document.getElementById("studySetContainer");
 const backFromStudySet = document.getElementById("backFromStudySet");
