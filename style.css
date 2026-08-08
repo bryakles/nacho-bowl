@@ -898,7 +898,7 @@ body.teacher-lock-active {
 .nacho-word-display {
   font-size: 3rem;
   font-weight: 800;
-  letter-spacing: 0.5rem;
+  letter-spacing: 0.4rem;
   text-align: center;
   color: var(--color-primary);
 }
