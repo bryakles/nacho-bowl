@@ -1598,14 +1598,14 @@ function removeSpanishArticle(word) {
 
 function normalizeLetter(letter) {
 
+  if (letter === "ñ" || letter === "Ñ") {
+    return "ñ";
+  }
+
   return letter
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, (mark) => {
-      // Keep the tilde for ñ
-      return mark === "\u0303" ? mark : "";
-    })
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-
 }
 
 function renderNachoBuilderWord() {
@@ -1735,7 +1735,7 @@ function guessNachoBuilderLetter(letter, button) {
     l: "ele",
     m: "eme",
     n: "ene",
-    ñ: "hola",
+    ñ: "eñe",
     o: "o",
     p: "pe",
     q: "ku",
