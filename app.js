@@ -1756,7 +1756,7 @@ function guessNachoBuilderLetter(letter, button) {
     ñ: "eñe",
     o: "o",
     p: "pe",
-    q: "ku",
+    q: "cu",
     r: "erre",
     s: "ese",
     t: "te",
@@ -1768,33 +1768,26 @@ function guessNachoBuilderLetter(letter, button) {
     z: "zeta"
   };
 
-  const spokenName =
-    guessedLetter === "ñ"
-      ? "eñe"
-      : letterNames[guessedLetter];
-  
-  const utterance = new SpeechSynthesisUtterance(spokenName);
-  utterance.lang = "es-ES";
+  const spokenName = letterNames[guessedLetter];
 
-speechSynthesis.cancel();
-speechSynthesis.speak(utterance);
+  if (spokenName) {
+    speakSpanish(spokenName);
+  }
 
   nachoBuilderGuessedLetters.add(guessedLetter);
 
-  nachoBuilderGuessedLetters.add(guessedLetter);
-
-   // Correct guess
+  // Correct guess
   const normalizedWord = normalizeLetter(nachoBuilderWord);
-  
+
   if (normalizedWord.includes(guessedLetter)) {
-  
+
     button.classList.add("correct");
     button.disabled = true;
-  
+
     renderNachoBuilderWord();
-  
+
   }
-  
+
   // Wrong guess
   else {
 
