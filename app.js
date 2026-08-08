@@ -267,6 +267,7 @@ const nachoKeyboard = document.getElementById("nachoKeyboard");
 const nachoGameMessage = document.getElementById("nachoGameMessage");
 const nachoNextWordBtn = document.getElementById("nachoNextWordBtn");
 const nachoBackBtn = document.getElementById("nachoBackBtn");
+const nachoPracticeSets = document.getElementById("nachoPracticeSets");
 
 const studySetContainer = document.getElementById("studySetContainer");
 const backFromStudySet = document.getElementById("backFromStudySet");
@@ -1578,12 +1579,14 @@ function startNachoBuilder(cards) {
   nachoBuilderGuessedLetters.clear();
   nachoBuilderWrongGuesses = 0;
 
+  updateNachoPracticeSets();
+
   updateNachoBuilderBowl();
   updateNachoBuilderStrikes();
 
   const randomCard = cards[Math.floor(Math.random() * cards.length)];
 
-nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
+  nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
   
   console.log("Nacho Builder word:", nachoBuilderWord);
   console.log("Original card:", randomCard);
@@ -1630,6 +1633,15 @@ function renderNachoBuilderWord() {
     .join(" ");
 
   nachoWordDisplay.textContent = display;
+}
+
+function updateNachoPracticeSets() {
+  const selectedSetNames = [...lastFilterSettings.sets];
+
+  nachoPracticeSets.innerHTML = `
+    <strong>Practicing:</strong>
+    ${selectedSetNames.join(" · ")}
+  `;
 }
 
 function updateNachoBuilderBowl() {
