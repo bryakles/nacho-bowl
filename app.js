@@ -1122,39 +1122,209 @@ function showAnswer() {
   // Show Answer removed — students must answer themselves
 }
 
-function getHint(student, correct) {
-  const sNorm = normalizeAnswer(student);  // accents preserved
-  const cNorm = normalizeAnswer(correct);
-  const sBase = stripAccents(sNorm);       // accents removed
-  const cBase = stripAccents(cNorm);
+function getHint(studentAnswer, correctAnswer) {
+  const student = studentAnswer.trim();
+  const correct = correctAnswer.trim();
 
-  // If base forms match but accented forms don't — purely an accent issue
-  if (sBase === cBase && sNorm !== cNorm) {
-    const sHasAccent = /[áéíóúüñ]/i.test(sNorm);
-    const cHasAccent = /[áéíóúüñ]/i.test(cNorm);
-    if (cHasAccent && !sHasAccent) return "Hint: add accent";
-    if (!cHasAccent && sHasAccent) return "Hint: remove accent";
-    return "Hint: fix accent";
+  const diagnostics = [];
+
+  const removeAccents = text =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  const studentBase = removeAccents(student);
+  const correctBase = removeAccents(correct);
+
+  // ------------------------------------------------------------
+  // WORDS
+  // ------------------------------------------------------------
+  const studentWords = student ? student.split(/\s+/) : [];
+  const correctWords = correct ? correct.split(/\s+/) : [];
+
+  if (studentWords.length !== correctWords.length) {
+    diagnostics.push(
+      `Words: ${studentWords.length < correctWords.length ? "too few" : "too many"}`
+    );
   }
 
-  // Space check (use base forms to avoid accent interference)
-  if (sBase.includes(" ") && !cBase.includes(" ")) return "Hint: remove space";
-  if (!sBase.includes(" ") && cBase.includes(" ")) return "Hint: add space";
+  // ------------------------------------------------------------
+  // LENGTH
+  // ------------------------------------------------------------
+  const studentNoSpaces = student.replace(/\s/g, "");
+  const correctNoSpaces = correct.replace(/\s/g, "");
 
-  // Length check
-  if (sBase.length > cBase.length) return "Hint: remove a letter";
-  if (sBase.length < cBase.length) return "Hint: add a letter";
+  const lengthDifference =
+    studentNoSpaces.length - correctNoSpaces.length;
 
-  // Same length — count differing characters
-  let diffs = 0;
-  for (let i = 0; i < sBase.length; i++) {
-    if (sBase[i] !== cBase[i]) diffs++;
+  if (lengthDifference !== 0) {
+    diagnostics.push(
+      `Length: ${lengthDifference < 0 ? "too short" : "too long"}`
+    );
   }
-  if (diffs <= 2) return "Hint: fix minor spelling";
 
-  return "Hint: try again";
+  // ------------------------------------------------------------
+  // ACCENTS
+  // ------------------------------------------------------------
+  const sameLettersIgnoringAccents =
+    studentBase.toLowerCase() === correctBase.toLowerCase();
+
+  if (sameLettersIgnoringAccents && student !== correct) {
+    const studentHasAccents = /[áéíóúüñ]/i.test(student);
+    const correctHasAccents = /[áéíóúüñ]/i.test(correct);
+
+    if (correctHasAccents && !studentHasAccents) {
+      diagnostics.push("Accents: add accent(s)");
+    } else if (!correctHasAccents && studentHasAccents) {
+      diagnostics.push("Accents: remove accent(s)");
+    } else {
+      diagnostics.push("Accents: check accent(s)");
+    }
+
+    return "Hint: " + diagnostics.join(" • ");
+  }
+
+  // ------------------------------------------------------------
+  // ARTICLE
+  // ------------------------------------------------------------
+  const articleRegex = /^(el|la|los|las|un|una|unos|unas)\s+/i;
+
+  const studentArticle =
+    student.match(articleRegex)?.[1]?.toLowerCase() || "";
+
+  const correctArticle =
+    correct.match(articleRegex)?.[1]?.toLowerCase() || "";
+
+  if (studentArticle !== correctArticle) {
+    if (!studentArticle && correctArticle) {
+      diagnostics.push("Article: missing");
+    } else if (studentArticle && !correctArticle) {
+      diagnostics.push("Article: remove it");
+    } else {
+      diagnostics.push("Article: incorrect");
+    }
+  }
+
+  // ------------------------------------------------------------
+  // WORD ORDER
+  // ------------------------------------------------------------
+  const sortedStudentWords = [...studentWords]
+    .map(word => removeAccents(word.toLowerCase()))
+    .sort();
+
+  const sortedCorrectWords = [...correctWords]
+    .map(word => removeAccents(word.toLowerCase()))
+    .sort();
+
+  const sameWordsDifferentOrder =
+    studentWords.length === correctWords.length &&
+    JSON.stringify(sortedStudentWords) ===
+      JSON.stringify(sortedCorrectWords) &&
+    studentBase.toLowerCase() !== correctBase.toLowerCase();
+
+  if (sameWordsDifferentOrder) {
+    diagnostics.push("Word order: incorrect");
+  }
+
+  // ------------------------------------------------------------
+  // BEGINNING / MIDDLE / END
+  //
+  // Only use these when the answers are reasonably close in length.
+  // This prevents misleading positional hints for very different answers.
+  // ------------------------------------------------------------
+  const lengthRatio =
+    correctNoSpaces.length > 0
+      ? studentNoSpaces.length / correctNoSpaces.length
+      : 0;
+
+  const reasonablyClose =
+    lengthRatio >= 0.7 &&
+    lengthRatio <= 1.3;
+
+  if (reasonablyClose && studentNoSpaces.length && correctNoSpaces.length) {
+
+    const studentLetters =
+      studentBase.replace(/\s/g, "").toLowerCase();
+
+    const correctLetters =
+      correctBase.replace(/\s/g, "").toLowerCase();
+
+    // ----------------------------------------------------------
+    // Beginning
+    // ----------------------------------------------------------
+    const beginningLength = Math.max(
+      1,
+      Math.ceil(correctLetters.length / 3)
+    );
+
+    let beginningCorrect = true;
+
+    for (
+      let i = 0;
+      i < Math.min(beginningLength, studentLetters.length);
+      i++
+    ) {
+      if (studentLetters[i] !== correctLetters[i]) {
+        beginningCorrect = false;
+        break;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Middle
+    // ----------------------------------------------------------
+    const middleStart = Math.floor(correctLetters.length / 3);
+    const middleEnd = Math.ceil(correctLetters.length * 2 / 3);
+
+    let middleCorrect = true;
+
+    for (
+      let i = middleStart;
+      i < Math.min(middleEnd, studentLetters.length);
+      i++
+    ) {
+      if (studentLetters[i] !== correctLetters[i]) {
+        middleCorrect = false;
+        break;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // End
+    // ----------------------------------------------------------
+    const endLength = Math.max(
+      1,
+      Math.ceil(correctLetters.length / 3)
+    );
+
+    const correctEnd = correctLetters.slice(-endLength);
+    const studentEnd = studentLetters.slice(-endLength);
+
+    const endCorrect = studentEnd === correctEnd;
+
+    if (!beginningCorrect) {
+      diagnostics.push("Beginning: incorrect");
+    }
+
+    if (!middleCorrect) {
+      diagnostics.push("Middle: incorrect");
+    }
+
+    if (!endCorrect) {
+      diagnostics.push("End: incorrect");
+    }
+  }
+
+  // ------------------------------------------------------------
+  // ONLY SHOW WHAT IS USEFUL
+  // ------------------------------------------------------------
+  if (diagnostics.length) {
+    return "Hint: " + diagnostics.join(" • ");
+  }
+
+  // ------------------------------------------------------------
+  // FALLBACK FOR A VERY DIFFERENT ANSWER
+  // ------------------------------------------------------------
+  return "Hint: Check your spelling and try again.";
 }
-
 function updateStats() {
   statCorrect.textContent = correctCount;
   statHinted.textContent = hintedCorrectCount;
