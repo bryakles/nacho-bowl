@@ -2579,13 +2579,27 @@ function cleanSortText(word, language) {
 // PRACTICE SELECTED STUDY CARDS
 // ------------------------------------------------------------
 
+// ------------------------------------------------------------
+// PRACTICE SELECTED STUDY CARDS
+// ------------------------------------------------------------
+
 function practiceSelectedStudyCards() {
 
-  // We will connect this to the existing
-  // practice system next.
+  if (selectedStudyCards.size === 0) {
+    return;
+  }
 
+  const selectedCards =
+    currentStudySetCards.filter(card =>
+      selectedStudyCards.has(card)
+    );
+
+  if (!selectedCards.length) {
+    return;
+  }
+
+  beginPractice(selectedCards);
 }
-
 
 // ============================================================
 // COPY SELECTED STUDY CARDS
