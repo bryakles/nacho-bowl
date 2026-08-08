@@ -1735,7 +1735,7 @@ function guessNachoBuilderLetter(letter, button) {
     l: "ele",
     m: "eme",
     n: "ene",
-    ñ: "enye",
+    ñ: "eñe",
     o: "o",
     p: "pe",
     q: "ku",
@@ -1750,10 +1750,16 @@ function guessNachoBuilderLetter(letter, button) {
     z: "zeta"
   };
 
-  const utterance = new SpeechSynthesisUtterance(letterNames[guessedLetter]);
+  const spokenName =
+    guessedLetter === "ñ"
+      ? "eñe"
+      : letterNames[guessedLetter];
+  
+  const utterance = new SpeechSynthesisUtterance(spokenName);
   utterance.lang = "es-ES";
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utterance);
+
+speechSynthesis.cancel();
+speechSynthesis.speak(utterance);
 
   nachoBuilderGuessedLetters.add(guessedLetter);
 
