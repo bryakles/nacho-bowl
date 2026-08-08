@@ -205,6 +205,9 @@ let nachoBuilderDisplay = [];
 let nachoBuilderGuessedLetters = new Set();
 let nachoBuilderWrongGuesses = 0;
 let nachoBuilderMaxWrongGuesses = 8;
+let nachoBuilderCurrentSet = "";
+let nachoBuilderCurrentSpanish = "";
+let nachoBuilderCurrentBowl = "";
 
 // ============================================================
 // DOM REFERENCES
@@ -1593,8 +1596,12 @@ function startNachoBuilder(cards) {
   updateNachoBuilderBowl();
   updateNachoBuilderStrikes();
 
+  nachoBuilderCurrentSet = [...lastFilterSettings.sets].join(", ");
+
   const randomCard = cards[Math.floor(Math.random() * cards.length)];
 
+  nachoBuilderCurrentSpanish = randomCard.spanish;
+  
   nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
   
   console.log("Nacho Builder word:", nachoBuilderWord);
@@ -1698,6 +1705,8 @@ function updateNachoBuilderBowl() {
     nachoBuilderWrongGuesses,
     stages.length - 1
   );
+
+  nachoBuilderCurrentBowl = `${stages[index].emoji} ${stages[index].label}`;
 
   nachoBowlProgress.innerHTML = `
     <div class="nacho-bowl-emoji">
@@ -1859,15 +1868,18 @@ function checkNachoBuilderGameStatus() {
 
   if (solved) {
   
-    renderNachoBuilderWord();
+  renderNachoBuilderWord();
   
-    showNachoBuilderMessage("🎉 Bowl complete! +1 🌮");
+  showNachoBuilderMessage("🎉 Bowl complete! +1 🌮");
+
+  saveAttemptHistory(
+    `${nachoBuilderCurrentSet} — Nacho Bowl — ${nachoBuilderCurrentBowl} — ${nachoBuilderCurrentSpanish} — ${currentUser.name} (${currentUser.username}) — ${new Date().toLocaleString()}`
+  );
   
-    lockNachoBuilderKeyboard();
+  lockNachoBuilderKeyboard();
   
-    return;
-  
-  }
+  return;
+}
   
   if (nachoBuilderWrongGuesses >= nachoBuilderMaxWrongGuesses) {
 
