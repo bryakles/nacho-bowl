@@ -459,6 +459,7 @@ loginForm.addEventListener("submit", (e) => {
   }
   loginError.classList.add("hidden");
   currentUser = user;
+  localStorage.setItem("nachoCurrentUser", user.username);
   showPracticeScreen();
 });
 
@@ -1870,4 +1871,17 @@ function updateNachoBuilderStrikes() {
 // INIT
 // ============================================================
 loadTeacherSettings();
-loadData();
+loadData().then(() => {
+  const savedUsername = localStorage.getItem("nachoCurrentUser");
+
+  if (savedUsername) {
+    const user = allAccounts.find(
+      a => a.username === savedUsername
+    );
+
+    if (user) {
+      currentUser = user;
+      showPracticeScreen();
+    }
+  }
+});
