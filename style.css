@@ -432,6 +432,12 @@ body.teacher-lock-active {
 .stat.hinted { color: var(--color-warning); }
 .stat.total { color: var(--color-text-muted); }
 
+.end-practice-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
 .mode-row {
   display: flex;
   flex-direction: column;
