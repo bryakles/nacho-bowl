@@ -1745,7 +1745,7 @@ function guessNachoBuilderLetter(letter, button) {
     d: "de",
     e: "e",
     f: "efe",
-    g: "ge",
+    g: "xe",
     h: "hache",
     i: "i",
     j: "jota",
