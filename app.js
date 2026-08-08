@@ -1837,7 +1837,7 @@ function checkNachoBuilderGameStatus() {
   
     renderNachoBuilderWord();
   
-    showNachoBuilderMessage("🎉 Bowl complete! +1 🧀");
+    showNachoBuilderMessage("🎉 Bowl complete! +1 🌮");
   
     lockNachoBuilderKeyboard();
   
