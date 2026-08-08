@@ -2164,10 +2164,29 @@ historyToggle.addEventListener("click", () => {
 });
 
 // ============================================================
+// STUDY SET
+// ============================================================
+
+
+// ------------------------------------------------------------
+// STUDY SET STATE
+// ------------------------------------------------------------
+
+// Cards currently selected by the student.
+// Uses the actual card objects so selections survive sorting.
+const selectedStudyCards = new Set();
+
+
+// ============================================================
 // STUDY SET FUNCTIONS
 // ============================================================
 
+let selectedStudyCards = new Set();
+let currentStudySetCards = [];
+
 function showStudySet(cards) {
+
+  currentStudySetCards = cards;
 
   filterPanel.classList.add("hidden");
   practicePanel.classList.add("hidden");
@@ -2176,97 +2195,734 @@ function showStudySet(cards) {
   studySetPanel.classList.remove("hidden");
 
   studySetContainer.innerHTML = `
+    <div class="study-set-controls">
+
+      <div class="study-set-selection-controls">
+        <button
+          id="selectAllStudyCards"
+          type="button"
+          class="study-set-control-btn"
+        >
+          Select All
+        </button>
+
+        <button
+          id="clearAllStudyCards"
+          type="button"
+          class="study-set-control-btn"
+        >
+          Clear All
+        </button>
+
+        <span
+          id="studySetSelectedCount"
+          class="study-set-selected-count"
+        >
+          0 selected
+        </span>
+      </div>
+
+      <button
+        id="copySelectedStudyCards"
+        type="button"
+        class="study-set-copy-btn"
+        disabled
+      >
+        Copy Selected
+      </button>
+
+    </div>
+
     <table class="study-table">
       <thead>
         <tr>
+          <th class="study-select-column">
+            <span class="sr-only">Select</span>
+          </th>
+
           <th id="sortSpanish" class="sortable">
             Spanish <span id="spanishArrow">↕</span>
           </th>
-  
+
           <th id="sortEnglish" class="sortable">
             English <span id="englishArrow">↕</span>
           </th>
         </tr>
       </thead>
-  
+
       <tbody></tbody>
     </table>
   `;
 
-  const tbody = studySetContainer.querySelector("tbody");
-  document.getElementById("sortSpanish").onclick = () => {
-    sortStudySet(cards, "spanish");
-  };
-  
-  document.getElementById("sortEnglish").onclick = () => {
-    sortStudySet(cards, "english");
-  };
+  const tbody =
+    studySetContainer.querySelector("tbody");
 
-  const sortedCards = [...cards];
+  // ------------------------------------------------------------
+  // SORT BUTTONS
+  // ------------------------------------------------------------
 
-  sortedCards.forEach(card => {
-    const row = document.createElement("tr");
-  
+  document
+    .getElementById("sortSpanish")
+    .onclick = () => {
+      sortStudySet(cards, "spanish");
+    };
+
+  document
+    .getElementById("sortEnglish")
+    .onclick = () => {
+      sortStudySet(cards, "english");
+    };
+
+  // ------------------------------------------------------------
+  // BUILD ROWS
+  // ------------------------------------------------------------
+
+  cards.forEach((card, index) => {
+
+    const row =
+      document.createElement("tr");
+
+    row.dataset.studyIndex = index;
+
     row.innerHTML = `
+      <td class="study-select-column">
+        <input
+          type="checkbox"
+          class="study-card-checkbox"
+          aria-label="Select ${card.spanish}"
+        >
+      </td>
+
       <td>
         ${card.spanish}
-        <button class="study-tts-btn" type="button" aria-label="Hear Spanish pronunciation">🔊</button>
+        <button
+          class="study-tts-btn"
+          type="button"
+          aria-label="Hear Spanish pronunciation"
+        >
+          🔊
+        </button>
       </td>
-      <td>${card.english}</td>
+
+      <td>
+        ${card.english}
+      </td>
     `;
-  
+
     tbody.appendChild(row);
-  
-    const speakButton = row.querySelector(".study-tts-btn");
-  
+
+    // ----------------------------------------------------------
+    // CHECKBOX
+    // ----------------------------------------------------------
+
+    const checkbox =
+      row.querySelector(".study-card-checkbox");
+
+    checkbox.addEventListener("change", () => {
+
+      if (checkbox.checked) {
+        selectedStudyCards.add(card);
+      } else {
+        selectedStudyCards.delete(card);
+      }
+
+      updateStudySetSelectionUI();
+    });
+
+    // ----------------------------------------------------------
+    // TEXT-TO-SPEECH
+    // ----------------------------------------------------------
+
+    const speakButton =
+      row.querySelector(".study-tts-btn");
+
     speakButton.addEventListener("click", () => {
       speakSpanish(card.spanish);
     });
   });
 
-  // Move the user to the Study Set panel
+  // ------------------------------------------------------------
+  // SELECT ALL
+  // ------------------------------------------------------------
+
+  document
+    .getElementById("selectAllStudyCards")
+    .addEventListener("click", () => {
+
+      cards.forEach(card => {
+        selectedStudyCards.add(card);
+      });
+
+      updateStudySetCheckboxes(cards);
+      updateStudySetSelectionUI();
+    });
+
+  // ------------------------------------------------------------
+  // CLEAR ALL
+  // ------------------------------------------------------------
+
+  document
+    .getElementById("clearAllStudyCards")
+    .addEventListener("click", () => {
+
+      selectedStudyCards.clear();
+
+      updateStudySetCheckboxes(cards);
+      updateStudySetSelectionUI();
+    });
+
+  // ------------------------------------------------------------
+  // COPY SELECTED
+  // ------------------------------------------------------------
+
+  document
+    .getElementById("copySelectedStudyCards")
+    .addEventListener("click", () => {
+      copySelectedStudyCards();
+    });
+
+  // ------------------------------------------------------------
+  // RESTORE SELECTION STATE
+  // ------------------------------------------------------------
+  
+  updateStudySetCheckboxes(cards);
+  updateStudySetSelectionUI();
+
+  // ------------------------------------------------------------
+  // SCROLL TO STUDY SET
+  // ------------------------------------------------------------
+
   studySetPanel.scrollIntoView({
     behavior: "smooth",
     block: "start"
   });
 }
 
+
+// ============================================================
+// STUDY SET SELECTION UI
+// ============================================================
+
+function updateStudySetCheckboxes(cards) {
+
+  const rows =
+    studySetContainer.querySelectorAll(
+      "tbody tr"
+    );
+
+  rows.forEach((row, index) => {
+
+    const checkbox =
+      row.querySelector(
+        ".study-card-checkbox"
+      );
+
+    if (!checkbox) return;
+
+    checkbox.checked =
+      selectedStudyCards.has(cards[index]);
+  });
+}
+
+
+function updateStudySetSelectionUI() {
+
+  const count =
+    selectedStudyCards.size;
+
+  const countDisplay =
+    document.getElementById(
+      "studySetSelectedCount"
+    );
+
+  const copyButton =
+    document.getElementById(
+      "copySelectedStudyCards"
+    );
+
+  if (countDisplay) {
+    countDisplay.textContent =
+      `${count} selected`;
+  }
+
+  if (copyButton) {
+    copyButton.disabled =
+      count === 0;
+  }
+}
+
+
+// ============================================================
+// COPY SELECTED STUDY CARDS
+// ============================================================
+
+async function copySelectedStudyCards() {
+
+  if (selectedStudyCards.size === 0) {
+    return;
+  }
+
+  // Preserve the order currently displayed in the Study Set.
+  // This means sorting the table before copying also sorts
+  // the copied list.
+  const selectedCards =
+    currentStudySetCards.filter(card =>
+      selectedStudyCards.has(card)
+    );
+
+  // Tab-separated text preserves the two-column structure
+  // when pasted into Google Docs, Google Sheets, Word, etc.
+  const textToCopy = [
+    "Spanish\tEnglish",
+    ...selectedCards.map(card =>
+      `${card.spanish}\t${card.english}`
+    )
+  ].join("\n");
+
+  try {
+
+    await navigator.clipboard.writeText(
+      textToCopy
+    );
+
+    const copyButton =
+      document.getElementById(
+        "copySelectedStudyCards"
+      );
+
+    if (copyButton) {
+
+      const originalText =
+        copyButton.textContent;
+
+      copyButton.textContent =
+        "Copied!";
+
+      setTimeout(() => {
+        copyButton.textContent =
+          originalText;
+      }, 1500);
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Could not copy selected study cards:",
+      error
+    );
+
+    alert(
+      "Sorry, the selected words could not be copied."
+    );
+  }
+}
+
+  // ----------------------------------------------------------
+  // TABLE REFERENCES
+  // ----------------------------------------------------------
+
+  const tbody =
+    studySetContainer.querySelector("tbody");
+
+  const sortSpanish =
+    document.getElementById("sortSpanish");
+
+  const sortEnglish =
+    document.getElementById("sortEnglish");
+
+  const selectAllButton =
+    document.getElementById("selectAllStudyCards");
+
+  const clearSelectionButton =
+    document.getElementById("clearStudyCardSelection");
+
+  const practiceSelectedButton =
+    document.getElementById("practiceSelectedStudyCards");
+
+  const copySelectedButton =
+    document.getElementById("copySelectedStudyCards");
+
+
+  // ----------------------------------------------------------
+  // SORTING
+  // ----------------------------------------------------------
+
+  sortSpanish.onclick = () => {
+    sortStudySet(cards, "spanish");
+  };
+
+  sortEnglish.onclick = () => {
+    sortStudySet(cards, "english");
+  };
+
+
+  // ----------------------------------------------------------
+  // RENDER STUDY SET ROWS
+  // ----------------------------------------------------------
+
+  cards.forEach(card => {
+
+    const row =
+      document.createElement("tr");
+
+    row.innerHTML = `
+      <td class="study-select-cell">
+        <input
+          type="checkbox"
+          class="study-card-checkbox"
+          aria-label="Select ${card.spanish}"
+        >
+      </td>
+
+      <td>
+        ${card.spanish}
+
+        <button
+          class="study-tts-btn"
+          type="button"
+          aria-label="Hear Spanish pronunciation"
+        >
+          🔊
+        </button>
+      </td>
+
+      <td>
+        ${card.english}
+      </td>
+    `;
+
+    tbody.appendChild(row);
+
+
+    // --------------------------------------------------------
+    // SELECTION CHECKBOX
+    // --------------------------------------------------------
+
+    const checkbox =
+      row.querySelector(".study-card-checkbox");
+
+    checkbox.checked =
+      selectedStudyCards.has(card);
+
+    checkbox.addEventListener(
+      "change",
+      () => {
+
+        if (checkbox.checked) {
+          selectedStudyCards.add(card);
+        } else {
+          selectedStudyCards.delete(card);
+        }
+
+        updateStudySelectionUI();
+      }
+    );
+
+
+    // --------------------------------------------------------
+    // TEXT-TO-SPEECH BUTTON
+    // --------------------------------------------------------
+
+    const speakButton =
+      row.querySelector(".study-tts-btn");
+
+    speakButton.addEventListener(
+      "click",
+      () => {
+        speakSpanish(card.spanish);
+      }
+    );
+
+  });
+
+
+  // ----------------------------------------------------------
+  // SELECT ALL
+  // ----------------------------------------------------------
+
+  selectAllButton.addEventListener(
+    "click",
+    () => {
+
+      cards.forEach(card => {
+        selectedStudyCards.add(card);
+      });
+
+      showStudySet(cards);
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // CLEAR SELECTION
+  // ----------------------------------------------------------
+
+  clearSelectionButton.addEventListener(
+    "click",
+    () => {
+
+      selectedStudyCards.clear();
+
+      showStudySet(cards);
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // PRACTICE SELECTED
+  // ----------------------------------------------------------
+
+  practiceSelectedButton.addEventListener(
+    "click",
+    () => {
+      practiceSelectedStudyCards();
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // COPY SELECTED
+  // ----------------------------------------------------------
+
+  copySelectedButton.addEventListener(
+    "click",
+    () => {
+      copySelectedStudyCards();
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // UPDATE SELECTION DISPLAY
+  // ----------------------------------------------------------
+
+  updateStudySelectionUI();
+
+
+  // ----------------------------------------------------------
+  // SCROLL TO STUDY SET
+  // ----------------------------------------------------------
+
+  studySetPanel.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+}
+
+
+// ------------------------------------------------------------
+// STUDY SET SELECTION UI
+// ------------------------------------------------------------
+
+function updateStudySelectionUI() {
+
+  const count =
+    selectedStudyCards.size;
+
+  const countDisplay =
+    document.getElementById(
+      "studySelectionCount"
+    );
+
+  const practiceButton =
+    document.getElementById(
+      "practiceSelectedStudyCards"
+    );
+
+  const copyButton =
+    document.getElementById(
+      "copySelectedStudyCards"
+    );
+
+  if (countDisplay) {
+    countDisplay.textContent =
+      `${count} selected`;
+  }
+
+  if (practiceButton) {
+    practiceButton.disabled =
+      count === 0;
+  }
+
+  if (copyButton) {
+    copyButton.disabled =
+      count === 0;
+  }
+}
+
+
+// ============================================================
+// STUDY SET SORTING
+// ============================================================
+
 function sortStudySet(cards, column) {
 
   if (studySetSortColumn === column) {
     studySetSortDirection =
-      studySetSortDirection === "asc" ? "desc" : "asc";
+      studySetSortDirection === "asc"
+        ? "desc"
+        : "asc";
   } else {
     studySetSortColumn = column;
     studySetSortDirection = "asc";
   }
 
-  const sortedCards = [...cards].sort((a, b) => {
-  const aText = cleanSortText(a[column] || "", column);
-  const bText = cleanSortText(b[column] || "", column);
+  const sortedCards =
+    [...cards].sort((a, b) => {
 
-  return aText.localeCompare(bText);
-});
+      const aText =
+        cleanSortText(
+          a[column] || "",
+          column
+        );
+
+      const bText =
+        cleanSortText(
+          b[column] || "",
+          column
+        );
+
+      return aText.localeCompare(
+        bText,
+        undefined,
+        { sensitivity: "base" }
+      );
+    });
 
   if (studySetSortDirection === "desc") {
     sortedCards.reverse();
   }
 
+  // Rebuild the table using the sorted cards.
+  // selectedStudyCards is NOT cleared, so
+  // previously selected cards remain selected.
   showStudySet(sortedCards);
 }
 
+// ------------------------------------------------------------
+// CLEAN SORT TEXT
+// ------------------------------------------------------------
+
 function cleanSortText(word, language) {
-  let text = word.trim();
+
+  let text =
+    word.trim();
+
 
   if (language === "spanish") {
-    text = text.replace(/^(el|la|los|las|un|una|unos|unas)\s+/i, "");
+
+    text =
+      text.replace(
+        /^(el|la|los|las|un|una|unos|unas)\s+/i,
+        ""
+      );
+
   }
+
 
   if (language === "english") {
-    text = text.replace(/^(the|a|an|to)\s+/i, "");
+
+    text =
+      text.replace(
+        /^(the|a|an|to)\s+/i,
+        ""
+      );
+
   }
 
+
   return text;
+}
+
+
+// ------------------------------------------------------------
+// PRACTICE SELECTED STUDY CARDS
+// ------------------------------------------------------------
+
+function practiceSelectedStudyCards() {
+
+  // We will connect this to the existing
+  // practice system next.
+
+}
+
+
+// ============================================================
+// COPY SELECTED STUDY CARDS
+// ============================================================
+
+async function copySelectedStudyCards() {
+
+  if (selectedStudyCards.size === 0) {
+    return;
+  }
+
+  // Preserve the current Study Set display order.
+  const rows =
+    studySetContainer.querySelectorAll(
+      "tbody tr"
+    );
+
+  const selectedCards = [];
+
+  rows.forEach(row => {
+
+    const index =
+      Number(row.dataset.studyIndex);
+
+    const card =
+      currentStudySetCards[index];
+
+    if (
+      card &&
+      selectedStudyCards.has(card)
+    ) {
+      selectedCards.push(card);
+    }
+  });
+
+  // Tab-separated text works well when pasting
+  // into Google Docs, Google Sheets, Word, etc.
+  const textToCopy = [
+    "Spanish\tEnglish",
+    ...selectedCards.map(card =>
+      `${card.spanish}\t${card.english}`
+    )
+  ].join("\n");
+
+  try {
+
+    await navigator.clipboard.writeText(
+      textToCopy
+    );
+
+    const copyButton =
+      document.getElementById(
+        "copySelectedStudyCards"
+      );
+
+    const originalText =
+      copyButton.textContent;
+
+    copyButton.textContent =
+      "Copied!";
+
+    setTimeout(() => {
+      copyButton.textContent =
+        originalText;
+    }, 1500);
+
+  } catch (error) {
+
+    console.error(
+      "Could not copy selected study cards:",
+      error
+    );
+
+    alert(
+      "Sorry, the selected words could not be copied."
+    );
+  }
 }
 
 // ============================================================
