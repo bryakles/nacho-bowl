@@ -1476,13 +1476,22 @@ function showStudySet(cards) {
 
   sortedCards.forEach(card => {
     const row = document.createElement("tr");
-
+  
     row.innerHTML = `
-      <td>${card.spanish}</td>
+      <td>
+        ${card.spanish}
+        <button class="study-tts-btn" type="button" aria-label="Hear Spanish pronunciation">🔊</button>
+      </td>
       <td>${card.english}</td>
     `;
-
+  
     tbody.appendChild(row);
+  
+    const speakButton = row.querySelector(".study-tts-btn");
+  
+    speakButton.addEventListener("click", () => {
+      speakSpanish(card.spanish);
+    });
   });
 
   // Move the user to the Study Set panel
