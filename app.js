@@ -258,6 +258,7 @@ const correctAnswerDisplay = document.getElementById("correctAnswerDisplay");
 const directionLabel   = document.getElementById("directionLabel");
 const answerInput      = document.getElementById("answerInput");
 const multipleChoiceOptions = document.getElementById("multipleChoiceOptions");
+const practiceModeTitle = document.getElementById("practiceModeTitle");
 
 const studySetPanel = document.getElementById("studySetPanel");
 
@@ -823,6 +824,8 @@ sessionModeLabel = PRACTICE_MODES[practiceMode]?.label || practiceMode;
   practicePanel.classList.remove("hidden");
   resultsPanel.classList.add("hidden");
 
+  practiceModeTitle.textContent = PRACTICE_MODES[practiceMode].label;
+  
   const setNames = [...new Set(practiceCards.map(c => c.setName))].join(", ");
   practiceSetLabel.textContent = setNames;
 
