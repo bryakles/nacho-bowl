@@ -1709,6 +1709,24 @@ function renderNachoBuilderKeyboard() {
   });
 }
 
+function speakSpanish(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "es-ES";
+
+  const voices = speechSynthesis.getVoices();
+
+  const spanishVoice =
+    voices.find(voice => voice.lang.toLowerCase() === "es-es") ||
+    voices.find(voice => voice.lang.toLowerCase().startsWith("es"));
+
+  if (spanishVoice) {
+    utterance.voice = spanishVoice;
+  }
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utterance);
+}
+
 function guessNachoBuilderLetter(letter, button) {
 
   // Convert keyboard letter to lowercase
