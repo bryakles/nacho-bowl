@@ -912,6 +912,13 @@ body.teacher-lock-active {
   margin-bottom: 0.5rem;
 }
 
+#backFromNachoBuilder {
+  position: fixed;
+  bottom: 70px;
+  left: 1.5rem;
+  z-index: 1000;
+}
+
 /* ============================================================
    NACHO BUILDER KEYBOARD
    ============================================================ */
