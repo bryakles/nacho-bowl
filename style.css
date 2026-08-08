@@ -915,7 +915,7 @@ body.teacher-lock-active {
 #nachoBackBtn {
   position: fixed;
   bottom: 70px;
-  left: 1.5rem;
+  right: 1.5rem;
   z-index: 1000;
 }
 
