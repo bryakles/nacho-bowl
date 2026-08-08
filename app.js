@@ -789,6 +789,11 @@ document.querySelectorAll(".session-chip").forEach(chip => {
 // ============================================================
 // PRACTICE SESSION
 // ============================================================
+
+// ------------------------------------------------------------
+// SESSION SETUP
+// ------------------------------------------------------------
+
 function shuffleArray(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -802,7 +807,7 @@ function beginPractice(filtered) {
   console.log("beginPractice() called");
   console.log("MODE:", practiceMode);
   console.log(filtered.map(card => card.spanish));
-  
+
   maxCardsPerSession = selectedCardCount;
 
   sessionStartMode = practiceMode;
@@ -817,16 +822,20 @@ function beginPractice(filtered) {
   resetPracticeState();
   practiceActive = true;
 
-  // Lock mode for this session
-sessionModeLabel = PRACTICE_MODES[practiceMode]?.label || practiceMode;
+  sessionModeLabel =
+    PRACTICE_MODES[practiceMode]?.label || practiceMode;
 
   filterPanel.classList.add("hidden");
   practicePanel.classList.remove("hidden");
   resultsPanel.classList.add("hidden");
 
-  practiceModeTitle.textContent = PRACTICE_MODES[practiceMode].label;
-  
-  const setNames = [...new Set(practiceCards.map(c => c.setName))].join(", ");
+  practiceModeTitle.textContent =
+    PRACTICE_MODES[practiceMode].label;
+
+  const setNames = [
+    ...new Set(practiceCards.map(c => c.setName))
+  ].join(", ");
+
   practiceSetLabel.textContent = setNames;
 
   updateStats();
@@ -836,14 +845,23 @@ sessionModeLabel = PRACTICE_MODES[practiceMode]?.label || practiceMode;
 function resetPracticeState() {
   currentCardIndex = -1;
   attemptedIndices = new Set();
+
   correctCount = 0;
   incorrectCount = 0;
   hintedCorrectCount = 0;
+
   currentCardState = "fresh";
   currentCardFirstWrongAnswer = "";
+  currentCardFirstWrongChoice = "";
+
   wrongAnswers = [];
   practiceActive = false;
 }
+
+
+// ------------------------------------------------------------
+// CARD DISPLAY / NAVIGATION
+// ------------------------------------------------------------
 
 function showNextCard() {
   if (attemptedIndices.size >= practiceCards.length) {
@@ -851,99 +869,178 @@ function showNextCard() {
     return;
   }
 
-  // Find next card index
   let next;
-  
+
   if (practiceMode === "ordered-answer") {
     next = attemptedIndices.size;
   } else {
-    const remaining = practiceCards.map((_, i) => i).filter(i => !attemptedIndices.has(i));
-    next = remaining[Math.floor(Math.random() * remaining.length)];
+    const remaining = practiceCards
+      .map((_, i) => i)
+      .filter(i => !attemptedIndices.has(i));
+
+    next =
+      remaining[Math.floor(Math.random() * remaining.length)];
   }
-  
+
   currentCardIndex = next;
-    currentCardState = "fresh";
-    currentCardFirstWrongAnswer = "";
-    currentCardPromptWord = "";
+
+  currentCardState = "fresh";
+  currentCardFirstWrongAnswer = "";
+  currentCardFirstWrongChoice = "";
+  currentCardPromptWord = "";
 
   const card = practiceCards[currentCardIndex];
-  const mode = (practiceMode === "mixed" || practiceMode === "multiple-choice")
-    ? (Math.random() < 0.5 ? "spanish-english" : "english-spanish")
-    : practiceMode;
 
-if (mode === "spanish-english" || mode === "answer") {
-  currentCardPromptWord = card.spanish;
-  promptText.innerHTML = formatPromptText(card.spanish);
-  directionLabel.textContent = mode === "answer" ? "" : "Spanish → English";
-  answerInput.placeholder = "Type the English meaning...";
-} else {
-  currentCardPromptWord = card.english;
-  promptText.innerHTML = formatPromptText(card.english);
-  directionLabel.textContent = "English → Spanish";
-  answerInput.placeholder = "Type the Spanish word...";
-}
+  const mode =
+    (practiceMode === "mixed" ||
+      practiceMode === "multiple-choice")
+      ? (Math.random() < 0.5
+          ? "spanish-english"
+          : "english-spanish")
+      : practiceMode;
 
-if (practiceMode === "multiple-choice") {
-  answerInput.classList.add("hidden");
-  checkBtn.classList.add("hidden");
-  multipleChoiceOptions.classList.remove("hidden");
-  document.querySelector(".accent-legend").classList.add("hidden");
-  createMultipleChoiceOptions(card, mode);
-} else {
-  answerInput.classList.remove("hidden");
-  checkBtn.classList.remove("hidden");
-  multipleChoiceOptions.classList.add("hidden");
-  document.querySelector(".accent-legend").classList.remove("hidden");
-}
+  if (
+    mode === "spanish-english" ||
+    mode === "answer"
+  ) {
+    currentCardPromptWord = card.spanish;
 
-  // Store the expected answer on the card temporarily
+    promptText.innerHTML =
+      formatPromptText(card.spanish);
+
+    directionLabel.textContent =
+      mode === "answer"
+        ? ""
+        : "Spanish → English";
+
+    answerInput.placeholder =
+      "Type the English meaning...";
+  } else {
+    currentCardPromptWord = card.english;
+
+    promptText.innerHTML =
+      formatPromptText(card.english);
+
+    directionLabel.textContent =
+      "English → Spanish";
+
+    answerInput.placeholder =
+      "Type the Spanish word...";
+  }
+
+  // ----------------------------------------------------------
+  // MULTIPLE CHOICE DISPLAY
+  // ----------------------------------------------------------
+
+  if (practiceMode === "multiple-choice") {
+    answerInput.classList.add("hidden");
+    checkBtn.classList.add("hidden");
+    multipleChoiceOptions.classList.remove("hidden");
+
+    document
+      .querySelector(".accent-legend")
+      .classList.add("hidden");
+
+    createMultipleChoiceOptions(card, mode);
+  } else {
+    answerInput.classList.remove("hidden");
+    checkBtn.classList.remove("hidden");
+    multipleChoiceOptions.classList.add("hidden");
+
+    document
+      .querySelector(".accent-legend")
+      .classList.remove("hidden");
+  }
+
+  // Store expected direction on card
   card._mode = mode;
 
+  // Reset answer area
   answerInput.value = "";
+
   feedbackText.textContent = "";
   feedbackText.className = "feedback-text";
+
   hintText.textContent = "";
+
   directionLabel.style.color = "";
-  responseDisplay.className = "response-display hidden";
+
+  responseDisplay.className =
+    "response-display hidden";
+
   responseIcon.textContent = "";
   responseText.textContent = "";
+
   correctAnswerDisplay.textContent = "";
-  correctAnswerDisplay.className = "correct-answer-display hidden";
+  correctAnswerDisplay.className =
+    "correct-answer-display hidden";
+
   answerInput.disabled = false;
   checkBtn.disabled = false;
-  answerInput.focus();
 
-  const remaining2 = practiceCards.length - attemptedIndices.size;
-  practiceProgress.textContent = `${attemptedIndices.size} done · ${remaining2} remaining`;
+  if (practiceMode !== "multiple-choice") {
+    answerInput.focus();
+  }
+
+  const remaining =
+    practiceCards.length - attemptedIndices.size;
+
+  practiceProgress.textContent =
+    `${attemptedIndices.size} done · ${remaining} remaining`;
+
   updateStats();
 }
 
 function getExpectedAnswer(card) {
-  const mode = card._mode || "spanish-english";
-  return (mode === "spanish-english" || mode === "answer")
+  const mode =
+    card._mode || "spanish-english";
+
+  return (
+    mode === "spanish-english" ||
+    mode === "answer"
+  )
     ? card.english
     : card.spanish;
 }
 
+
+// ------------------------------------------------------------
+// MULTIPLE CHOICE
+// ------------------------------------------------------------
+
 function createMultipleChoiceOptions(card, mode) {
-  const correctAnswer = mode === "spanish-english" ? card.english : card.spanish;
+  const correctAnswer =
+    mode === "spanish-english"
+      ? card.english
+      : card.spanish;
 
   const answerPool = getFilteredCards()
-    .map(c => mode === "spanish-english" ? c.english : c.spanish)
-    .filter(a => a && a !== correctAnswer);
+    .map(c =>
+      mode === "spanish-english"
+        ? c.english
+        : c.spanish
+    )
+    .filter(
+      a => a && a !== correctAnswer
+    );
 
   const distractors = shuffleArray(answerPool)
-    .filter((value, index, self) => self.indexOf(value) === index)
+    .filter(
+      (value, index, self) =>
+        self.indexOf(value) === index
+    )
     .slice(0, 4);
-  
+
   let choices;
   let correctChoice;
-  
+
+  // 20% chance that "None of these" is correct
   if (Math.random() < 0.2) {
     choices = [
       ...distractors,
       "None of these"
     ];
+
     correctChoice = "None of these";
   } else {
     choices = [
@@ -951,48 +1048,221 @@ function createMultipleChoiceOptions(card, mode) {
       ...distractors.slice(0, 3),
       "None of these"
     ];
+
     correctChoice = correctAnswer;
   }
-  
+
   // Shuffle everything except "None of these"
   choices = shuffleArray(
-    choices.filter(choice => choice !== "None of these")
+    choices.filter(
+      choice => choice !== "None of these"
+    )
   );
-  
-  // Always put it last
+
+  // Always put "None of these" last
   choices.push("None of these");
 
   multipleChoiceOptions.innerHTML = "";
 
   choices.forEach((choice, index) => {
-    const button = document.createElement("button");
-    button.className = "multiple-choice-btn";
-    button.textContent = `${String.fromCharCode(65 + index)}. ${choice}`;
+    const button =
+      document.createElement("button");
+
+    button.className =
+      "multiple-choice-btn";
+
+    button.textContent =
+      `${String.fromCharCode(65 + index)}. ${choice}`;
 
     button.addEventListener("click", () => {
-      checkMultipleChoiceAnswer(choice, correctChoice);
+      checkMultipleChoiceAnswer(
+        choice,
+        correctChoice
+      );
     });
 
     multipleChoiceOptions.appendChild(button);
   });
 }
 
+function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer) {
+  if (currentCardIndex < 0 || currentCardState === "done") return;
+
+  const buttons = document.querySelectorAll("#multipleChoiceOptions button");
+
+  // ============================================================
+  // FIRST ATTEMPT
+  // ============================================================
+  if (currentCardState === "fresh") {
+
+    if (selectedAnswer === correctAnswer) {
+      // First attempt correct
+      correctCount++;
+      currentCardState = "done";
+      attemptedIndices.add(currentCardIndex);
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+
+        const text = btn.textContent.replace(/^[A-E]\.\s/, "");
+
+        if (text === selectedAnswer) {
+          btn.style.borderColor = "var(--color-success)";
+          btn.style.background = "#dcfce7";
+        }
+      });
+
+      responseIcon.textContent = "✓";
+      responseText.textContent = selectedAnswer;
+      responseDisplay.className = "response-display correct";
+      directionLabel.textContent = "Press Enter for the next card.";
+
+    } else {
+      // First attempt wrong:
+      // Turn selected answer RED, but DO NOT reveal the answer.
+      currentCardState = "hint_shown";
+
+      buttons.forEach(btn => {
+        const text = btn.textContent.replace(/^[A-E]\.\s/, "");
+
+        if (text === selectedAnswer) {
+          btn.style.borderColor = "var(--color-danger)";
+          btn.style.background = "#fee2e2";
+          btn.classList.add("mc-wrong-first");
+        }
+      });
+
+      // Allow one more choice, but prevent the student
+      // from selecting the same wrong answer again.
+      buttons.forEach(btn => {
+        btn.disabled = false;
+      });
+
+      responseIcon.textContent = "✗";
+      responseText.textContent = "Not quite — try again.";
+      responseDisplay.className = "response-display incorrect";
+
+      feedbackText.textContent = "";
+      hintText.textContent = "";
+      directionLabel.textContent = "Try one more time.";
+
+      // Keep the first wrong button disabled so it cannot be selected again
+      buttons.forEach(btn => {
+        const text = btn.textContent.replace(/^[A-E]\.\s/, "");
+
+        if (text === selectedAnswer) {
+          btn.disabled = true;
+        }
+      });
+    }
+
+    updateStats();
+    return;
+  }
+
+  // ============================================================
+  // SECOND ATTEMPT
+  // ============================================================
+  if (currentCardState === "hint_shown") {
+
+    if (selectedAnswer === correctAnswer) {
+      // Second attempt correct = HINTED CORRECT
+      hintedCorrectCount++;
+      currentCardState = "done";
+      attemptedIndices.add(currentCardIndex);
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+
+        const text = btn.textContent.replace(/^[A-E]\.\s/, "");
+
+        if (text === selectedAnswer) {
+          btn.style.borderColor = "var(--color-warning)";
+          btn.style.background = "#fef3c7";
+        }
+      });
+
+      responseIcon.textContent = "✓";
+      responseText.textContent = selectedAnswer;
+      responseDisplay.className = "response-display hinted";
+      directionLabel.textContent = "Press Enter for the next card.";
+
+      feedbackText.textContent = "";
+      hintText.textContent = "";
+
+    } else {
+      // Second attempt wrong = INCORRECT
+      incorrectCount++;
+      currentCardState = "done";
+      attemptedIndices.add(currentCardIndex);
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+
+        const text = btn.textContent.replace(/^[A-E]\.\s/, "");
+
+        // Keep both wrong choices red
+        if (text === selectedAnswer || btn.classList.contains("mc-wrong-first")) {
+          btn.style.borderColor = "var(--color-danger)";
+          btn.style.background = "#fee2e2";
+        }
+
+        // Now reveal the correct answer
+        if (text === correctAnswer) {
+          btn.style.borderColor = "var(--color-success)";
+          btn.style.background = "#dcfce7";
+        }
+      });
+
+      responseIcon.textContent = "✗";
+      responseText.textContent = selectedAnswer;
+      responseDisplay.className = "response-display incorrect";
+
+      correctAnswerDisplay.textContent = correctAnswer;
+      correctAnswerDisplay.className = "correct-answer-display";
+
+      directionLabel.textContent = "Press Enter for the next card.";
+
+      feedbackText.textContent = "";
+      hintText.textContent = "";
+
+      wrongAnswers.push({
+        prompt: currentCardPromptWord,
+        studentAnswer: selectedAnswer
+      });
+    }
+
+    updateStats();
+  }
+}
+
+
+// ------------------------------------------------------------
+// ANSWER NORMALIZATION
+// ------------------------------------------------------------
+
 function normalizeAnswer(str) {
   return str
     .trim()
     .toLowerCase()
-    .normalize("NFC")              // consistent accent representation
-    .replace(/[.,!?;:¡¿]/g, "")  // strip punctuation only
+    .normalize("NFC")
+    .replace(/[.,!?;:¡¿]/g, "")
     .replace(/\s+/g, " ");
 }
 
 function stripAccents(str) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 function getAcceptedAnswers(answerString) {
   // Remove teacher notes in parentheses
-  const withoutNotes = answerString.replace(/\([^)]*\)/g, "");
+  const withoutNotes =
+    answerString.replace(
+      /\([^)]*\)/g,
+      ""
+    );
 
   // Split alternatives inside brackets
   return withoutNotes
@@ -1003,113 +1273,166 @@ function getAcceptedAnswers(answerString) {
     .filter(Boolean);
 }
 
-function checkMultipleChoiceAnswer(selectedAnswer, correctAnswer) {
-  if (currentCardIndex < 0 || currentCardState === "done") return;
 
-  const buttons = document.querySelectorAll("#multipleChoiceOptions button");
-
-  buttons.forEach(btn => {
-    btn.disabled = true;
-
-    const text = btn.textContent.replace(/^[A-E]\.\s/, "");
-
-    if (text === correctAnswer) {
-      btn.style.borderColor = "var(--color-success)";
-      btn.style.background = "#dcfce7";
-    }
-
-    if (text === selectedAnswer && selectedAnswer !== correctAnswer) {
-      btn.style.borderColor = "var(--color-danger)";
-      btn.style.background = "#fee2e2";
-    }
-  });
-
-  if (selectedAnswer === correctAnswer) {
-    correctCount++;
-    responseIcon.textContent = "✓";
-    responseText.textContent = selectedAnswer;
-    responseDisplay.className = "response-display correct";
-  } else {
-    incorrectCount++;
-    responseIcon.textContent = "✗";
-    responseText.textContent = selectedAnswer;
-    responseDisplay.className = "response-display incorrect";
-
-    correctAnswerDisplay.textContent = correctAnswer;
-    correctAnswerDisplay.className = "correct-answer-display";
-  }
-
-  currentCardState = "done";
-  attemptedIndices.add(currentCardIndex);
-
-  directionLabel.textContent = "Press Enter for the next card.";
-
-  updateStats();
-}
+// ------------------------------------------------------------
+// TYPED ANSWER CHECKING
+// ------------------------------------------------------------
 
 function checkAnswer() {
-  if (currentCardIndex < 0 || currentCardState === "done") return;
+  if (
+    currentCardIndex < 0 ||
+    currentCardState === "done"
+  ) {
+    return;
+  }
 
-  const card = practiceCards[currentCardIndex];
-  const expectedAnswers = getAcceptedAnswers(getExpectedAnswer(card));
-  const student = answerInput.value;
+  const card =
+    practiceCards[currentCardIndex];
+
+  const expectedAnswers =
+    getAcceptedAnswers(
+      getExpectedAnswer(card)
+    );
+
+  const student =
+    answerInput.value;
 
   if (!student.trim()) return;
 
-  const isCorrect = expectedAnswers.includes(normalizeAnswer(student));
+  const isCorrect =
+    expectedAnswers.includes(
+      normalizeAnswer(student)
+    );
 
   if (currentCardState === "fresh") {
+
     if (isCorrect) {
+
       // First attempt correct
       correctCount++;
+
       currentCardState = "done";
-      attemptedIndices.add(currentCardIndex);
+
+      attemptedIndices.add(
+        currentCardIndex
+      );
+
       answerInput.disabled = true;
       checkBtn.disabled = true;
+
       responseIcon.textContent = "✓";
-      responseText.textContent = student;
-      responseDisplay.className = "response-display correct";
-      directionLabel.textContent = "Press Enter for the next card.";
+      responseText.textContent =
+        student;
+
+      responseDisplay.className =
+        "response-display correct";
+
+      directionLabel.textContent =
+        "Press Enter for the next card.";
+
       feedbackText.textContent = "";
       hintText.textContent = "";
+
     } else {
-      // First attempt wrong — give hint, allow retry
-      currentCardState = "hint_shown";
-      currentCardFirstWrongAnswer = student;
-      feedbackText.textContent = "✗ Not quite — try again!";
-      feedbackText.className = "feedback-text incorrect";
-      hintText.textContent = getHint(student, expectedAnswers[0]);
+
+      // First attempt wrong
+      // Give typed-answer diagnostic hint
+      // and allow one retry.
+
+      currentCardState =
+        "hint_shown";
+
+      currentCardFirstWrongAnswer =
+        student;
+
+      feedbackText.textContent =
+        "✗ Not quite — try again!";
+
+      feedbackText.className =
+        "feedback-text incorrect";
+
+      hintText.textContent =
+        getHint(
+          student,
+          expectedAnswers[0]
+        );
+
       answerInput.value = "";
       answerInput.focus();
     }
-  } else if (currentCardState === "hint_shown") {
-    // Second attempt
+
+  } else if (
+    currentCardState === "hint_shown"
+  ) {
+
+    // --------------------------------------------------------
+    // SECOND TYPED ATTEMPT
+    // --------------------------------------------------------
+
     if (isCorrect) {
+
       hintedCorrectCount++;
+
       currentCardState = "done";
-      attemptedIndices.add(currentCardIndex);
+
+      attemptedIndices.add(
+        currentCardIndex
+      );
+
       answerInput.disabled = true;
       checkBtn.disabled = true;
+
       responseIcon.textContent = "✓";
-      responseText.textContent = student;
-      responseDisplay.className = "response-display hinted";
-      directionLabel.textContent = "Press Enter for the next card.";
+      responseText.textContent =
+        student;
+
+      responseDisplay.className =
+        "response-display hinted";
+
+      directionLabel.textContent =
+        "Press Enter for the next card.";
+
       feedbackText.textContent = "";
       hintText.textContent = "";
+
     } else {
-      // Second attempt wrong — mark incorrect, record wrong answer
+
+      // Second attempt wrong
       incorrectCount++;
+
       currentCardState = "done";
-      attemptedIndices.add(currentCardIndex);
+
+      attemptedIndices.add(
+        currentCardIndex
+      );
+
+      wrongAnswers.push({
+        prompt:
+          currentCardPromptWord,
+        studentAnswer:
+          currentCardFirstWrongAnswer
+      });
+
       answerInput.disabled = true;
       checkBtn.disabled = true;
-      wrongAnswers.push({ prompt: currentCardPromptWord, studentAnswer: currentCardFirstWrongAnswer });
+
       responseIcon.textContent = "✗";
-      responseText.textContent = currentCardFirstWrongAnswer;
-      responseDisplay.className = "response-display incorrect";
-      correctAnswerDisplay.textContent = expectedAnswers.join(" / ");
-      correctAnswerDisplay.className = "correct-answer-display";
-      directionLabel.textContent = "Press Enter for the next card.";
+
+      responseText.textContent =
+        currentCardFirstWrongAnswer;
+
+      responseDisplay.className =
+        "response-display incorrect";
+
+      correctAnswerDisplay.textContent =
+        expectedAnswers.join(" / ");
+
+      correctAnswerDisplay.className =
+        "correct-answer-display";
+
+      directionLabel.textContent =
+        "Press Enter for the next card.";
+
       feedbackText.textContent = "";
       hintText.textContent = "";
     }
@@ -1119,20 +1442,344 @@ function checkAnswer() {
 }
 
 function showAnswer() {
-  // Show Answer removed — students must answer themselves
+  // Show Answer removed —
+  // students must answer themselves
 }
 
-function getHint(studentAnswer, correctAnswer) {
-  const student = studentAnswer.trim();
-  const correct = correctAnswer.trim();
+
+// ------------------------------------------------------------
+// ANSWER DIAGNOSTICS / HINTS
+// ------------------------------------------------------------
+
+function getHint(
+  studentAnswer,
+  correctAnswer
+) {
+  const student =
+    studentAnswer.trim();
+
+  const correct =
+    correctAnswer.trim();
 
   const diagnostics = [];
 
   const removeAccents = text =>
-    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    text
+      .normalize("NFD")
+      .replace(
+        /[\u0300-\u036f]/g,
+        ""
+      );
 
-  const studentBase = removeAccents(student);
-  const correctBase = removeAccents(correct);
+  const studentBase =
+    removeAccents(student);
+
+  const correctBase =
+    removeAccents(correct);
+
+  // ----------------------------------------------------------
+  // ACCENTS
+  // Only mention accents when everything else
+  // is essentially correct.
+  // ----------------------------------------------------------
+
+  if (
+    studentBase.toLowerCase() ===
+      correctBase.toLowerCase() &&
+    student !== correct
+  ) {
+
+    const studentHasAccent =
+      /[áéíóúüñ]/i.test(student);
+
+    const correctHasAccent =
+      /[áéíóúüñ]/i.test(correct);
+
+    if (
+      correctHasAccent &&
+      !studentHasAccent
+    ) {
+      diagnostics.push(
+        "Accents: add accent(s)"
+      );
+
+    } else if (
+      !correctHasAccent &&
+      studentHasAccent
+    ) {
+      diagnostics.push(
+        "Accents: remove accent(s)"
+      );
+
+    } else {
+      diagnostics.push(
+        "Accents: check accent(s)"
+      );
+    }
+
+    return (
+      "Hint: " +
+      diagnostics.join(" • ")
+    );
+  }
+
+  // ----------------------------------------------------------
+  // ARTICLE
+  // ----------------------------------------------------------
+
+  const articleRegex =
+    /^(el|la|los|las|un|una|unos|unas)\s+/i;
+
+  const studentArticle =
+    student.match(articleRegex)
+      ?.[1]
+      ?.toLowerCase() || "";
+
+  const correctArticle =
+    correct.match(articleRegex)
+      ?.[1]
+      ?.toLowerCase() || "";
+
+  if (
+    studentArticle !== correctArticle
+  ) {
+
+    if (
+      !studentArticle &&
+      correctArticle
+    ) {
+
+      diagnostics.push(
+        "Article: missing"
+      );
+
+    } else if (
+      studentArticle &&
+      !correctArticle
+    ) {
+
+      diagnostics.push(
+        "Article: remove it"
+      );
+
+    } else {
+
+      diagnostics.push(
+        "Article: incorrect"
+      );
+    }
+  }
+
+  // ----------------------------------------------------------
+  // WORD ORDER
+  // ----------------------------------------------------------
+
+  const sortedStudentWords =
+    student
+      .split(/\s+/)
+      .map(word =>
+        removeAccents(
+          word.toLowerCase()
+        )
+      )
+      .sort();
+
+  const sortedCorrectWords =
+    correct
+      .split(/\s+/)
+      .map(word =>
+        removeAccents(
+          word.toLowerCase()
+        )
+      )
+      .sort();
+
+  const sameWordsDifferentOrder =
+    student.split(/\s+/).length ===
+      correct.split(/\s+/).length &&
+    JSON.stringify(
+      sortedStudentWords
+    ) ===
+      JSON.stringify(
+        sortedCorrectWords
+      ) &&
+    student.toLowerCase() !==
+      correct.toLowerCase();
+
+  if (
+    sameWordsDifferentOrder
+  ) {
+
+    diagnostics.push(
+      "Word order: incorrect"
+    );
+  }
+
+  // ----------------------------------------------------------
+  // BEGINNING / MIDDLE / END
+  // ----------------------------------------------------------
+
+  const studentLetters =
+    studentBase
+      .replace(/\s/g, "")
+      .toLowerCase();
+
+  const correctLetters =
+    correctBase
+      .replace(/\s/g, "")
+      .toLowerCase();
+
+  if (
+    studentLetters.length &&
+    correctLetters.length
+  ) {
+
+    const length =
+      Math.min(
+        studentLetters.length,
+        correctLetters.length
+      );
+
+    // Beginning
+    const beginningEnd =
+      Math.ceil(length / 3);
+
+    let beginningCorrect =
+      true;
+
+    for (
+      let i = 0;
+      i < beginningEnd;
+      i++
+    ) {
+
+      if (
+        studentLetters[i] !==
+        correctLetters[i]
+      ) {
+
+        beginningCorrect =
+          false;
+
+        break;
+      }
+    }
+
+    // Middle
+    const middleStart =
+      Math.floor(
+        correctLetters.length / 3
+      );
+
+    const middleEnd =
+      Math.ceil(
+        correctLetters.length * 2 / 3
+      );
+
+    let middleCorrect =
+      true;
+
+    for (
+      let i = middleStart;
+      i < Math.min(
+        middleEnd,
+        length
+      );
+      i++
+    ) {
+
+      if (
+        studentLetters[i] !==
+        correctLetters[i]
+      ) {
+
+        middleCorrect =
+          false;
+
+        break;
+      }
+    }
+
+    // End
+    const endLength =
+      Math.ceil(
+        correctLetters.length / 3
+      );
+
+    const correctEnd =
+      correctLetters.slice(
+        -endLength
+      );
+
+    const studentEnd =
+      studentLetters.slice(
+        -endLength
+      );
+
+    const endCorrect =
+      studentEnd === correctEnd;
+
+    if (!beginningCorrect) {
+      diagnostics.push(
+        "Beginning: incorrect"
+      );
+    }
+
+    if (!middleCorrect) {
+      diagnostics.push(
+        "Middle: incorrect"
+      );
+    }
+
+    if (!endCorrect) {
+      diagnostics.push(
+        "End: incorrect"
+      );
+    }
+  }
+
+  // ----------------------------------------------------------
+  // FALLBACK
+  // ----------------------------------------------------------
+
+  if (diagnostics.length) {
+    return (
+      "Hint: " +
+      diagnostics.join(" • ")
+    );
+  }
+
+  return (
+    "Hint: Check your spelling and try again."
+  );
+}
+
+
+// ------------------------------------------------------------
+// PRACTICE STATS
+// ------------------------------------------------------------
+
+function updateStats() {
+  statCorrect.textContent =
+    correctCount;
+
+  statHinted.textContent =
+    hintedCorrectCount;
+
+  statIncorrect.textContent =
+    incorrectCount;
+
+  statTotal.textContent =
+    practiceCards.length;
+
+  const remaining =
+    practiceCards.length -
+    attemptedIndices.size;
+
+  practiceProgress.textContent =
+    `${attemptedIndices.size} done · ${remaining} remaining`;
+}
+
 
   // ------------------------------------------------------------
   // WORDS
