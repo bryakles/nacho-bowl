@@ -1199,15 +1199,20 @@ function checkConversationAnswer(
 
   if (question.type === "MULTIPLE_CHOICE") {
 
-    const correctLetter =
+    const correctMatch =
       String(question.answer)
         .trim()
-        .toUpperCase();
+        .match(/^([A-Z])/i);
+    
+    const correctLetter =
+      correctMatch
+        ? correctMatch[1].toUpperCase()
+        : "";
 
-    const selectedLetter =
-      String(studentAnswer)
-        .trim()
-        .toUpperCase();
+const selectedLetter =
+  String(studentAnswer)
+    .trim()
+    .toUpperCase();
 
     console.log(
       "MULTIPLE CHOICE:",
