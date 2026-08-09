@@ -278,6 +278,212 @@
         </button>
       
       </section>
+
+      <!-- ACTIVE CONVERSATION PANEL -->
+      <section id="conversationPanel" class="panel hidden">
+      
+        <div class="practice-header">
+          <div>
+            <h2 id="conversationTitle">Conversation</h2>
+      
+            <div class="practice-meta">
+              <span id="conversationLevel" class="set-label"></span>
+              <span id="conversationProgress" class="progress-label"></span>
+            </div>
+          </div>
+        </div>
+      
+        <!-- SCENE -->
+        <div id="conversationScene" class="conversation-scene">
+      
+          <img
+            id="conversationSceneImage"
+            class="conversation-scene-image hidden"
+            alt=""
+          />
+      
+          <p
+            id="conversationSceneText"
+            class="conversation-scene-text"
+          ></p>
+      
+        </div>
+      
+        <!-- TEACHER PROMPT -->
+        <div class="conversation-teacher-area">
+      
+          <div class="conversation-teacher-label">
+            👩‍🏫 Profesora
+          </div>
+      
+          <p
+            id="conversationPrompt"
+            class="conversation-prompt"
+          ></p>
+      
+          <button
+            id="conversationReplayBtn"
+            class="btn btn-ghost"
+            type="button"
+          >
+            🔊 Escuchar otra vez
+          </button>
+      
+        </div>
+      
+        <!-- YES / NO -->
+        <div
+          id="conversationYesNo"
+          class="conversation-answer-area hidden"
+        >
+      
+          <button
+            class="btn btn-primary conversation-answer-btn"
+            data-answer="SÍ"
+            type="button"
+          >
+            Sí
+          </button>
+      
+          <button
+            class="btn btn-secondary conversation-answer-btn"
+            data-answer="NO"
+            type="button"
+          >
+            No
+          </button>
+      
+        </div>
+      
+        <!-- MULTIPLE CHOICE -->
+        <div
+          id="conversationChoices"
+          class="conversation-choices hidden"
+        ></div>
+      
+        <!-- WRITING -->
+        <div
+          id="conversationWriting"
+          class="conversation-writing hidden"
+        >
+      
+          <textarea
+            id="conversationWritingInput"
+            placeholder="Escribe tu respuesta..."
+            rows="4"
+          ></textarea>
+      
+          <button
+            id="conversationSubmitWriting"
+            class="btn btn-primary"
+            type="button"
+          >
+            Check
+          </button>
+      
+        </div>
+      
+        <!-- SPEAKING -->
+        <div
+          id="conversationSpeaking"
+          class="conversation-speaking hidden"
+        >
+      
+          <p>
+            🎤 Graba tu respuesta en español.
+          </p>
+      
+          <div class="conversation-record-controls">
+      
+            <button
+              id="conversationRecordBtn"
+              class="btn btn-primary"
+              type="button"
+            >
+              🎤 Start Recording
+            </button>
+      
+            <button
+              id="conversationStopBtn"
+              class="btn btn-danger hidden"
+              type="button"
+            >
+              ⏹ Stop Recording
+            </button>
+      
+          </div>
+      
+          <audio
+            id="conversationAudioPlayback"
+            class="hidden"
+            controls
+          ></audio>
+      
+          <div
+            id="conversationRecordingActions"
+            class="hidden"
+          >
+      
+            <button
+              id="conversationRecordAgainBtn"
+              class="btn btn-secondary"
+              type="button"
+            >
+              🔄 Record Again
+            </button>
+      
+            <button
+              id="conversationDownloadBtn"
+              class="btn btn-primary"
+              type="button"
+            >
+              ⬇️ Download Recording
+            </button>
+      
+          </div>
+      
+        </div>
+      
+        <!-- FEEDBACK -->
+        <div
+          id="conversationFeedback"
+          class="conversation-feedback"
+        ></div>
+      
+        <!-- SCAFFOLD -->
+        <div
+          id="conversationScaffold"
+          class="conversation-scaffold hidden"
+        >
+      
+          <strong>💡 Try this:</strong>
+      
+          <span id="conversationScaffoldText"></span>
+      
+        </div>
+      
+        <!-- NAVIGATION -->
+        <div class="conversation-navigation">
+      
+          <button
+            id="conversationNextBtn"
+            class="btn btn-primary hidden"
+            type="button"
+          >
+            Next →
+          </button>
+      
+          <button
+            id="conversationEndBtn"
+            class="btn btn-secondary"
+            type="button"
+          >
+            ← Conversations
+          </button>
+      
+        </div>
+      
+      </section>
       
       <!-- RESULTS PANEL -->
       <section id="resultsPanel" class="panel hidden">
