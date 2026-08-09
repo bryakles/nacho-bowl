@@ -1179,24 +1179,68 @@ function checkConversationAnswer(
       currentConversationIndex
     ];
 
-  const normalizedStudent =
-    normalizeConversationAnswer(
-      studentAnswer
-    );
+  let correct = false;
 
-  const acceptedAnswers = [
-    question.answer,
-    ...question.accepted
-  ]
-    .filter(Boolean)
-    .map(
-      normalizeConversationAnswer
-    );
 
-  const correct =
-    acceptedAnswers.includes(
-      normalizedStudent
-    );
+  // ----------------------------------------------------------
+  // MULTIPLE CHOICE
+  // ----------------------------------------------------------
+
+  if (question.type === "MULTIPLE_CHOICE") {
+
+    // ANSWER: A
+    const correctLetter =
+      String(question.answer)
+        .trim()
+        .toUpperCase();
+
+    // Clicked option:
+    // A. En la escuela
+    const selectedMatch =
+      String(studentAnswer)
+        .trim()
+        .match(/^([A-Z])\./i);
+
+    const selectedLetter =
+      selectedMatch
+        ? selectedMatch[1].toUpperCase()
+        : "";
+
+    correct =
+      correctLetter === selectedLetter;
+
+
+  // ----------------------------------------------------------
+  // ALL OTHER QUESTION TYPES
+  // ----------------------------------------------------------
+
+  } else {
+
+    const normalizedStudent =
+      normalizeConversationAnswer(
+        studentAnswer
+      );
+
+    const acceptedAnswers = [
+      question.answer,
+      ...question.accepted
+    ]
+      .filter(Boolean)
+      .map(
+        normalizeConversationAnswer
+      );
+
+    correct =
+      acceptedAnswers.includes(
+        normalizedStudent
+      );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // CORRECT
+  // ----------------------------------------------------------
 
   if (correct) {
 
@@ -1216,12 +1260,16 @@ function checkConversationAnswer(
 
   }
 
+
+  // ----------------------------------------------------------
+  // INCORRECT
+  // ----------------------------------------------------------
+
   handleConversationWrongAnswer(
     question
   );
 
 }
-
 
 // ------------------------------------------------------------
 // WRONG ANSWER
