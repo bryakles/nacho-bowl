@@ -2197,6 +2197,22 @@ function showStudySet(cards) {
     <div class="study-set-controls">
 
       <button
+        id="selectAllStudyCards"
+        type="button"
+        class="study-set-control-btn"
+      >
+        Select All
+      </button>
+    
+      <button
+        id="clearAllStudyCards"
+        type="button"
+        class="study-set-control-btn"
+      >
+        Clear All
+      </button>
+    
+      <button
         id="practiceSelectedStudyCards"
         type="button"
         class="study-set-practice-btn"
@@ -2204,7 +2220,7 @@ function showStudySet(cards) {
       >
         Practice Selected
       </button>
-      
+    
       <button
         id="copySelectedStudyCards"
         type="button"
@@ -2213,7 +2229,7 @@ function showStudySet(cards) {
       >
         Copy Selected
       </button>
-
+    
     </div>
 
     <table class="study-table">
@@ -2537,11 +2553,6 @@ function cleanSortText(word, language) {
 
   return text;
 }
-
-
-// ------------------------------------------------------------
-// PRACTICE SELECTED STUDY CARDS
-// ------------------------------------------------------------
 
 // ------------------------------------------------------------
 // PRACTICE SELECTED STUDY CARDS
