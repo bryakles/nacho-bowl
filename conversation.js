@@ -27,11 +27,17 @@ const conversationBtn =
 const conversationSelectionPanel =
   document.getElementById("conversationSelectionPanel");
 
+const conversationPanel =
+  document.getElementById("conversationPanel");
+
 const conversationList =
   document.getElementById("conversationList");
 
 const conversationSelectionBackBtn =
   document.getElementById("conversationSelectionBackBtn");
+
+const conversationEndBtn =
+  document.getElementById("conversationEndBtn");
 
 
 // ------------------------------------------------------------
@@ -359,15 +365,19 @@ function selectConversation(conversation) {
   const docURL =
     convertGoogleDocURL(conversation.docURL);
 
-  console.log(
-    "Loading conversation:",
-    conversation.title
+  // Hide the conversation list.
+
+  conversationSelectionPanel.classList.add(
+    "hidden"
   );
 
-  console.log(
-    "Google Doc URL:",
-    docURL
+  // Show the actual conversation.
+
+  conversationPanel.classList.remove(
+    "hidden"
   );
+
+  // Load the selected Google Doc.
 
   loadConversationDocument(
     conversation,
@@ -486,3 +496,15 @@ conversationSelectionBackBtn.addEventListener(
 
   }
 );
+
+conversationEndBtn.addEventListener("click", () => {
+
+  conversationPanel.classList.add("hidden");
+
+  conversationSelectionPanel.classList.remove(
+    "hidden"
+  );
+
+  loadConversationIndex();
+
+});
