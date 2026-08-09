@@ -1114,18 +1114,23 @@ function showMultipleChoice(question) {
     button.textContent =
       option;
 
-    button.addEventListener(
-      "click",
-      () => {
+    button.addEventListener("click", () => {
 
-        // Pass the option exactly as it appears
-        // in the Google Doc.
-        checkConversationAnswer(
-          option
-        );
+      // Get the letter from the option:
+      // "A. En la escuela" → "A"
+      const match =
+        option.trim().match(/^([A-Z])\./i);
 
-      }
-    );
+      const selectedLetter =
+        match
+          ? match[1].toUpperCase()
+          : "";
+
+      checkConversationAnswer(
+        selectedLetter
+      );
+
+    });
 
     conversationChoices.appendChild(
       button
@@ -1138,7 +1143,6 @@ function showMultipleChoice(question) {
   );
 
 }
-
 
 // ------------------------------------------------------------
 // WRITING
@@ -1189,29 +1193,27 @@ function checkConversationAnswer(
   let correct = false;
 
 
-  // ----------------------------------------------------------
+    // ----------------------------------------------------------
   // MULTIPLE CHOICE
   // ----------------------------------------------------------
 
   if (question.type === "MULTIPLE_CHOICE") {
 
-    // ANSWER: A
     const correctLetter =
       String(question.answer)
         .trim()
         .toUpperCase();
 
-    // Clicked option:
-    // A. En la escuela
-    const selectedMatch =
+    const selectedLetter =
       String(studentAnswer)
         .trim()
-        .match(/^([A-Z])\./i);
+        .toUpperCase();
 
-    const selectedLetter =
-      selectedMatch
-        ? selectedMatch[1].toUpperCase()
-        : "";
+    console.log(
+      "MULTIPLE CHOICE:",
+      "correct =", correctLetter,
+      "selected =", selectedLetter
+    );
 
     correct =
       correctLetter === selectedLetter;
@@ -1222,7 +1224,7 @@ function checkConversationAnswer(
   // ----------------------------------------------------------
 
   } else {
-
+    
     const normalizedStudent =
       normalizeConversationAnswer(
         studentAnswer
