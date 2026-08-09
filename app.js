@@ -541,7 +541,9 @@ function showFilterPanel() {
   filterPanel.classList.remove("hidden");
   practicePanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
+
   renderLevelChips();
+  loadMyStudySets();
   updateCardCountPreview();
 }
 
@@ -575,42 +577,116 @@ function renderModeChips() {
 }
 
 function renderLevelChips() {
-  const levels = [...new Set(allCards.map(c => c.level).filter(Boolean))].sort();
+  const levels = [
+    ...new Set(
+      allCards
+        .map(c => c.level)
+        .filter(Boolean)
+    )
+  ].sort();
+
   levelOptions.innerHTML = "";
+
   levels.forEach(level => {
-    const chip = makeChip(level, selectedLevels, () => {
-      toggleSelection(selectedLevels, level);
-      // Reset lower selections when levels change
-      selectedUnits.clear();
-      selectedSets.clear();
-      renderUnitChips();
-      renderSetChips();
-      updateCardCountPreview();
-    });
+
+    const chip =
+      makeChip(
+        level,
+        selectedLevels,
+        () => {
+
+          // Selecting a regular filter
+          // cancels any My Study Set selection.
+          selectedMyStudySet = null;
+
+          document
+            .querySelectorAll(
+              "#myStudySetOptions .my-study-set-chip"
+            )
+            .forEach(myChip => {
+              myChip.classList.remove("active");
+            });
+
+          toggleSelection(
+            selectedLevels,
+            level
+          );
+
+          // Reset lower selections when levels change.
+          selectedUnits.clear();
+          selectedSets.clear();
+
+          renderUnitChips();
+          renderSetChips();
+          updateCardCountPreview();
+        }
+      );
+
     levelOptions.appendChild(chip);
   });
 }
 
 function renderUnitChips() {
+
   unitOptions.innerHTML = "";
-  const filtered = selectedLevels.size
-    ? allCards.filter(c => selectedLevels.has(c.level))
-    : allCards;
-  const units = [...new Set(filtered.map(c => c.unit).filter(Boolean))].sort();
+
+  const filtered =
+    selectedLevels.size
+      ? allCards.filter(c =>
+          selectedLevels.has(c.level)
+        )
+      : allCards;
+
+  const units =
+    [
+      ...new Set(
+        filtered
+          .map(c => c.unit)
+          .filter(Boolean)
+      )
+    ].sort();
 
   if (!units.length) {
-    unitOptions.innerHTML = '<span class="filter-hint">Select a level first</span>';
+
+    unitOptions.innerHTML =
+      '<span class="filter-hint">Select a level first</span>';
+
     return;
   }
 
   units.forEach(unit => {
-    const chip = makeChip(unit, selectedUnits, () => {
-      toggleSelection(selectedUnits, unit);
-      // Reset set selections when units change
-      selectedSets.clear();
-      renderSetChips();
-      updateCardCountPreview();
-    });
+
+    const chip =
+      makeChip(
+        unit,
+        selectedUnits,
+        () => {
+
+          // Selecting a regular filter
+          // cancels any My Study Set selection.
+          selectedMyStudySet = null;
+
+          document
+            .querySelectorAll(
+              "#myStudySetOptions .my-study-set-chip"
+            )
+            .forEach(myChip => {
+              myChip.classList.remove("active");
+            });
+
+          toggleSelection(
+            selectedUnits,
+            unit
+          );
+
+          // Reset set selections when units change.
+          selectedSets.clear();
+
+          renderSetChips();
+          updateCardCountPreview();
+        }
+      );
+
     unitOptions.appendChild(chip);
   });
 }
