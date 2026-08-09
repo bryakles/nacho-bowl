@@ -2709,6 +2709,68 @@ async function copySelectedStudyCards() {
   }
 }
 
+function saveSelectedStudySet() {
+
+  if (selectedStudyCards.size === 0) {
+    return;
+  }
+
+  // Get the cards in the order currently displayed.
+  const rows =
+    studySetContainer.querySelectorAll(
+      "tbody tr"
+    );
+
+  const selectedCards = [];
+
+  rows.forEach(row => {
+
+    const index =
+      Number(row.dataset.studyIndex);
+
+    const card =
+      currentStudySetCards[index];
+
+    if (
+      card &&
+      selectedStudyCards.has(card)
+    ) {
+      selectedCards.push(card);
+    }
+  });
+
+  if (!selectedCards.length) {
+    return;
+  }
+
+  const name =
+    prompt("Name this study set:");
+
+  if (!name || !name.trim()) {
+    return;
+  }
+
+  const savedStudySets =
+    JSON.parse(
+      localStorage.getItem("nachoSavedStudySets") || "[]"
+    );
+
+  savedStudySets.push({
+    id: Date.now(),
+    name: name.trim(),
+    cards: selectedCards
+  });
+
+  localStorage.setItem(
+    "nachoSavedStudySets",
+    JSON.stringify(savedStudySets)
+  );
+
+  alert(
+    `"${name.trim()}" was saved!`
+  );
+}
+
 // ============================================================
 // NACHO BUILDER FUNCTIONS
 // ============================================================
