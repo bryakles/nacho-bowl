@@ -216,6 +216,47 @@ body.teacher-lock-active {
   border-radius: var(--radius-md);
 }
 
+/* ============================================================
+   MY STUDY SETS
+   ============================================================ */
+
+.my-study-sets-group {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.my-study-set-chips {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 0.25rem;
+  border-radius: var(--radius-md);
+}
+
+.my-study-set-chip {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius-full);
+  background: #dcfce7;
+  color: #15803d;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+  user-select: none;
+}
+
+.my-study-set-chip:hover {
+  border-color: var(--color-success);
+  background: #bbf7d0;
+}
+
+.my-study-set-chip.active {
+  background: var(--color-success);
+  color: #ffffff;
+  border-color: var(--color-success);
+}
+
 .chip {
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-full);
@@ -601,6 +642,69 @@ body.teacher-lock-active {
 
 .study-tts-btn:active {
   transform: scale(0.95);
+}
+
+.study-set-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.study-set-control-btn,
+.study-set-practice-btn,
+.study-set-copy-btn {
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+}
+
+/* Select All / Clear All */
+
+.study-set-control-btn {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.study-set-control-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Practice Selected */
+
+.study-set-practice-btn {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.study-set-practice-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+/* Copy Selected */
+
+.study-set-copy-btn {
+  background: var(--color-secondary);
+  color: #ffffff;
+}
+
+.study-set-copy-btn:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+/* Disabled buttons */
+
+.study-set-practice-btn:disabled,
+.study-set-copy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* ============================================================
