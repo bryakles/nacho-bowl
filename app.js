@@ -2589,10 +2589,30 @@ function practiceSelectedStudyCards() {
     return;
   }
 
-  const selectedCards =
-    currentStudySetCards.filter(card =>
-      selectedStudyCards.has(card)
+  // Get cards in the order currently displayed
+  // in the Study Set.
+  const rows =
+    studySetContainer.querySelectorAll(
+      "tbody tr"
     );
+
+  const selectedCards = [];
+
+  rows.forEach(row => {
+
+    const index =
+      Number(row.dataset.studyIndex);
+
+    const card =
+      currentStudySetCards[index];
+
+    if (
+      card &&
+      selectedStudyCards.has(card)
+    ) {
+      selectedCards.push(card);
+    }
+  });
 
   if (!selectedCards.length) {
     return;
@@ -2600,7 +2620,6 @@ function practiceSelectedStudyCards() {
 
   beginPractice(selectedCards);
 }
-
 // ============================================================
 // COPY SELECTED STUDY CARDS
 // ============================================================
