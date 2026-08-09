@@ -275,6 +275,110 @@
         </div>
       </section>
 
+      <!-- CONVERSATION PANEL -->
+      <section id="conversationPanel" class="panel hidden">
+      
+        <div class="conversation-header">
+          <div>
+            <h2 id="conversationTitle">Conversation</h2>
+            <div class="conversation-meta">
+              <span id="conversationLevel"></span>
+              <span id="conversationProgress"></span>
+            </div>
+          </div>
+        </div>
+      
+        <div id="conversationScene" class="conversation-scene">
+          <img id="conversationSceneImage" class="conversation-image hidden" alt="">
+          <p id="conversationSceneText"></p>
+        </div>
+      
+        <div id="conversationTeacher" class="conversation-teacher">
+          <div id="conversationTeacherImage"></div>
+          <div class="teacher-message">
+            <p id="conversationPrompt"></p>
+            <button id="conversationReplayBtn" class="btn btn-ghost">
+              🔊 Listen Again
+            </button>
+          </div>
+        </div>
+      
+        <div id="conversationResponseArea" class="conversation-response-area">
+      
+          <!-- Yes / No -->
+          <div id="conversationYesNo" class="hidden">
+            <button class="btn btn-primary conversation-answer-btn" data-answer="SÍ">
+              Sí
+            </button>
+            <button class="btn btn-primary conversation-answer-btn" data-answer="NO">
+              No
+            </button>
+          </div>
+      
+          <!-- Multiple Choice -->
+          <div id="conversationChoices" class="hidden"></div>
+      
+          <!-- Written Response -->
+          <div id="conversationWriting" class="hidden">
+            <textarea
+              id="conversationWritingInput"
+              placeholder="Escribe tu respuesta..."
+            ></textarea>
+      
+            <button id="conversationSubmitWriting" class="btn btn-primary">
+              Submit
+            </button>
+          </div>
+      
+          <!-- Spoken Response -->
+          <div id="conversationSpeaking" class="hidden">
+      
+            <button id="conversationRecordBtn" class="btn btn-primary">
+              🎙️ Start Recording
+            </button>
+      
+            <button id="conversationStopBtn" class="btn btn-danger hidden">
+              ⏹ Stop
+            </button>
+      
+            <audio id="conversationAudioPlayback" controls class="hidden"></audio>
+      
+            <div class="conversation-recording-actions hidden"
+                 id="conversationRecordingActions">
+      
+              <button id="conversationRecordAgainBtn" class="btn btn-secondary">
+                🔄 Record Again
+              </button>
+      
+              <button id="conversationDownloadBtn" class="btn btn-primary">
+                ⬇️ Download Recording
+              </button>
+      
+            </div>
+      
+          </div>
+      
+        </div>
+      
+        <div id="conversationFeedback" class="conversation-feedback"></div>
+      
+        <div id="conversationScaffold" class="conversation-scaffold hidden">
+          <span class="scaffold-label">💡 Try this:</span>
+          <p id="conversationScaffoldText"></p>
+        </div>
+      
+        <div class="conversation-controls">
+          <button id="conversationNextBtn" class="btn btn-secondary hidden">
+            Continue →
+          </button>
+      
+          <button id="conversationEndBtn" class="btn btn-danger">
+            End Conversation
+          </button>
+        </div>
+      
+      </section>
+
       <!-- ATTEMPT HISTORY -->
       <section class="panel history-panel">
         <button id="historyToggle" class="btn btn-ghost history-toggle">
@@ -368,6 +472,7 @@
     </div>
   </div>
   
-  <script src="app.js?v=13"></script>  
+  <script src="app.js?v=13"></script>
+  <script src="conversation.js?v=1"></script>
 </body>
 </html>
