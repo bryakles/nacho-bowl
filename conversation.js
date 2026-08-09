@@ -419,6 +419,74 @@ async function loadConversationDocument(
   docURL
 ) {
 
+  try {
+
+    const response = await fetch(docURL);
+
+    if (!response.ok) {
+      throw new Error(
+        `Could not load conversation (${response.status})`
+      );
+    }
+
+    const text = await response.text();
+
+    console.log("Conversation document loaded.");
+
+    // Parse the Google Doc
+    conversationData = parseConversation(text);
+
+    if (!conversationData.questions.length) {
+      throw new Error("No questions found in conversation.");
+    }
+
+    // Store the selected conversation
+    conversationQuestions =
+      conversationData.questions;
+
+    currentConversationIndex = 0;
+    conversationAttempts = 0;
+    conversationScaffoldShown = false;
+
+    // Use the information from the Google Sheet
+    // if the document doesn't provide it.
+    if (!conversationData.title) {
+      conversationData.title =
+        conversation.title;
+    }
+
+    if (!conversationData.level) {
+      conversationData.level =
+        conversation.level;
+    }
+
+    // Render the conversation
+    renderConversationHeader();
+    renderConversationScene();
+    showConversationQuestion();
+
+  } catch (error) {
+
+    console.error(
+      "Conversation document loading error:",
+      error
+    );
+
+    conversationPanel.classList.remove("hidden");
+
+    conversationPrompt.textContent =
+      "⚠️ Could not load this conversation.";
+
+    conversationFeedback.textContent =
+      error.message;
+
+    conversationFeedback.className =
+      "conversation-feedback error";
+
+  }
+
+}
+
   conversationList.innerHTML =
     `<p class="filter-hint">
       Loading <strong>${conversation.title}</strong>...
@@ -493,6 +561,965 @@ function escapeHTML(text) {
     .replace(/'/g, "&#039;");
 
 }
+
+// ============================================================
+// CONVERSATION ENGINE
+// ============================================================
+
+// ------------------------------------------------------------
+// PARSER
+// ------------------------------------------------------------
+
+function parseConversation(text) {
+
+  const lines =
+    text
+      .replace(/\r/g, "")
+      .split("\n");
+
+  const conversation = {
+    title: "",
+    level: "",
+    topic: "",
+    scene: {
+      imageURL: "",
+      text: ""
+    },
+    questions: [],
+    endTeacher: ""
+  };
+
+  let section = "";
+  let currentQuestion = null;
+  let currentField = null;
+  let collectingOptions = false;
+  let collectingAccepted = false;
+
+  for (let i = 0; i < lines.length; i++) {
+
+    const rawLine = lines[i];
+    const line = rawLine.trim();
+
+    if (!line) continue;
+
+    // --------------------------------------------------------
+    // QUESTION HEADER
+    // --------------------------------------------------------
+
+    const questionMatch =
+      line.match(/^##\s*QUESTION\s+(\d+)/i);
+
+    if (questionMatch) {
+
+      if (currentQuestion) {
+        conversation.questions.push(currentQuestion);
+      }
+
+      currentQuestion = {
+        number: Number(questionMatch[1]),
+        type: "",
+        teacher: "",
+        answer: "",
+        options: [],
+        accepted: [],
+        scaffold: "",
+        imageURL: ""
+      };
+
+      section = "question";
+      currentField = null;
+      collectingOptions = false;
+      collectingAccepted = false;
+
+      continue;
+    }
+
+    // --------------------------------------------------------
+    // SCENE
+    // --------------------------------------------------------
+
+    if (/^##\s*SCENE/i.test(line)) {
+
+      section = "scene";
+      currentField = null;
+
+      continue;
+    }
+
+    // --------------------------------------------------------
+    // END
+    // --------------------------------------------------------
+
+    if (/^##\s*END/i.test(line)) {
+
+      if (currentQuestion) {
+        conversation.questions.push(currentQuestion);
+        currentQuestion = null;
+      }
+
+      section = "end";
+      currentField = null;
+
+      continue;
+    }
+
+    // --------------------------------------------------------
+    // TOP-LEVEL FIELDS
+    // --------------------------------------------------------
+
+    if (
+      !currentQuestion &&
+      section !== "scene" &&
+      section !== "end"
+    ) {
+
+      const titleMatch =
+        line.match(/^TITLE:\s*(.*)$/i);
+
+      const levelMatch =
+        line.match(/^LEVEL:\s*(.*)$/i);
+
+      const topicMatch =
+        line.match(/^TOPIC:\s*(.*)$/i);
+
+      if (titleMatch) {
+        conversation.title =
+          titleMatch[1].trim();
+        continue;
+      }
+
+      if (levelMatch) {
+        conversation.level =
+          levelMatch[1].trim();
+        continue;
+      }
+
+      if (topicMatch) {
+        conversation.topic =
+          topicMatch[1].trim();
+        continue;
+      }
+
+    }
+
+    // --------------------------------------------------------
+    // END TEACHER
+    // --------------------------------------------------------
+
+    if (section === "end") {
+
+      if (/^TEACHER:/i.test(line)) {
+
+        currentField = "endTeacher";
+
+        continue;
+      }
+
+      if (currentField === "endTeacher") {
+
+        conversation.endTeacher +=
+          (conversation.endTeacher ? " " : "") +
+          line;
+
+      }
+
+      continue;
+    }
+
+    // --------------------------------------------------------
+    // SCENE FIELDS
+    // --------------------------------------------------------
+
+    if (section === "scene") {
+
+      if (/^IMAGE_URL:/i.test(line)) {
+
+        conversation.scene.imageURL =
+          line
+            .replace(/^IMAGE_URL:\s*/i, "")
+            .trim();
+
+        currentField = null;
+
+        continue;
+      }
+
+      if (/^TEXT:/i.test(line)) {
+
+        currentField = "sceneText";
+
+        continue;
+      }
+
+      if (currentField === "sceneText") {
+
+        conversation.scene.text +=
+          (conversation.scene.text ? " " : "") +
+          line;
+
+      }
+
+      continue;
+    }
+
+    // --------------------------------------------------------
+    // QUESTION FIELDS
+    // --------------------------------------------------------
+
+    if (currentQuestion) {
+
+      if (/^TYPE:/i.test(line)) {
+
+        currentQuestion.type =
+          line
+            .replace(/^TYPE:\s*/i, "")
+            .trim()
+            .toUpperCase();
+
+        currentField = null;
+        collectingOptions = false;
+        collectingAccepted = false;
+
+        continue;
+      }
+
+      if (/^TEACHER:/i.test(line)) {
+
+        currentField = "teacher";
+        collectingOptions = false;
+        collectingAccepted = false;
+
+        continue;
+      }
+
+      if (/^ANSWER:/i.test(line)) {
+
+        currentField = "answer";
+        collectingOptions = false;
+        collectingAccepted = false;
+
+        continue;
+      }
+
+      if (/^OPTIONS:/i.test(line)) {
+
+        currentField = "options";
+        collectingOptions = true;
+        collectingAccepted = false;
+
+        continue;
+      }
+
+      if (/^ACCEPT:/i.test(line)) {
+
+        currentField = "accepted";
+        collectingAccepted = true;
+        collectingOptions = false;
+
+        continue;
+      }
+
+      if (/^SCAFFOLD:/i.test(line)) {
+
+        currentField = "scaffold";
+        collectingOptions = false;
+        collectingAccepted = false;
+
+        continue;
+      }
+
+      if (/^IMAGE_URL:/i.test(line)) {
+
+        currentQuestion.imageURL =
+          line
+            .replace(/^IMAGE_URL:\s*/i, "")
+            .trim();
+
+        currentField = null;
+
+        continue;
+      }
+
+      // ------------------------------------------------------
+      // OPTIONS
+      // ------------------------------------------------------
+
+      if (
+        collectingOptions &&
+        /^[A-Z]\.\s*/.test(line)
+      ) {
+
+        currentQuestion.options.push(line);
+
+        continue;
+      }
+
+      // ------------------------------------------------------
+      // ACCEPTED ANSWERS
+      // ------------------------------------------------------
+
+      if (collectingAccepted) {
+
+        currentQuestion.accepted.push(line);
+
+        continue;
+      }
+
+      // ------------------------------------------------------
+      // MULTI-LINE FIELDS
+      // ------------------------------------------------------
+
+      if (currentField === "teacher") {
+
+        currentQuestion.teacher +=
+          (currentQuestion.teacher ? " " : "") +
+          line;
+
+        continue;
+      }
+
+      if (currentField === "answer") {
+
+        currentQuestion.answer +=
+          (currentQuestion.answer ? " " : "") +
+          line;
+
+        continue;
+      }
+
+      if (currentField === "scaffold") {
+
+        currentQuestion.scaffold +=
+          (currentQuestion.scaffold ? " " : "") +
+          line;
+
+        continue;
+      }
+
+    }
+
+  }
+
+  // Add final question
+  if (currentQuestion) {
+    conversation.questions.push(currentQuestion);
+  }
+
+  return conversation;
+
+}
+
+
+// ------------------------------------------------------------
+// HEADER
+// ------------------------------------------------------------
+
+function renderConversationHeader() {
+
+  conversationTitle.textContent =
+    conversationData.title ||
+    "Conversation";
+
+  conversationLevel.textContent =
+    conversationData.level
+      ? `Level ${conversationData.level}`
+      : "";
+
+}
+
+
+// ------------------------------------------------------------
+// SCENE
+// ------------------------------------------------------------
+
+function renderConversationScene() {
+
+  const scene =
+    conversationData.scene;
+
+  conversationSceneText.textContent =
+    scene.text || "";
+
+  if (scene.imageURL) {
+
+    conversationSceneImage.src =
+      scene.imageURL;
+
+    conversationSceneImage.alt =
+      conversationData.title ||
+      "Conversation scene";
+
+    conversationSceneImage.classList.remove(
+      "hidden"
+    );
+
+  } else {
+
+    conversationSceneImage.classList.add(
+      "hidden"
+    );
+
+  }
+
+}
+
+
+// ------------------------------------------------------------
+// SHOW QUESTION
+// ------------------------------------------------------------
+
+function showConversationQuestion() {
+
+  const question =
+    conversationQuestions[
+      currentConversationIndex
+    ];
+
+  if (!question) {
+
+    finishConversation();
+
+    return;
+  }
+
+  conversationAttempts = 0;
+  conversationScaffoldShown = false;
+
+  conversationFeedback.textContent = "";
+  conversationFeedback.className =
+    "conversation-feedback";
+
+  conversationScaffold.classList.add(
+    "hidden"
+  );
+
+  conversationNextBtn.classList.add(
+    "hidden"
+  );
+
+  conversationEndBtn.classList.remove(
+    "hidden"
+  );
+
+  clearConversationResponseAreas();
+
+  conversationProgress.textContent =
+    `Question ${
+      currentConversationIndex + 1
+    } of ${
+      conversationQuestions.length
+    }`;
+
+  conversationPrompt.textContent =
+    question.teacher || "";
+
+  // Question-specific image
+  if (question.imageURL) {
+
+    conversationSceneImage.src =
+      question.imageURL;
+
+    conversationSceneImage.alt =
+      "Question image";
+
+    conversationSceneImage.classList.remove(
+      "hidden"
+    );
+
+  } else {
+
+    renderConversationScene();
+
+  }
+
+  // Play teacher prompt
+  playSpanishText(
+    question.teacher
+  );
+
+  switch (question.type) {
+
+    case "YES_NO":
+      showYesNo();
+      break;
+
+    case "MULTIPLE_CHOICE":
+      showMultipleChoice(question);
+      break;
+
+    case "SHORT_WRITE":
+    case "LONG_WRITE":
+      showWriting();
+      break;
+
+    case "SHORT_SPEAK":
+    case "LONG_SPEAK":
+      showSpeaking();
+      break;
+
+    default:
+
+      conversationFeedback.textContent =
+        `⚠️ Unknown question type: ${
+          question.type
+        }`;
+
+  }
+
+}
+
+
+// ------------------------------------------------------------
+// CLEAR RESPONSE AREAS
+// ------------------------------------------------------------
+
+function clearConversationResponseAreas() {
+
+  conversationYesNo.classList.add(
+    "hidden"
+  );
+
+  conversationChoices.classList.add(
+    "hidden"
+  );
+
+  conversationWriting.classList.add(
+    "hidden"
+  );
+
+  conversationSpeaking.classList.add(
+    "hidden"
+  );
+
+  conversationWritingInput.value = "";
+  conversationWritingInput.disabled = false;
+
+  conversationSubmitWriting.disabled = false;
+
+  conversationAudioPlayback.classList.add(
+    "hidden"
+  );
+
+  conversationRecordingActions.classList.add(
+    "hidden"
+  );
+
+  conversationAudioPlayback.removeAttribute(
+    "src"
+  );
+
+  if (conversationAudioURL) {
+
+    URL.revokeObjectURL(
+      conversationAudioURL
+    );
+
+    conversationAudioURL = null;
+
+  }
+
+  conversationAudioBlob = null;
+
+}
+
+
+// ------------------------------------------------------------
+// YES / NO
+// ------------------------------------------------------------
+
+function showYesNo() {
+
+  conversationYesNo.classList.remove(
+    "hidden"
+  );
+
+  conversationYesNo
+    .querySelectorAll(
+      ".conversation-answer-btn"
+    )
+    .forEach(button => {
+
+      button.disabled = false;
+
+      button.onclick = () => {
+
+        checkConversationAnswer(
+          button.dataset.answer
+        );
+
+      };
+
+    });
+
+}
+
+
+// ------------------------------------------------------------
+// MULTIPLE CHOICE
+// ------------------------------------------------------------
+
+function showMultipleChoice(question) {
+
+  conversationChoices.innerHTML = "";
+
+  question.options.forEach(option => {
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+
+    button.className =
+      "btn btn-primary conversation-choice-btn";
+
+    button.textContent =
+      option;
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        checkConversationAnswer(
+          option
+        );
+
+      }
+    );
+
+    conversationChoices.appendChild(
+      button
+    );
+
+  });
+
+  conversationChoices.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+// ------------------------------------------------------------
+// WRITING
+// ------------------------------------------------------------
+
+function showWriting() {
+
+  conversationWriting.classList.remove(
+    "hidden"
+  );
+
+  conversationWritingInput.focus();
+
+}
+
+
+// ------------------------------------------------------------
+// SPEAKING
+// ------------------------------------------------------------
+
+function showSpeaking() {
+
+  conversationSpeaking.classList.remove(
+    "hidden"
+  );
+
+}
+
+
+// ------------------------------------------------------------
+// CHECK ANSWER
+// ------------------------------------------------------------
+
+function checkConversationAnswer(
+  studentAnswer
+) {
+
+  const question =
+    conversationQuestions[
+      currentConversationIndex
+    ];
+
+  const normalizedStudent =
+    normalizeConversationAnswer(
+      studentAnswer
+    );
+
+  const acceptedAnswers = [
+    question.answer,
+    ...question.accepted
+  ]
+    .filter(Boolean)
+    .map(
+      normalizeConversationAnswer
+    );
+
+  const correct =
+    acceptedAnswers.includes(
+      normalizedStudent
+    );
+
+  if (correct) {
+
+    conversationFeedback.textContent =
+      "¡Muy bien! ✓";
+
+    conversationFeedback.className =
+      "conversation-feedback correct";
+
+    disableCurrentConversationResponse();
+
+    conversationNextBtn.classList.remove(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+  handleConversationWrongAnswer(
+    question
+  );
+
+}
+
+
+// ------------------------------------------------------------
+// WRONG ANSWER
+// ------------------------------------------------------------
+
+function handleConversationWrongAnswer(
+  question
+) {
+
+  conversationAttempts++;
+
+  conversationFeedback.textContent =
+    "No exactamente. Inténtalo otra vez.";
+
+  conversationFeedback.className =
+    "conversation-feedback incorrect";
+
+  if (
+    conversationAttempts >= 2 &&
+    question.scaffold &&
+    !conversationScaffoldShown
+  ) {
+
+    conversationScaffoldText.textContent =
+      question.scaffold;
+
+    conversationScaffold.classList.remove(
+      "hidden"
+    );
+
+    conversationScaffoldShown = true;
+
+    playSpanishText(
+      question.scaffold
+    );
+
+  }
+
+}
+
+
+// ------------------------------------------------------------
+// NORMALIZE
+// ------------------------------------------------------------
+
+function normalizeConversationAnswer(
+  value
+) {
+
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(
+      /[\u0300-\u036f]/g,
+      ""
+    )
+    .replace(
+      /[¿?¡!.,;:"]/g,
+      ""
+    )
+    .replace(
+      /\s+/g,
+      " "
+    );
+
+}
+
+
+// ------------------------------------------------------------
+// DISABLE RESPONSE
+// ------------------------------------------------------------
+
+function disableCurrentConversationResponse() {
+
+  conversationYesNo
+    .querySelectorAll("button")
+    .forEach(button => {
+
+      button.disabled = true;
+
+    });
+
+  conversationChoices
+    .querySelectorAll("button")
+    .forEach(button => {
+
+      button.disabled = true;
+
+    });
+
+  conversationWritingInput.disabled =
+    true;
+
+  conversationSubmitWriting.disabled =
+    true;
+
+}
+
+
+// ------------------------------------------------------------
+// NEXT QUESTION
+// ------------------------------------------------------------
+
+conversationNextBtn.addEventListener(
+  "click",
+  () => {
+
+    currentConversationIndex++;
+
+    showConversationQuestion();
+
+  }
+);
+
+
+// ------------------------------------------------------------
+// WRITING SUBMIT
+// ------------------------------------------------------------
+
+conversationSubmitWriting.addEventListener(
+  "click",
+  () => {
+
+    const answer =
+      conversationWritingInput.value.trim();
+
+    if (!answer) return;
+
+    checkConversationAnswer(
+      answer
+    );
+
+  }
+);
+
+
+conversationWritingInput.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+
+      event.preventDefault();
+
+      conversationSubmitWriting.click();
+
+    }
+
+  }
+);
+
+
+// ------------------------------------------------------------
+// TEXT TO SPEECH
+// ------------------------------------------------------------
+
+function playSpanishText(text) {
+
+  if (
+    !text ||
+    !("speechSynthesis" in window)
+  ) {
+
+    return;
+
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance =
+    new SpeechSynthesisUtterance(
+      text
+    );
+
+  utterance.lang = "es-ES";
+  utterance.rate = 0.9;
+
+  window.speechSynthesis.speak(
+    utterance
+  );
+
+}
+
+
+// ------------------------------------------------------------
+// REPLAY
+// ------------------------------------------------------------
+
+conversationReplayBtn.addEventListener(
+  "click",
+  () => {
+
+    const question =
+      conversationQuestions[
+        currentConversationIndex
+      ];
+
+    if (question) {
+
+      playSpanishText(
+        question.teacher
+      );
+
+    }
+
+  }
+);
+
+
+// ------------------------------------------------------------
+// FINISH
+// ------------------------------------------------------------
+
+function finishConversation() {
+
+  clearConversationResponseAreas();
+
+  conversationPrompt.textContent =
+    conversationData.endTeacher ||
+    "¡Muy bien! Has terminado la conversación.";
+
+  conversationFeedback.textContent =
+    "🎉 ¡Conversación completada!";
+
+  conversationFeedback.className =
+    "conversation-feedback correct";
+
+  conversationNextBtn.classList.add(
+    "hidden"
+  );
+
+}
+
 // ------------------------------------------------------------
 // BACK
 // ------------------------------------------------------------
