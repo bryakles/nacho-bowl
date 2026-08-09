@@ -615,23 +615,76 @@ function renderUnitChips() {
   });
 }
 
+// ============================================================
+// REGULAR STUDY SET CHIPS
+// ============================================================
+
 function renderSetChips() {
+
   setOptions.innerHTML = "";
+
   let filtered = allCards;
-  if (selectedLevels.size) filtered = filtered.filter(c => selectedLevels.has(c.level));
-  if (selectedUnits.size) filtered = filtered.filter(c => selectedUnits.has(c.unit));
-  const sets = [...new Set(filtered.map(c => c.setName).filter(Boolean))].sort();
+
+  if (selectedLevels.size) {
+    filtered =
+      filtered.filter(c =>
+        selectedLevels.has(c.level)
+      );
+  }
+
+  if (selectedUnits.size) {
+    filtered =
+      filtered.filter(c =>
+        selectedUnits.has(c.unit)
+      );
+  }
+
+  const sets =
+    [
+      ...new Set(
+        filtered
+          .map(c => c.setName)
+          .filter(Boolean)
+      )
+    ].sort();
 
   if (!sets.length) {
-    setOptions.innerHTML = '<span class="filter-hint">Select a unit first</span>';
+
+    setOptions.innerHTML =
+      '<span class="filter-hint">Select a unit first</span>';
+
     return;
   }
 
   sets.forEach(set => {
-    const chip = makeChip(set, selectedSets, () => {
-      toggleSelection(selectedSets, set);
-      updateCardCountPreview();
-    });
+
+    const chip =
+      makeChip(
+        set,
+        selectedSets,
+        () => {
+
+          // Selecting a regular Study Set
+          // cancels any My Study Set selection.
+          selectedMyStudySet = null;
+
+          document
+            .querySelectorAll(
+              "#myStudySetOptions .my-study-set-chip"
+            )
+            .forEach(myChip => {
+              myChip.classList.remove("active");
+            });
+
+          toggleSelection(
+            selectedSets,
+            set
+          );
+
+          updateCardCountPreview();
+        }
+      );
+
     setOptions.appendChild(chip);
   });
 }
@@ -929,21 +982,45 @@ function loadMyStudySets() {
       savedSet.name;
 
     chip.addEventListener("click", () => {
-
+    
       // Remove selection from other My Study Sets.
       container
         .querySelectorAll(".my-study-set-chip")
         .forEach(otherChip => {
           otherChip.classList.remove("active");
         });
-
+    
       chip.classList.add("active");
-
-      // Store the selected saved set.
+    
+      // Select this saved study set.
       selectedMyStudySet =
         savedSet;
-
-      // Update the card count.
+    
+      // Clear the regular Level / Unit / Study Set filters.
+      selectedLevels.clear();
+      selectedUnits.clear();
+      selectedSets.clear();
+    
+      // Refresh their visual state.
+      document
+        .querySelectorAll("#levelOptions .chip")
+        .forEach(chip => {
+          chip.classList.remove("active");
+        });
+    
+      document
+        .querySelectorAll("#unitOptions .chip")
+        .forEach(chip => {
+          chip.classList.remove("active");
+        });
+    
+      document
+        .querySelectorAll("#setOptions .chip")
+        .forEach(chip => {
+          chip.classList.remove("active");
+        });
+    
+      // Update the card count and Start Practice button.
       updateCardCountPreview();
     });
 
