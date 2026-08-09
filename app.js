@@ -122,6 +122,7 @@ let currentUser = null;  // Logged-in student { name, username, password }
 let selectedLevels = new Set();
 let selectedUnits = new Set();
 let selectedSets = new Set();
+let selectedMyStudySet = null;
 
 let practiceCards = [];         // Cards for current session (up to 25)
 let currentCardIndex = -1;
@@ -653,10 +654,36 @@ function toggleSelection(set, value) {
 }
 
 function getFilteredCards() {
+
+  // If a saved My Study Set is selected,
+  // use its cards instead of the regular filters.
+  if (selectedMyStudySet) {
+    return selectedMyStudySet.cards;
+  }
+
   let cards = allCards;
-  if (selectedLevels.size) cards = cards.filter(c => selectedLevels.has(c.level));
-  if (selectedUnits.size) cards = cards.filter(c => selectedUnits.has(c.unit));
-  if (selectedSets.size) cards = cards.filter(c => selectedSets.has(c.setName));
+
+  if (selectedLevels.size) {
+    cards =
+      cards.filter(c =>
+        selectedLevels.has(c.level)
+      );
+  }
+
+  if (selectedUnits.size) {
+    cards =
+      cards.filter(c =>
+        selectedUnits.has(c.unit)
+      );
+  }
+
+  if (selectedSets.size) {
+    cards =
+      cards.filter(c =>
+        selectedSets.has(c.setName)
+      );
+  }
+
   return cards;
 }
 
@@ -858,6 +885,71 @@ function resetPracticeState() {
   practiceActive = false;
 }
 
+// ============================================================
+// MY STUDY SETS
+// ============================================================
+
+function loadMyStudySets() {
+
+  const container =
+    document.getElementById("myStudySetOptions");
+
+  if (!container) {
+    return;
+  }
+
+  const savedStudySets =
+    JSON.parse(
+      localStorage.getItem("nachoSavedStudySets") || "[]"
+    );
+
+  container.innerHTML = "";
+
+  if (savedStudySets.length === 0) {
+
+    container.innerHTML = `
+      <span class="filter-hint">
+        No saved study sets yet
+      </span>
+    `;
+
+    return;
+  }
+
+  savedStudySets.forEach(savedSet => {
+
+    const chip =
+      document.createElement("button");
+
+    chip.type = "button";
+    chip.className =
+      "my-study-set-chip";
+
+    chip.textContent =
+      savedSet.name;
+
+    chip.addEventListener("click", () => {
+
+      // Remove selection from other My Study Sets.
+      container
+        .querySelectorAll(".my-study-set-chip")
+        .forEach(otherChip => {
+          otherChip.classList.remove("active");
+        });
+
+      chip.classList.add("active");
+
+      // Store the selected saved set.
+      selectedMyStudySet =
+        savedSet;
+
+      // Update the card count.
+      updateCardCountPreview();
+    });
+
+    container.appendChild(chip);
+  });
+}
 
 // ------------------------------------------------------------
 // CARD DISPLAY / NAVIGATION
