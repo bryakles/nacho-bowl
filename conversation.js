@@ -9,7 +9,7 @@
 
 // Paste the published Google Doc URL here.
 const CONVERSATION_URL =
-  "https://docs.google.com/document/d/1SKtGroJi2XKavlou09asttGIvFOzoui5tSG336m2SYg/edit?tab=t.0";
+  "https://docs.google.com/document/d/1SKtGroJi2XKavlou09asttGIvFOzoui5tSG336m2SYg/export?format=txt";
 
 
 // ------------------------------------------------------------
