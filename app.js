@@ -111,6 +111,11 @@ const PRACTICE_MODES = {
   }
   };
 
+  "conversation": {
+    label: "🗣️ Conversation",
+    enabled: true
+  }
+
 // ============================================================
 // STATE
 // ============================================================
@@ -153,6 +158,7 @@ const practiceModes = {
   "multiple-choice": "🔢 Multiple Choice",
   "study-set": "📚 Study Set",
   "nacho-builder": "🌮 Nacho Builder"
+  "conversation": "🗣️ Conversation",
 };
 
 const TEACHER_PASSWORD = "nacho5";
@@ -849,9 +855,13 @@ startPracticeBtn.addEventListener("click", () => {
     showStudySet(filtered);
     return;
   }
-
+  
+  if (practiceMode === "conversation") {
+    startConversation();
+    return;
+  }
+  
   beginPractice(filtered);
-});
 
 nachoNextWordBtn.addEventListener("click", () => {
   nachoGameMessage.classList.add("hidden");
