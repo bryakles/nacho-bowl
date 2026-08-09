@@ -2446,9 +2446,9 @@ function updateStudySetSelectionUI() {
   const count =
     selectedStudyCards.size;
 
-  const countDisplay =
+  const practiceButton =
     document.getElementById(
-      "studySetSelectedCount"
+      "practiceSelectedStudyCards"
     );
 
   const copyButton =
@@ -2456,9 +2456,9 @@ function updateStudySetSelectionUI() {
       "copySelectedStudyCards"
     );
 
-  if (countDisplay) {
-    countDisplay.textContent =
-      `${count} selected`;
+  if (practiceButton) {
+    practiceButton.disabled =
+      count === 0;
   }
 
   if (copyButton) {
