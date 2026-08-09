@@ -1118,6 +1118,8 @@ function showMultipleChoice(question) {
       "click",
       () => {
 
+        // Pass the option exactly as it appears
+        // in the Google Doc.
         checkConversationAnswer(
           option
         );
@@ -1178,6 +1180,11 @@ function checkConversationAnswer(
     conversationQuestions[
       currentConversationIndex
     ];
+
+  console.log("QUESTION TYPE:", question.type);
+  console.log("QUESTION ANSWER:", question.answer);
+  console.log("QUESTION OPTIONS:", question.options);
+  console.log("STUDENT ANSWER:", studentAnswer);
 
   let correct = false;
 
