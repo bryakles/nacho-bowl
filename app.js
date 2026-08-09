@@ -2461,7 +2461,7 @@ function showStudySet(cards) {
       <button
         id="saveStudySet"
         type="button"
-        class="study-set-save-btn"
+        class="study-set-control-btn"
         disabled
       >
         Save Study Set
