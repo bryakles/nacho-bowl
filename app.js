@@ -108,7 +108,7 @@ const PRACTICE_MODES = {
   "nacho-builder": {
     label: "🌮 Nacho Builder",
     enabled: true
-  }
+  },
   
   "conversation": {
     label: "🗣️ Conversation",
