@@ -2214,12 +2214,12 @@ function showStudySet(cards) {
       </button>
     
       <button
-        id="practiceSelectedStudyCards"
+        id="saveStudySet"
         type="button"
-        class="study-set-practice-btn"
+        class="study-set-save-btn"
         disabled
       >
-        Practice Selected
+        Save Study Set
       </button>
     
       <button
@@ -2374,14 +2374,13 @@ function showStudySet(cards) {
   
   
     // ------------------------------------------------------------
-    // PRACTICE SELECTED
+    // SAVE STUDY SET
     // ------------------------------------------------------------
-  
+    
     document
-      .getElementById("practiceSelectedStudyCards")
+      .getElementById("saveStudySet")
       .addEventListener("click", () => {
-  
-        practiceSelectedStudyCards();
+        saveSelectedStudySet();
       });
   
   
@@ -2446,20 +2445,20 @@ function updateStudySetSelectionUI() {
   const count =
     selectedStudyCards.size;
 
-  const practiceButton =
+  const saveButton =
     document.getElementById(
-      "practiceSelectedStudyCards"
+      "saveStudySet"
     );
-
+  
+  if (saveButton) {
+    saveButton.disabled =
+      count === 0;
+  }
+  
   const copyButton =
     document.getElementById(
       "copySelectedStudyCards"
     );
-
-  if (practiceButton) {
-    practiceButton.disabled =
-      count === 0;
-  }
 
   if (copyButton) {
     copyButton.disabled =
