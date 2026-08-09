@@ -2196,31 +2196,15 @@ function showStudySet(cards) {
   studySetContainer.innerHTML = `
     <div class="study-set-controls">
 
-      <div class="study-set-selection-controls">
-        <button
-          id="selectAllStudyCards"
-          type="button"
-          class="study-set-control-btn"
-        >
-          Select All
-        </button>
-
-        <button
-          id="clearAllStudyCards"
-          type="button"
-          class="study-set-control-btn"
-        >
-          Clear All
-        </button>
-
-        <span
-          id="studySetSelectedCount"
-          class="study-set-selected-count"
-        >
-          0 selected
-        </span>
-      </div>
-
+      <button
+        id="practiceSelectedStudyCards"
+        type="button"
+        class="study-set-practice-btn"
+        disabled
+      >
+        Practice Selected
+      </button>
+      
       <button
         id="copySelectedStudyCards"
         type="button"
@@ -2341,39 +2325,19 @@ function showStudySet(cards) {
   });
 
   // ------------------------------------------------------------
-  // SELECT ALL
+  // PRACTICE SELECTED
   // ------------------------------------------------------------
-
+  
   document
-    .getElementById("selectAllStudyCards")
+    .getElementById("practiceSelectedStudyCards")
     .addEventListener("click", () => {
-
-      cards.forEach(card => {
-        selectedStudyCards.add(card);
-      });
-
-      updateStudySetCheckboxes(cards);
-      updateStudySetSelectionUI();
+      practiceSelectedStudyCards();
     });
-
-  // ------------------------------------------------------------
-  // CLEAR ALL
-  // ------------------------------------------------------------
-
-  document
-    .getElementById("clearAllStudyCards")
-    .addEventListener("click", () => {
-
-      selectedStudyCards.clear();
-
-      updateStudySetCheckboxes(cards);
-      updateStudySetSelectionUI();
-    });
-
+  
   // ------------------------------------------------------------
   // COPY SELECTED
   // ------------------------------------------------------------
-
+  
   document
     .getElementById("copySelectedStudyCards")
     .addEventListener("click", () => {
