@@ -109,12 +109,12 @@ const PRACTICE_MODES = {
     label: "🌮 Nacho Builder",
     enabled: true
   }
-  };
-
+  
   "conversation": {
     label: "🗣️ Conversation",
     enabled: true
   }
+  };
 
 // ============================================================
 // STATE
