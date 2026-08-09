@@ -561,7 +561,10 @@ function parseConversation(text) {
         answer: "",
         options: [],
         accepted: [],
+        model: [],
+        modelRecast: "",
         scaffold: "",
+        scaffoldRecast: "",
         imageURL: ""
       };
 
@@ -779,6 +782,33 @@ function parseConversation(text) {
         continue;
       }
 
+      if (/^MODEL:/i.test(line)) {
+
+        currentField = "model";
+        collectingOptions = false;
+        collectingAccepted = false;
+      
+        continue;
+      }
+      
+      if (/^MODEL RECAST:/i.test(line)) {
+      
+        currentField = "modelRecast";
+        collectingOptions = false;
+        collectingAccepted = false;
+      
+        continue;
+      }
+      
+      if (/^SCAFFOLD RECAST:/i.test(line)) {
+      
+        currentField = "scaffoldRecast";
+        collectingOptions = false;
+        collectingAccepted = false;
+      
+        continue;
+      }
+
       // ------------------------------------------------------
       // OPTIONS
       // ------------------------------------------------------
@@ -805,6 +835,17 @@ function parseConversation(text) {
       }
 
       // ------------------------------------------------------
+      // MODEL ANSWERS
+      // ------------------------------------------------------
+      
+      if (currentField === "model") {
+      
+        currentQuestion.model.push(line);
+      
+        continue;
+      }
+
+            // ------------------------------------------------------
       // MULTI-LINE FIELDS
       // ------------------------------------------------------
 
@@ -835,6 +876,24 @@ function parseConversation(text) {
         continue;
       }
 
+      if (currentField === "modelRecast") {
+
+        currentQuestion.modelRecast +=
+          (currentQuestion.modelRecast ? " " : "") +
+          line;
+
+        continue;
+      }
+
+      if (currentField === "scaffoldRecast") {
+
+        currentQuestion.scaffoldRecast +=
+          (currentQuestion.scaffoldRecast ? " " : "") +
+          line;
+
+        continue;
+      }
+
     }
 
   }
@@ -847,7 +906,6 @@ function parseConversation(text) {
   return conversation;
 
 }
-
 
 // ------------------------------------------------------------
 // HEADER
