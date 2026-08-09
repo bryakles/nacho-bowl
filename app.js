@@ -862,6 +862,7 @@ startPracticeBtn.addEventListener("click", () => {
   }
   
   beginPractice(filtered);
+});
 
 nachoNextWordBtn.addEventListener("click", () => {
   nachoGameMessage.classList.add("hidden");
