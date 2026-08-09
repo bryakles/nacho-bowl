@@ -7,6 +7,8 @@ const BORED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJaLVNNt
 const HISTORY_STORAGE_KEY = "spanish-practice-history-v1";
 const NACHO_STORAGE_KEY   = "nacho-bowl-count-v1";
 const PERFECT_STORAGE_KEY = "nacho-perfect-sessions-v1";
+const CONVERSATIONS_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXkS0P0pDGSxXKQqtbPpv5lQb03OkgJW4p8o9fHpTdmiSJBHN8klf8cOrWxd-3iv_5J2stOk0m-Z_t/pub?output=csv";
 
 let maxCardsPerSession = 25;
 
@@ -110,10 +112,6 @@ const PRACTICE_MODES = {
     enabled: true
   },
   
-  "conversation": {
-    label: "🗣️ Conversation",
-    enabled: true
-  }
   };
 
 // ============================================================
@@ -158,7 +156,6 @@ const practiceModes = {
   "multiple-choice": "🔢 Multiple Choice",
   "study-set": "📚 Study Set",
   "nacho-builder": "🌮 Nacho Builder",
-  "conversation": "🗣️ Conversation",
 };
 
 const TEACHER_PASSWORD = "nacho5";
@@ -853,11 +850,6 @@ startPracticeBtn.addEventListener("click", () => {
   
   if (practiceMode === "study-set") {
     showStudySet(filtered);
-    return;
-  }
-  
-  if (practiceMode === "conversation") {
-    startConversation();
     return;
   }
   
