@@ -157,7 +157,7 @@ const practiceModes = {
   "ordered-answer": "📋 Answer: Ordered",
   "multiple-choice": "🔢 Multiple Choice",
   "study-set": "📚 Study Set",
-  "nacho-builder": "🌮 Nacho Builder"
+  "nacho-builder": "🌮 Nacho Builder",
   "conversation": "🗣️ Conversation",
 };
 
