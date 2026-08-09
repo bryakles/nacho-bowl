@@ -2194,9 +2194,10 @@ function showStudySet(cards) {
   studySetPanel.classList.remove("hidden");
 
   studySetContainer.innerHTML = `
+  
     <div class="study-set-controls">
-
-      <button
+  
+    <button
         id="selectAllStudyCards"
         type="button"
         class="study-set-control-btn"
@@ -2340,43 +2341,79 @@ function showStudySet(cards) {
     });
   });
 
-  // ------------------------------------------------------------
-  // PRACTICE SELECTED
-  // ------------------------------------------------------------
+    // ------------------------------------------------------------
+    // SELECT ALL
+    // ------------------------------------------------------------
   
-  document
-    .getElementById("practiceSelectedStudyCards")
-    .addEventListener("click", () => {
-      practiceSelectedStudyCards();
+    document
+      .getElementById("selectAllStudyCards")
+      .addEventListener("click", () => {
+  
+        cards.forEach(card => {
+          selectedStudyCards.add(card);
+        });
+  
+        updateStudySetCheckboxes(cards);
+        updateStudySetSelectionUI();
+      });
+  
+  
+    // ------------------------------------------------------------
+    // CLEAR ALL
+    // ------------------------------------------------------------
+  
+    document
+      .getElementById("clearAllStudyCards")
+      .addEventListener("click", () => {
+  
+        selectedStudyCards.clear();
+  
+        updateStudySetCheckboxes(cards);
+        updateStudySetSelectionUI();
+      });
+  
+  
+    // ------------------------------------------------------------
+    // PRACTICE SELECTED
+    // ------------------------------------------------------------
+  
+    document
+      .getElementById("practiceSelectedStudyCards")
+      .addEventListener("click", () => {
+  
+        practiceSelectedStudyCards();
+      });
+  
+  
+    // ------------------------------------------------------------
+    // COPY SELECTED
+    // ------------------------------------------------------------
+  
+    document
+      .getElementById("copySelectedStudyCards")
+      .addEventListener("click", () => {
+  
+        copySelectedStudyCards();
+      });
+  
+  
+    // ------------------------------------------------------------
+    // RESTORE SELECTION STATE
+    // ------------------------------------------------------------
+  
+    updateStudySetCheckboxes(cards);
+    updateStudySetSelectionUI();
+  
+  
+    // ------------------------------------------------------------
+    // SCROLL TO STUDY SET
+    // ------------------------------------------------------------
+  
+    studySetPanel.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
     });
-  
-  // ------------------------------------------------------------
-  // COPY SELECTED
-  // ------------------------------------------------------------
-  
-  document
-    .getElementById("copySelectedStudyCards")
-    .addEventListener("click", () => {
-      copySelectedStudyCards();
-    });
-
-  // ------------------------------------------------------------
-  // RESTORE SELECTION STATE
-  // ------------------------------------------------------------
-  
-  updateStudySetCheckboxes(cards);
-  updateStudySetSelectionUI();
-
-  // ------------------------------------------------------------
-  // SCROLL TO STUDY SET
-  // ------------------------------------------------------------
-
-  studySetPanel.scrollIntoView({
-    behavior: "smooth",
-    block: "start"
-  });
-}
-
+  }
 
 // ============================================================
 // STUDY SET SELECTION UI
