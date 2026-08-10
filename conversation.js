@@ -1,33 +1,37 @@
 // ============================================================
-// NACHO BOWL — CONVERSATION SELECTION
+// NACHO BOWL — CONVERSATION ENGINE
+// Spreadsheet-driven TPRS conversation practice
 // ============================================================
 
-// ------------------------------------------------------------
+
+// ============================================================
 // GOOGLE SHEET
-// ------------------------------------------------------------
+// ============================================================
 
 const CONVERSATION_INDEX_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXkS0P0pDGSxXKQqtbPpv5lQb03OkgJW4p8o9fHpTdmiSJBHN8klf8cOrWxd-3iv_5J2stOk0m-Z_t/pub?output=csv";
 
 
-// ------------------------------------------------------------
+// ============================================================
 // STATE
-// ------------------------------------------------------------
+// ============================================================
 
 let conversationIndex = [];
 let conversationData = null;
-let conversationQuestions = [];
-let currentConversationIndex = 0;
+
+let conversationRows = [];
+let currentConceptIndex = 0;
+let currentQuestionIndex = 0;
+
 let conversationAttempts = 0;
-let conversationScaffoldShown = false;
 
-let conversationAudioURL = null;
-let conversationAudioBlob = null;
+// Teacher-report data
+let conversationReport = [];
 
 
-// ------------------------------------------------------------
+// ============================================================
 // DOM REFERENCES
-// ------------------------------------------------------------
+// ============================================================
 
 const conversationBtn =
   document.getElementById("conversationBtn");
@@ -48,9 +52,9 @@ const conversationEndBtn =
   document.getElementById("conversationEndBtn");
 
 
-// ------------------------------------------------------------
+// ============================================================
 // OPEN CONVERSATIONS
-// ------------------------------------------------------------
+// ============================================================
 
 conversationBtn.addEventListener("click", () => {
 
@@ -59,13 +63,11 @@ conversationBtn.addEventListener("click", () => {
 });
 
 
-// ------------------------------------------------------------
+// ============================================================
 // OPEN CONVERSATION SELECTION
-// ------------------------------------------------------------
+// ============================================================
 
 async function openConversationSelection() {
-
-  // Hide the normal panels.
 
   if (typeof filterPanel !== "undefined") {
     filterPanel.classList.add("hidden");
@@ -87,20 +89,18 @@ async function openConversationSelection() {
     nachoBuilderPanel.classList.add("hidden");
   }
 
-  // Show conversation selection.
-
-  conversationSelectionPanel.classList.remove("hidden");
-
-  // Load conversations.
+  conversationSelectionPanel.classList.remove(
+    "hidden"
+  );
 
   await loadConversationIndex();
 
 }
 
 
-// ------------------------------------------------------------
-// LOAD GOOGLE SHEET
-// ------------------------------------------------------------
+// ============================================================
+// LOAD CONVERSATION INDEX
+// ============================================================
 
 async function loadConversationIndex() {
 
@@ -113,9 +113,11 @@ async function loadConversationIndex() {
       await fetch(CONVERSATION_INDEX_URL);
 
     if (!response.ok) {
+
       throw new Error(
         `Could not load conversation list (${response.status})`
       );
+
     }
 
     const csv =
@@ -123,8 +125,6 @@ async function loadConversationIndex() {
 
     conversationIndex =
       parseConversationCSV(csv);
-
-    // Only show active conversations.
 
     conversationIndex =
       conversationIndex
@@ -154,9 +154,9 @@ async function loadConversationIndex() {
 }
 
 
-// ------------------------------------------------------------
-// PARSE CSV
-// ------------------------------------------------------------
+// ============================================================
+// PARSE INDEX CSV
+// ============================================================
 
 function parseConversationCSV(csv) {
 
@@ -164,7 +164,9 @@ function parseConversationCSV(csv) {
     csv
       .replace(/\r/g, "")
       .split("\n")
-      .filter(line => line.trim() !== "");
+      .filter(line =>
+        line.trim() !== ""
+      );
 
   if (lines.length < 2) {
     return [];
@@ -192,17 +194,32 @@ function parseConversationCSV(csv) {
       });
 
       return {
-        title: row["Title"] || "",
-        level: row["Level"] || "",
-        topic: row["Topic"] || "",
-        description: row["Description"] || "",
-        docURL: row["Doc URL"] || "",
+
+        title:
+          row["Title"] || "",
+
+        level:
+          row["Level"] || "",
+
+        topic:
+          row["Topic"] || "",
+
+        description:
+          row["Description"] || "",
+
+        docURL:
+          row["Doc URL"] || "",
+
         active:
           String(row["Active"])
             .toLowerCase() === "true",
+
         order:
           Number(row["Order"]) || 9999,
-        imageURL: row["Image URL"] || ""
+
+        imageURL:
+          row["Image URL"] || ""
+
       };
 
     });
@@ -210,19 +227,25 @@ function parseConversationCSV(csv) {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // CSV LINE PARSER
-// ------------------------------------------------------------
+// ============================================================
 
 function parseCSVLine(line) {
 
   const values = [];
+
   let current = "";
   let insideQuotes = false;
 
-  for (let i = 0; i < line.length; i++) {
+  for (
+    let i = 0;
+    i < line.length;
+    i++
+  ) {
 
-    const character = line[i];
+    const character =
+      line[i];
 
     if (character === '"') {
 
@@ -236,7 +259,8 @@ function parseCSVLine(line) {
 
       } else {
 
-        insideQuotes = !insideQuotes;
+        insideQuotes =
+          !insideQuotes;
 
       }
 
@@ -263,9 +287,9 @@ function parseCSVLine(line) {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // RENDER CONVERSATION LIST
-// ------------------------------------------------------------
+// ============================================================
 
 function renderConversationList() {
 
@@ -286,6 +310,7 @@ function renderConversationList() {
       document.createElement("button");
 
     card.type = "button";
+
     card.className =
       "conversation-list-card";
 
@@ -340,11 +365,16 @@ function renderConversationList() {
 
     card.appendChild(content);
 
-    card.addEventListener("click", () => {
+    card.addEventListener(
+      "click",
+      () => {
 
-      selectConversation(conversation);
+        selectConversation(
+          conversation
+        );
 
-    });
+      }
+    );
 
     conversationList.appendChild(card);
 
@@ -353,9 +383,9 @@ function renderConversationList() {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // SELECT CONVERSATION
-// ------------------------------------------------------------
+// ============================================================
 
 function selectConversation(conversation) {
 
@@ -371,21 +401,17 @@ function selectConversation(conversation) {
   }
 
   const docURL =
-    convertGoogleDocURL(conversation.docURL);
-
-  // Hide the conversation list.
+    convertGoogleDocURL(
+      conversation.docURL
+    );
 
   conversationSelectionPanel.classList.add(
     "hidden"
   );
 
-  // Show the actual conversation.
-
   conversationPanel.classList.remove(
     "hidden"
   );
-
-  // Load the selected Google Doc.
 
   loadConversationDocument(
     conversation,
@@ -393,6 +419,11 @@ function selectConversation(conversation) {
   );
 
 }
+
+
+// ============================================================
+// GOOGLE DOC URL
+// ============================================================
 
 function convertGoogleDocURL(url) {
 
@@ -402,9 +433,11 @@ function convertGoogleDocURL(url) {
     );
 
   if (!match) {
+
     throw new Error(
       "Invalid Google Docs URL."
     );
+
   }
 
   const documentId =
@@ -417,6 +450,11 @@ function convertGoogleDocURL(url) {
 
 }
 
+
+// ============================================================
+// LOAD CONVERSATION DOCUMENT
+// ============================================================
+
 async function loadConversationDocument(
   conversation,
   docURL
@@ -424,58 +462,69 @@ async function loadConversationDocument(
 
   try {
 
-    const response = await fetch(docURL);
+    const response =
+      await fetch(docURL);
 
     if (!response.ok) {
+
       throw new Error(
         `Could not load conversation (${response.status})`
       );
+
     }
 
-    const text = await response.text();
+    const text =
+      await response.text();
 
-    console.log("Conversation document loaded.");
+    conversationData =
+      parseConversation(text);
 
-    // Parse the Google Doc
-    conversationData = parseConversation(text);
+    if (
+      !conversationData.rows.length
+    ) {
 
-    if (!conversationData.questions.length) {
-      throw new Error("No questions found in conversation.");
+      throw new Error(
+        "No conversation rows found."
+      );
+
     }
 
-    // Store the selected conversation
-    conversationQuestions =
-      conversationData.questions;
+    conversationRows =
+      conversationData.rows;
 
-    currentConversationIndex = 0;
+    currentConceptIndex = 0;
+    currentQuestionIndex = 0;
+
     conversationAttempts = 0;
-    conversationScaffoldShown = false;
 
-    // Use the information from the Google Sheet
-    // if the document doesn't provide it.
+    conversationReport = [];
+
     if (!conversationData.title) {
+
       conversationData.title =
         conversation.title;
+
     }
 
     if (!conversationData.level) {
+
       conversationData.level =
         conversation.level;
+
     }
 
-    // Render the conversation
     renderConversationHeader();
+
     renderConversationScene();
+
     showConversationQuestion();
 
   } catch (error) {
 
     console.error(
-      "Conversation document loading error:",
+      "Conversation loading error:",
       error
     );
-
-    conversationPanel.classList.remove("hidden");
 
     conversationPrompt.textContent =
       "⚠️ Could not load this conversation.";
@@ -490,426 +539,509 @@ async function loadConversationDocument(
 
 }
 
-function escapeHTML(text) {
-
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
 
 // ============================================================
-// CONVERSATION ENGINE
+// CONVERSATION PARSER
+//
+// Expected spreadsheet:
+//
+// Title | Concept | Statement | Q1 | Q2 | Q3 | ...
+//
+// Each question cell:
+//
+// YES_NO
+// ¿Había un chico?
+// SÍ
+//
+// EITHER_OR
+// ¿Había un chico o una chica?
+// un chico
+//
+// MULTIPLE_CHOICE
+// ¿Qué había?
+// A. un chico
+// B. una chica
+// C. un mono
+// D. unos chicos
+// A
+//
+// SHORT_WRITE
+// ¿Qué había?
+// un chico | el chico
+//
+// LONG_WRITE
+// Describe la situación.
+// 
 // ============================================================
-
-// ------------------------------------------------------------
-// PARSER
-// ------------------------------------------------------------
 
 function parseConversation(text) {
 
-  const lines =
-    text
-      .replace(/\r/g, "")
-      .split("\n");
+  const rows =
+    parseSpreadsheetTSV(text);
+
+  if (!rows.length) {
+
+    return {
+      title: "",
+      level: "",
+      topic: "",
+      scene: {
+        imageURL: "",
+        text: ""
+      },
+      rows: [],
+      endTeacher: ""
+    };
+
+  }
+
+  const firstRow =
+    rows[0];
+
+  const headers =
+    firstRow.map(cell =>
+      String(cell).trim()
+    );
 
   const conversation = {
+
     title: "",
     level: "",
     topic: "",
+
     scene: {
       imageURL: "",
       text: ""
     },
-    questions: [],
+
+    rows: [],
+
     endTeacher: ""
+
   };
 
-  let section = "";
-  let currentQuestion = null;
-  let currentField = null;
-  let collectingOptions = false;
-  let collectingAccepted = false;
 
-  for (let i = 0; i < lines.length; i++) {
+  // ----------------------------------------------------------
+  // OPTIONAL METADATA
+  // ----------------------------------------------------------
 
-    const rawLine = lines[i];
-    const line = rawLine.trim();
+  const titleIndex =
+    headers.findIndex(
+      h => h.toLowerCase() === "title"
+    );
 
-    if (!line) continue;
+  const levelIndex =
+    headers.findIndex(
+      h => h.toLowerCase() === "level"
+    );
 
-    // --------------------------------------------------------
-    // QUESTION HEADER
-    // --------------------------------------------------------
+  const topicIndex =
+    headers.findIndex(
+      h => h.toLowerCase() === "topic"
+    );
 
-    const questionMatch =
-      line.match(/^##\s*QUESTION\s+(\d+)/i);
 
-    if (questionMatch) {
+  // ----------------------------------------------------------
+  // DATA ROWS
+  // ----------------------------------------------------------
 
-      if (currentQuestion) {
-        conversation.questions.push(currentQuestion);
-      }
+  for (
+    let r = 1;
+    r < rows.length;
+    r++
+  ) {
 
-      currentQuestion = {
-        number: Number(questionMatch[1]),
-        type: "",
-        teacher: "",
-        answer: "",
-        options: [],
-        accepted: [],
-        model: [],
-        modelRecast: "",
-        scaffold: "",
-        scaffoldRecast: "",
-        imageURL: ""
-      };
-
-      section = "question";
-      currentField = null;
-      collectingOptions = false;
-      collectingAccepted = false;
-
-      continue;
-    }
-
-    // --------------------------------------------------------
-    // SCENE
-    // --------------------------------------------------------
-
-    if (/^##\s*SCENE/i.test(line)) {
-
-      section = "scene";
-      currentField = null;
-
-      continue;
-    }
-
-    // --------------------------------------------------------
-    // END
-    // --------------------------------------------------------
-
-    if (/^##\s*END/i.test(line)) {
-
-      if (currentQuestion) {
-        conversation.questions.push(currentQuestion);
-        currentQuestion = null;
-      }
-
-      section = "end";
-      currentField = null;
-
-      continue;
-    }
-
-    // --------------------------------------------------------
-    // TOP-LEVEL FIELDS
-    // --------------------------------------------------------
+    const spreadsheetRow =
+      rows[r];
 
     if (
-      !currentQuestion &&
-      section !== "scene" &&
-      section !== "end"
+      !spreadsheetRow ||
+      !spreadsheetRow.length
+    ) {
+      continue;
+    }
+
+    const title =
+      spreadsheetRow[0] || "";
+
+    const concept =
+      spreadsheetRow[1] || "";
+
+    const statement =
+      spreadsheetRow[2] || "";
+
+    // Skip completely empty rows
+
+    if (
+      !title &&
+      !concept &&
+      !statement
     ) {
 
-      const titleMatch =
-        line.match(/^TITLE:\s*(.*)$/i);
-
-      const levelMatch =
-        line.match(/^LEVEL:\s*(.*)$/i);
-
-      const topicMatch =
-        line.match(/^TOPIC:\s*(.*)$/i);
-
-      if (titleMatch) {
-        conversation.title =
-          titleMatch[1].trim();
-        continue;
-      }
-
-      if (levelMatch) {
-        conversation.level =
-          levelMatch[1].trim();
-        continue;
-      }
-
-      if (topicMatch) {
-        conversation.topic =
-          topicMatch[1].trim();
-        continue;
-      }
-
-    }
-
-    // --------------------------------------------------------
-    // END TEACHER
-    // --------------------------------------------------------
-
-    if (section === "end") {
-
-      if (/^TEACHER:/i.test(line)) {
-
-        currentField = "endTeacher";
-
-        continue;
-      }
-
-      if (currentField === "endTeacher") {
-
-        conversation.endTeacher +=
-          (conversation.endTeacher ? " " : "") +
-          line;
-
-      }
-
       continue;
+
     }
 
-    // --------------------------------------------------------
-    // SCENE FIELDS
-    // --------------------------------------------------------
+    const questions = [];
 
-    if (section === "scene") {
+    // Q1 begins in column D
 
-      if (/^IMAGE_URL:/i.test(line)) {
+    for (
+      let c = 3;
+      c < spreadsheetRow.length;
+      c++
+    ) {
 
-        conversation.scene.imageURL =
-          line
-            .replace(/^IMAGE_URL:\s*/i, "")
-            .trim();
-
-        currentField = null;
-
-        continue;
-      }
-
-      if (/^TEXT:/i.test(line)) {
-
-        currentField = "sceneText";
-
-        continue;
-      }
-
-      if (currentField === "sceneText") {
-
-        conversation.scene.text +=
-          (conversation.scene.text ? " " : "") +
-          line;
-
-      }
-
-      continue;
-    }
-
-    // --------------------------------------------------------
-    // QUESTION FIELDS
-    // --------------------------------------------------------
-
-    if (currentQuestion) {
-
-      if (/^TYPE:/i.test(line)) {
-
-        currentQuestion.type =
-          line
-            .replace(/^TYPE:\s*/i, "")
-            .trim()
-            .toUpperCase();
-
-        currentField = null;
-        collectingOptions = false;
-        collectingAccepted = false;
-
-        continue;
-      }
-
-      if (/^TEACHER:/i.test(line)) {
-
-        currentField = "teacher";
-        collectingOptions = false;
-        collectingAccepted = false;
-
-        continue;
-      }
-
-      if (/^ANSWER:/i.test(line)) {
-
-        currentField = "answer";
-        collectingOptions = false;
-        collectingAccepted = false;
-
-        continue;
-      }
-
-      if (/^OPTIONS:/i.test(line)) {
-
-        currentField = "options";
-        collectingOptions = true;
-        collectingAccepted = false;
-
-        continue;
-      }
-
-      if (/^ACCEPT:/i.test(line)) {
-
-        currentField = "accepted";
-        collectingAccepted = true;
-        collectingOptions = false;
-
-        continue;
-      }
-
-      if (/^SCAFFOLD:/i.test(line)) {
-
-        currentField = "scaffold";
-        collectingOptions = false;
-        collectingAccepted = false;
-
-        continue;
-      }
-
-      if (/^IMAGE_URL:/i.test(line)) {
-
-        currentQuestion.imageURL =
-          line
-            .replace(/^IMAGE_URL:\s*/i, "")
-            .trim();
-
-        currentField = null;
-
-        continue;
-      }
-
-      if (/^MODEL:/i.test(line)) {
-
-        currentField = "model";
-        collectingOptions = false;
-        collectingAccepted = false;
-      
-        continue;
-      }
-      
-      if (/^MODEL RECAST:/i.test(line)) {
-      
-        currentField = "modelRecast";
-        collectingOptions = false;
-        collectingAccepted = false;
-      
-        continue;
-      }
-      
-      if (/^SCAFFOLD RECAST:/i.test(line)) {
-      
-        currentField = "scaffoldRecast";
-        collectingOptions = false;
-        collectingAccepted = false;
-      
-        continue;
-      }
-
-      // ------------------------------------------------------
-      // OPTIONS
-      // ------------------------------------------------------
+      const cell =
+        spreadsheetRow[c];
 
       if (
-        collectingOptions &&
-        /^[A-Z]\.\s*/.test(line)
+        !cell ||
+        !String(cell).trim()
       ) {
-
-        currentQuestion.options.push(line);
-
         continue;
       }
 
-      // ------------------------------------------------------
-      // ACCEPTED ANSWERS
-      // ------------------------------------------------------
+      const question =
+        parseQuestionCell(
+          cell
+        );
 
-      if (collectingAccepted) {
+      if (question) {
 
-        currentQuestion.accepted.push(line);
+        question.number =
+          questions.length + 1;
 
-        continue;
-      }
+        questions.push(
+          question
+        );
 
-      // ------------------------------------------------------
-      // MODEL ANSWERS
-      // ------------------------------------------------------
-      
-      if (currentField === "model") {
-      
-        currentQuestion.model.push(line);
-      
-        continue;
-      }
-
-            // ------------------------------------------------------
-      // MULTI-LINE FIELDS
-      // ------------------------------------------------------
-
-      if (currentField === "teacher") {
-
-        currentQuestion.teacher +=
-          (currentQuestion.teacher ? " " : "") +
-          line;
-
-        continue;
-      }
-
-      if (currentField === "answer") {
-
-        currentQuestion.answer +=
-          (currentQuestion.answer ? " " : "") +
-          line;
-
-        continue;
-      }
-
-      if (currentField === "scaffold") {
-
-        currentQuestion.scaffold +=
-          (currentQuestion.scaffold ? " " : "") +
-          line;
-
-        continue;
-      }
-
-      if (currentField === "modelRecast") {
-
-        currentQuestion.modelRecast +=
-          (currentQuestion.modelRecast ? " " : "") +
-          line;
-
-        continue;
-      }
-
-      if (currentField === "scaffoldRecast") {
-
-        currentQuestion.scaffoldRecast +=
-          (currentQuestion.scaffoldRecast ? " " : "") +
-          line;
-
-        continue;
       }
 
     }
 
-  }
+    conversation.rows.push({
 
-  // Add final question
-  if (currentQuestion) {
-    conversation.questions.push(currentQuestion);
+      title:
+        String(title).trim(),
+
+      concept:
+        String(concept).trim(),
+
+      statement:
+        String(statement).trim(),
+
+      questions
+
+    });
+
   }
 
   return conversation;
 
 }
 
-// ------------------------------------------------------------
+
+// ============================================================
+// PARSE GOOGLE DOC / TSV
+// ============================================================
+
+function parseSpreadsheetTSV(text) {
+
+  const cleaned =
+    text.replace(/\r/g, "");
+
+  const lines =
+    cleaned.split("\n");
+
+  return lines.map(line =>
+    parseTSVLine(line)
+  );
+
+}
+
+
+// ============================================================
+// PARSE TSV LINE
+// ============================================================
+
+function parseTSVLine(line) {
+
+  const values = [];
+
+  let current = "";
+  let insideQuotes = false;
+
+  for (
+    let i = 0;
+    i < line.length;
+    i++
+  ) {
+
+    const character =
+      line[i];
+
+    if (character === '"') {
+
+      if (
+        insideQuotes &&
+        line[i + 1] === '"'
+      ) {
+
+        current += '"';
+        i++;
+
+      } else {
+
+        insideQuotes =
+          !insideQuotes;
+
+      }
+
+    } else if (
+      character === "\t" &&
+      !insideQuotes
+    ) {
+
+      values.push(current);
+      current = "";
+
+    } else {
+
+      current += character;
+
+    }
+
+  }
+
+  values.push(current);
+
+  return values;
+
+}
+
+
+// ============================================================
+// PARSE QUESTION CELL
+// ============================================================
+
+function parseQuestionCell(cell) {
+
+  let text =
+    String(cell)
+      .replace(/\r/g, "")
+      .trim();
+
+  // Remove wrapping quotes that can survive
+  // Google Sheets / CSV export.
+
+  if (
+    text.startsWith('"') &&
+    text.endsWith('"')
+  ) {
+
+    text =
+      text.slice(
+        1,
+        -1
+      );
+
+  }
+
+  const lines =
+    text
+      .split("\n")
+      .map(line =>
+        line.trim()
+      )
+      .filter(Boolean);
+
+  if (!lines.length) {
+    return null;
+  }
+
+  const type =
+    lines[0]
+      .toUpperCase()
+      .trim();
+
+  const validTypes = [
+    "YES_NO",
+    "EITHER_OR",
+    "MULTIPLE_CHOICE",
+    "SHORT_WRITE",
+    "LONG_WRITE"
+  ];
+
+  if (
+    !validTypes.includes(type)
+  ) {
+
+    console.warn(
+      "Unknown question type:",
+      type
+    );
+
+    return null;
+
+  }
+
+  const question = {
+
+    type,
+
+    prompt: "",
+
+    answer: "",
+
+    acceptedKeywords: [],
+
+    options: [],
+
+    correctOption: "",
+
+    responseRequired: true
+
+  };
+
+
+  // ==========================================================
+  // YES / NO
+  // ==========================================================
+
+  if (
+    type === "YES_NO"
+  ) {
+
+    question.prompt =
+      lines[1] || "";
+
+    question.answer =
+      lines[2] || "";
+
+    return question;
+
+  }
+
+
+  // ==========================================================
+  // EITHER / OR
+  // ==========================================================
+
+  if (
+    type === "EITHER_OR"
+  ) {
+
+    question.prompt =
+      lines[1] || "";
+
+    question.answer =
+      lines[2] || "";
+
+    return question;
+
+  }
+
+
+  // ==========================================================
+  // MULTIPLE CHOICE
+  // ==========================================================
+
+  if (
+    type === "MULTIPLE_CHOICE"
+  ) {
+
+    question.prompt =
+      lines[1] || "";
+
+    for (
+      let i = 2;
+      i < lines.length - 1;
+      i++
+    ) {
+
+      const option =
+        lines[i];
+
+      if (
+        /^[A-Z]\.\s*/i.test(
+          option
+        )
+      ) {
+
+        question.options.push(
+          option
+        );
+
+      }
+
+    }
+
+    question.correctOption =
+      lines[lines.length - 1]
+        .trim()
+        .toUpperCase();
+
+    return question;
+
+  }
+
+
+  // ==========================================================
+  // SHORT WRITE
+  // ==========================================================
+
+  if (
+    type === "SHORT_WRITE"
+  ) {
+
+    question.prompt =
+      lines[1] || "";
+
+    question.acceptedKeywords =
+      (lines[2] || "")
+        .split("|")
+        .map(answer =>
+          normalizeConversationAnswer(
+            answer
+          )
+        )
+        .filter(Boolean);
+
+    return question;
+
+  }
+
+
+  // ==========================================================
+  // LONG WRITE
+  // ==========================================================
+
+  if (
+    type === "LONG_WRITE"
+  ) {
+
+    question.prompt =
+      lines[1] || "";
+
+    // Long write is not automatically
+    // evaluated as correct/incorrect.
+
+    question.responseRequired =
+      false;
+
+    return question;
+
+  }
+
+  return question;
+
+}
+
+
+// ============================================================
 // HEADER
-// ------------------------------------------------------------
+// ============================================================
 
 function renderConversationHeader() {
 
@@ -925,70 +1057,129 @@ function renderConversationHeader() {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // SCENE
-// ------------------------------------------------------------
+// ============================================================
 
 function renderConversationScene() {
 
   const scene =
     conversationData.scene;
 
-  conversationSceneText.textContent =
-    scene.text || "";
+  if (
+    typeof conversationSceneText !==
+    "undefined"
+  ) {
 
-  if (scene.imageURL) {
+    conversationSceneText.textContent =
+      scene.text || "";
 
-    conversationSceneImage.src =
-      scene.imageURL;
+  }
 
-    conversationSceneImage.alt =
-      conversationData.title ||
-      "Conversation scene";
+  if (
+    typeof conversationSceneImage !==
+    "undefined"
+  ) {
 
-    conversationSceneImage.classList.remove(
-      "hidden"
-    );
+    if (scene.imageURL) {
 
-  } else {
+      conversationSceneImage.src =
+        scene.imageURL;
 
-    conversationSceneImage.classList.add(
-      "hidden"
-    );
+      conversationSceneImage.alt =
+        conversationData.title ||
+        "Conversation scene";
+
+      conversationSceneImage.classList.remove(
+        "hidden"
+      );
+
+    } else {
+
+      conversationSceneImage.classList.add(
+        "hidden"
+      );
+
+    }
 
   }
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
+// GET CURRENT QUESTION
+// ============================================================
+
+function getCurrentQuestion() {
+
+  const row =
+    conversationRows[
+      currentConceptIndex
+    ];
+
+  if (!row) {
+    return null;
+  }
+
+  return row.questions[
+    currentQuestionIndex
+  ] || null;
+
+}
+
+
+// ============================================================
 // SHOW QUESTION
-// ------------------------------------------------------------
+// ============================================================
 
 function showConversationQuestion() {
 
-  const question =
-    conversationQuestions[
-      currentConversationIndex
+  const row =
+    conversationRows[
+      currentConceptIndex
     ];
 
-  if (!question) {
+  if (!row) {
 
     finishConversation();
 
     return;
+
   }
 
-  conversationAttempts = 0;
-  conversationScaffoldShown = false;
+  // If we've reached the end of this concept,
+  // move to the next concept.
 
-  conversationFeedback.textContent = "";
+  if (
+    currentQuestionIndex >=
+    row.questions.length
+  ) {
+
+    currentConceptIndex++;
+
+    currentQuestionIndex = 0;
+
+    showConversationQuestion();
+
+    return;
+
+  }
+
+  const question =
+    row.questions[
+      currentQuestionIndex
+    ];
+
+  conversationAttempts = 0;
+
+  clearConversationResponseAreas();
+
+  conversationFeedback.textContent =
+    "";
+
   conversationFeedback.className =
     "conversation-feedback";
-
-  conversationScaffold.classList.add(
-    "hidden"
-  );
 
   conversationNextBtn.classList.add(
     "hidden"
@@ -998,61 +1189,107 @@ function showConversationQuestion() {
     "hidden"
   );
 
-  clearConversationResponseAreas();
+
+  // ----------------------------------------------------------
+  // PROGRESS
+  // ----------------------------------------------------------
 
   conversationProgress.textContent =
-    `Question ${
-      currentConversationIndex + 1
+    `Concept ${
+      currentConceptIndex + 1
     } of ${
-      conversationQuestions.length
+      conversationRows.length
+    } • Question ${
+      currentQuestionIndex + 1
+    } of ${
+      row.questions.length
     }`;
 
-  conversationPrompt.textContent =
-    question.teacher || "";
 
-  // Question-specific image
-  if (question.imageURL) {
+  // ----------------------------------------------------------
+  // STATEMENT
+  // ----------------------------------------------------------
 
-    conversationSceneImage.src =
-      question.imageURL;
+  if (
+    typeof conversationSceneText !==
+    "undefined"
+  ) {
 
-    conversationSceneImage.alt =
-      "Question image";
-
-    conversationSceneImage.classList.remove(
-      "hidden"
-    );
-
-  } else {
-
-    renderConversationScene();
+    conversationSceneText.textContent =
+      row.statement || "";
 
   }
 
-  // Play teacher prompt
+
+  // ----------------------------------------------------------
+  // PROMPT
+  // ----------------------------------------------------------
+
+  conversationPrompt.textContent =
+    question.prompt || "";
+
+
+  // ----------------------------------------------------------
+  // SPEAK PROMPT
+  // ----------------------------------------------------------
+
   playSpanishText(
-    question.teacher
+    question.prompt
   );
 
-  switch (question.type) {
+
+  // ----------------------------------------------------------
+  // QUESTION TYPE
+  // ----------------------------------------------------------
+
+  switch (
+    question.type
+  ) {
 
     case "YES_NO":
-      showYesNo();
+
+      showYesNo(
+        question
+      );
+
       break;
+
+
+    case "EITHER_OR":
+
+      showEitherOr(
+        question
+      );
+
+      break;
+
 
     case "MULTIPLE_CHOICE":
-      showMultipleChoice(question);
+
+      showMultipleChoice(
+        question
+      );
+
       break;
+
 
     case "SHORT_WRITE":
-    case "LONG_WRITE":
-      showWriting();
+
+      showWriting(
+        question
+      );
+
       break;
 
-    case "SHORT_SPEAK":
-    case "LONG_SPEAK":
-      showSpeaking();
+
+    case "LONG_WRITE":
+
+      showLongWriting(
+        question
+      );
+
       break;
+
 
     default:
 
@@ -1066,63 +1303,88 @@ function showConversationQuestion() {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // CLEAR RESPONSE AREAS
-// ------------------------------------------------------------
+// ============================================================
 
 function clearConversationResponseAreas() {
 
-  conversationYesNo.classList.add(
-    "hidden"
-  );
+  if (
+    typeof conversationYesNo !==
+    "undefined"
+  ) {
 
-  conversationChoices.classList.add(
-    "hidden"
-  );
-
-  conversationWriting.classList.add(
-    "hidden"
-  );
-
-  conversationSpeaking.classList.add(
-    "hidden"
-  );
-
-  conversationWritingInput.value = "";
-  conversationWritingInput.disabled = false;
-
-  conversationSubmitWriting.disabled = false;
-
-  conversationAudioPlayback.classList.add(
-    "hidden"
-  );
-
-  conversationRecordingActions.classList.add(
-    "hidden"
-  );
-
-  conversationAudioPlayback.removeAttribute(
-    "src"
-  );
-
-  if (conversationAudioURL) {
-
-    URL.revokeObjectURL(
-      conversationAudioURL
+    conversationYesNo.classList.add(
+      "hidden"
     );
-
-    conversationAudioURL = null;
 
   }
 
-  conversationAudioBlob = null;
+  if (
+    typeof conversationChoices !==
+    "undefined"
+  ) {
+
+    conversationChoices.classList.add(
+      "hidden"
+    );
+
+    conversationChoices.innerHTML =
+      "";
+
+  }
+
+  if (
+    typeof conversationWriting !==
+    "undefined"
+  ) {
+
+    conversationWriting.classList.add(
+      "hidden"
+    );
+
+  }
+
+  if (
+    typeof conversationSpeaking !==
+    "undefined"
+  ) {
+
+    conversationSpeaking.classList.add(
+      "hidden"
+    );
+
+  }
+
+  if (
+    typeof conversationWritingInput !==
+    "undefined"
+  ) {
+
+    conversationWritingInput.value =
+      "";
+
+    conversationWritingInput.disabled =
+      false;
+
+  }
+
+  if (
+    typeof conversationSubmitWriting !==
+    "undefined"
+  ) {
+
+    conversationSubmitWriting.disabled =
+      false;
+
+  }
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // YES / NO
-// ------------------------------------------------------------
+// ============================================================
 
 function showYesNo() {
 
@@ -1136,65 +1398,246 @@ function showYesNo() {
     )
     .forEach(button => {
 
-      button.disabled = false;
+      button.disabled =
+        false;
 
-      button.onclick = () => {
+      button.onclick =
+        () => {
 
-        checkConversationAnswer(
-          button.dataset.answer
-        );
+          checkConversationAnswer(
+            button.dataset.answer
+          );
 
-      };
+        };
 
     });
 
 }
 
 
-// ------------------------------------------------------------
-// MULTIPLE CHOICE
-// ------------------------------------------------------------
+// ============================================================
+// EITHER / OR
+//
+// This uses the same existing answer-button area.
+// The two choices are extracted from the prompt.
+//
+// Example:
+// ¿Había un chico o una chica?
+//
+// Creates:
+// [un chico] [una chica]
+// ============================================================
 
-function showMultipleChoice(question) {
+function showEitherOr(question) {
 
-  conversationChoices.innerHTML = "";
+  conversationYesNo.classList.remove(
+    "hidden"
+  );
 
-  question.options.forEach(option => {
-
-    const button =
-      document.createElement("button");
-
-    button.type = "button";
-
-    button.className =
-      "btn btn-primary conversation-choice-btn";
-
-    button.textContent =
-      option;
-
-    button.addEventListener("click", () => {
-
-      // Get the letter from the option:
-      // "A. En la escuela" → "A"
-      const match =
-        option.trim().match(/^([A-Z])\./i);
-
-      const selectedLetter =
-        match
-          ? match[1].toUpperCase()
-          : "";
-
-      checkConversationAnswer(
-        selectedLetter
+  const buttons =
+    conversationYesNo
+      .querySelectorAll(
+        ".conversation-answer-btn"
       );
 
-    });
-
-    conversationChoices.appendChild(
-      button
+  const choices =
+    extractEitherOrChoices(
+      question.prompt
     );
 
-  });
+
+  if (
+    choices.length !== 2
+  ) {
+
+    conversationFeedback.textContent =
+      "⚠️ Could not determine the two choices.";
+
+    conversationFeedback.className =
+      "conversation-feedback error";
+
+    return;
+
+  }
+
+
+  buttons.forEach(
+    (button, index) => {
+
+      if (
+        !choices[index]
+      ) {
+
+        button.classList.add(
+          "hidden"
+        );
+
+        return;
+
+      }
+
+      button.classList.remove(
+        "hidden"
+      );
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        choices[index];
+
+      button.dataset.answer =
+        choices[index];
+
+      button.onclick =
+        () => {
+
+          checkConversationAnswer(
+            choices[index]
+          );
+
+        };
+
+    }
+  );
+
+}
+
+
+// ============================================================
+// EXTRACT EITHER / OR CHOICES
+// ============================================================
+
+function extractEitherOrChoices(
+  prompt
+) {
+
+  const normalized =
+    String(prompt)
+      .replace(
+        /[¿?]/g,
+        ""
+      )
+      .trim();
+
+  const match =
+    normalized.match(
+      /^(.+?)\s+o\s+(.+?)(?:\s+.*)?$/i
+    );
+
+  if (!match) {
+    return [];
+  }
+
+  let first =
+    match[1].trim();
+
+  let second =
+    match[2].trim();
+
+  // Remove leading question material
+  // when the "o" occurs inside the actual
+  // two choices.
+
+  const firstWords =
+    first.split(/\s+/);
+
+  const secondWords =
+    second.split(/\s+/);
+
+  // In questions such as:
+  // "¿Era George o Robert el chico?"
+  //
+  // We want:
+  // George
+  // Robert
+
+  if (
+    firstWords.length > 1
+  ) {
+
+    first =
+      firstWords[
+        firstWords.length - 1
+      ];
+
+  }
+
+  if (
+    secondWords.length > 1
+  ) {
+
+    second =
+      secondWords[0];
+
+  }
+
+  return [
+    first,
+    second
+  ];
+
+}
+
+
+// ============================================================
+// MULTIPLE CHOICE
+// ============================================================
+
+function showMultipleChoice(
+  question
+) {
+
+  conversationChoices.innerHTML =
+    "";
+
+  question.options.forEach(
+    option => {
+
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.type =
+        "button";
+
+      button.className =
+        "btn btn-primary conversation-choice-btn";
+
+      button.textContent =
+        option;
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          const match =
+            option
+              .trim()
+              .match(
+                /^([A-Z])\./i
+              );
+
+          const selectedLetter =
+            match
+              ? match[1]
+                  .toUpperCase()
+              : "";
+
+          checkConversationAnswer(
+            selectedLetter
+          );
+
+        }
+      );
+
+      conversationChoices.appendChild(
+        button
+      );
+
+    }
+  );
 
   conversationChoices.classList.remove(
     "hidden"
@@ -1202,9 +1645,10 @@ function showMultipleChoice(question) {
 
 }
 
-// ------------------------------------------------------------
-// WRITING
-// ------------------------------------------------------------
+
+// ============================================================
+// SHORT WRITE
+// ============================================================
 
 function showWriting() {
 
@@ -1217,102 +1661,176 @@ function showWriting() {
 }
 
 
-// ------------------------------------------------------------
-// SPEAKING
-// ------------------------------------------------------------
+// ============================================================
+// LONG WRITE
+// ============================================================
 
-function showSpeaking() {
+function showLongWriting() {
 
-  conversationSpeaking.classList.remove(
+  conversationWriting.classList.remove(
     "hidden"
   );
+
+  conversationWritingInput.focus();
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // CHECK ANSWER
-// ------------------------------------------------------------
+// ============================================================
 
 function checkConversationAnswer(
   studentAnswer
 ) {
 
-  const question =
-    conversationQuestions[
-      currentConversationIndex
+  const row =
+    conversationRows[
+      currentConceptIndex
     ];
 
-  console.log("QUESTION TYPE:", question.type);
-  console.log("QUESTION ANSWER:", question.answer);
-  console.log("QUESTION OPTIONS:", question.options);
-  console.log("STUDENT ANSWER:", studentAnswer);
+  const question =
+    getCurrentQuestion();
 
-  let correct = false;
+  if (
+    !row ||
+    !question
+  ) {
+
+    return;
+
+  }
+
+  conversationAttempts++;
 
 
-    // ----------------------------------------------------------
+  // ==========================================================
+  // RECORD ATTEMPT
+  // ==========================================================
+
+  recordQuestionAttempt(
+    question,
+    studentAnswer
+  );
+
+
+  // ==========================================================
+  // LONG WRITE
+  //
+  // Always advances. Teacher reviews later.
+  // ==========================================================
+
+  if (
+    question.type ===
+    "LONG_WRITE"
+  ) {
+
+    conversationFeedback.textContent =
+      "Respuesta guardada ✓";
+
+    conversationFeedback.className =
+      "conversation-feedback correct";
+
+    disableCurrentConversationResponse();
+
+    conversationNextBtn.classList.remove(
+      "hidden"
+    );
+
+    return;
+
+  }
+
+
+  // ==========================================================
+  // DETERMINE CORRECTNESS
+  // ==========================================================
+
+  let correct =
+    false;
+
+
+  // ----------------------------------------------------------
   // MULTIPLE CHOICE
   // ----------------------------------------------------------
 
-  if (question.type === "MULTIPLE_CHOICE") {
-
-    const correctMatch =
-      String(question.answer)
-        .trim()
-        .match(/^([A-Z])/i);
-    
-    const correctLetter =
-      correctMatch
-        ? correctMatch[1].toUpperCase()
-        : "";
-
-const selectedLetter =
-  String(studentAnswer)
-    .trim()
-    .toUpperCase();
-
-    console.log(
-      "MULTIPLE CHOICE:",
-      "correct =", correctLetter,
-      "selected =", selectedLetter
-    );
+  if (
+    question.type ===
+    "MULTIPLE_CHOICE"
+  ) {
 
     correct =
-      correctLetter === selectedLetter;
-
-
-  // ----------------------------------------------------------
-  // ALL OTHER QUESTION TYPES
-  // ----------------------------------------------------------
-
-  } else {
-    
-    const normalizedStudent =
       normalizeConversationAnswer(
         studentAnswer
-      );
-
-    const acceptedAnswers = [
-      question.answer,
-      ...question.accepted
-    ]
-      .filter(Boolean)
-      .map(
-        normalizeConversationAnswer
-      );
-
-    correct =
-      acceptedAnswers.includes(
-        normalizedStudent
+      ) ===
+      normalizeConversationAnswer(
+        question.correctOption
       );
 
   }
 
 
   // ----------------------------------------------------------
-  // CORRECT
+  // YES / NO
   // ----------------------------------------------------------
+
+  else if (
+    question.type ===
+    "YES_NO"
+  ) {
+
+    correct =
+      normalizeConversationAnswer(
+        studentAnswer
+      ) ===
+      normalizeConversationAnswer(
+        question.answer
+      );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // EITHER / OR
+  // ----------------------------------------------------------
+
+  else if (
+    question.type ===
+    "EITHER_OR"
+  ) {
+
+    correct =
+      normalizeConversationAnswer(
+        studentAnswer
+      ) ===
+      normalizeConversationAnswer(
+        question.answer
+      );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // SHORT WRITE
+  // ----------------------------------------------------------
+
+  else if (
+    question.type ===
+    "SHORT_WRITE"
+  ) {
+
+    correct =
+      evaluateShortWrite(
+        studentAnswer,
+        question.acceptedKeywords
+      );
+
+  }
+
+
+  // ==========================================================
+  // CORRECT
+  // ==========================================================
 
   if (correct) {
 
@@ -1333,59 +1851,92 @@ const selectedLetter =
   }
 
 
-  // ----------------------------------------------------------
+  // ==========================================================
   // INCORRECT
-  // ----------------------------------------------------------
-
-  handleConversationWrongAnswer(
-    question
-  );
-
-}
-
-// ------------------------------------------------------------
-// WRONG ANSWER
-// ------------------------------------------------------------
-
-function handleConversationWrongAnswer(
-  question
-) {
-
-  conversationAttempts++;
+  //
+  // The student does NOT move forward.
+  // The current concept restarts from Q1.
+  // ==========================================================
 
   conversationFeedback.textContent =
-    "No exactamente. Inténtalo otra vez.";
+    "No exactamente. Vamos a repetir esta idea.";
 
   conversationFeedback.className =
     "conversation-feedback incorrect";
 
-  if (
-    conversationAttempts >= 2 &&
-    question.scaffold &&
-    !conversationScaffoldShown
-  ) {
 
-    conversationScaffoldText.textContent =
-      question.scaffold;
+  // Give the student a moment to see
+  // the feedback before resetting.
 
-    conversationScaffold.classList.remove(
-      "hidden"
-    );
+  setTimeout(
+    () => {
 
-    conversationScaffoldShown = true;
+      currentQuestionIndex = 0;
 
-    playSpanishText(
-      question.scaffold
-    );
+      conversationAttempts = 0;
 
-  }
+      showConversationQuestion();
+
+    },
+    900
+  );
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
+// SHORT WRITE EVALUATION
+// ============================================================
+//
+// Spreadsheet answer:
+//
+// George | el chico | el chico era George
+//
+// Any accepted target that appears in the
+// student's normalized response is accepted.
+//
+// This intentionally ignores:
+// - capitalization
+// - accents
+// - punctuation
+// - extra spaces
+//
+// ============================================================
+
+function evaluateShortWrite(
+  studentAnswer,
+  acceptedKeywords
+) {
+
+  const student =
+    normalizeConversationAnswer(
+      studentAnswer
+    );
+
+  if (!student) {
+    return false;
+  }
+
+  return acceptedKeywords.some(
+    keyword => {
+
+      if (!keyword) {
+        return false;
+      }
+
+      return student.includes(
+        keyword
+      );
+
+    }
+  );
+
+}
+
+
+// ============================================================
 // NORMALIZE
-// ------------------------------------------------------------
+// ============================================================
 
 function normalizeConversationAnswer(
   value
@@ -1400,7 +1951,7 @@ function normalizeConversationAnswer(
       ""
     )
     .replace(
-      /[¿?¡!.,;:"]/g,
+      /[¿?¡!.,;:"']/g,
       ""
     )
     .replace(
@@ -1411,46 +1962,210 @@ function normalizeConversationAnswer(
 }
 
 
-// ------------------------------------------------------------
-// DISABLE RESPONSE
-// ------------------------------------------------------------
+// ============================================================
+// RECORD QUESTION ATTEMPT
+// ============================================================
 
-function disableCurrentConversationResponse() {
+function recordQuestionAttempt(
+  question,
+  studentAnswer
+) {
 
-  conversationYesNo
-    .querySelectorAll("button")
-    .forEach(button => {
+  const row =
+    conversationRows[
+      currentConceptIndex
+    ];
 
-      button.disabled = true;
+  const existing =
+    conversationReport.find(
+      item =>
+        item.conceptIndex ===
+          currentConceptIndex &&
+        item.questionIndex ===
+          currentQuestionIndex
+    );
 
-    });
 
-  conversationChoices
-    .querySelectorAll("button")
-    .forEach(button => {
+  if (existing) {
 
-      button.disabled = true;
+    existing.attempts++;
 
-    });
+    if (
+      question.type ===
+      "SHORT_WRITE"
+    ) {
 
-  conversationWritingInput.disabled =
-    true;
+      existing.responses.push(
+        {
+          text:
+            studentAnswer,
+          accepted:
+            false
+        }
+      );
 
-  conversationSubmitWriting.disabled =
-    true;
+    }
+
+    if (
+      question.type ===
+      "LONG_WRITE"
+    ) {
+
+      existing.responses.push(
+        {
+          text:
+            studentAnswer,
+          accepted:
+            false
+        }
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  conversationReport.push({
+
+    conceptIndex:
+      currentConceptIndex,
+
+    questionIndex:
+      currentQuestionIndex,
+
+    questionNumber:
+      currentQuestionIndex + 1,
+
+    type:
+      question.type,
+
+    prompt:
+      question.prompt,
+
+    attempts:
+      1,
+
+    responses:
+      question.type === "SHORT_WRITE" ||
+      question.type === "LONG_WRITE"
+        ? [
+            {
+              text:
+                studentAnswer,
+              accepted:
+                false
+            }
+          ]
+        : []
+
+  });
 
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
+// DISABLE RESPONSE
+// ============================================================
+
+function disableCurrentConversationResponse() {
+
+  if (
+    typeof conversationYesNo !==
+    "undefined"
+  ) {
+
+    conversationYesNo
+      .querySelectorAll(
+        "button"
+      )
+      .forEach(button => {
+
+        button.disabled =
+          true;
+
+      });
+
+  }
+
+  if (
+    typeof conversationChoices !==
+    "undefined"
+  ) {
+
+    conversationChoices
+      .querySelectorAll(
+        "button"
+      )
+      .forEach(button => {
+
+        button.disabled =
+          true;
+
+      });
+
+  }
+
+  if (
+    typeof conversationWritingInput !==
+    "undefined"
+  ) {
+
+    conversationWritingInput.disabled =
+      true;
+
+  }
+
+  if (
+    typeof conversationSubmitWriting !==
+    "undefined"
+  ) {
+
+    conversationSubmitWriting.disabled =
+      true;
+
+  }
+
+}
+
+
+// ============================================================
 // NEXT QUESTION
-// ------------------------------------------------------------
+// ============================================================
 
 conversationNextBtn.addEventListener(
   "click",
   () => {
 
-    currentConversationIndex++;
+    const row =
+      conversationRows[
+        currentConceptIndex
+      ];
+
+    if (!row) {
+
+      finishConversation();
+
+      return;
+
+    }
+
+    currentQuestionIndex++;
+
+    // End of concept:
+    // move to next row.
+
+    if (
+      currentQuestionIndex >=
+      row.questions.length
+    ) {
+
+      currentConceptIndex++;
+
+      currentQuestionIndex = 0;
+
+    }
 
     showConversationQuestion();
 
@@ -1458,9 +2173,9 @@ conversationNextBtn.addEventListener(
 );
 
 
-// ------------------------------------------------------------
+// ============================================================
 // WRITING SUBMIT
-// ------------------------------------------------------------
+// ============================================================
 
 conversationSubmitWriting.addEventListener(
   "click",
@@ -1469,7 +2184,9 @@ conversationSubmitWriting.addEventListener(
     const answer =
       conversationWritingInput.value.trim();
 
-    if (!answer) return;
+    if (!answer) {
+      return;
+    }
 
     checkConversationAnswer(
       answer
@@ -1478,6 +2195,10 @@ conversationSubmitWriting.addEventListener(
   }
 );
 
+
+// ============================================================
+// ENTER KEY
+// ============================================================
 
 conversationWritingInput.addEventListener(
   "keydown",
@@ -1490,6 +2211,23 @@ conversationWritingInput.addEventListener(
 
       event.preventDefault();
 
+      // Long write should allow
+      // line breaks, so Enter should
+      // NOT submit it.
+
+      const question =
+        getCurrentQuestion();
+
+      if (
+        question &&
+        question.type ===
+          "LONG_WRITE"
+      ) {
+
+        return;
+
+      }
+
       conversationSubmitWriting.click();
 
     }
@@ -1498,15 +2236,18 @@ conversationWritingInput.addEventListener(
 );
 
 
-// ------------------------------------------------------------
+// ============================================================
 // TEXT TO SPEECH
-// ------------------------------------------------------------
+// ============================================================
 
 function playSpanishText(text) {
 
   if (
     !text ||
-    !("speechSynthesis" in window)
+    !(
+      "speechSynthesis"
+      in window
+    )
   ) {
 
     return;
@@ -1520,8 +2261,11 @@ function playSpanishText(text) {
       text
     );
 
-  utterance.lang = "es-ES";
-  utterance.rate = 0.9;
+  utterance.lang =
+    "es-ES";
+
+  utterance.rate =
+    0.9;
 
   window.speechSynthesis.speak(
     utterance
@@ -1530,23 +2274,21 @@ function playSpanishText(text) {
 }
 
 
-// ------------------------------------------------------------
+// ============================================================
 // REPLAY
-// ------------------------------------------------------------
+// ============================================================
 
 conversationReplayBtn.addEventListener(
   "click",
   () => {
 
     const question =
-      conversationQuestions[
-        currentConversationIndex
-      ];
+      getCurrentQuestion();
 
     if (question) {
 
       playSpanishText(
-        question.teacher
+        question.prompt
       );
 
     }
@@ -1555,9 +2297,9 @@ conversationReplayBtn.addEventListener(
 );
 
 
-// ------------------------------------------------------------
+// ============================================================
 // FINISH
-// ------------------------------------------------------------
+// ============================================================
 
 function finishConversation() {
 
@@ -1577,11 +2319,291 @@ function finishConversation() {
     "hidden"
   );
 
+  renderConversationReport();
+
 }
 
-// ------------------------------------------------------------
+
+// ============================================================
+// TEACHER REPORT
+// ============================================================
+
+function renderConversationReport() {
+
+  const report =
+    document.createElement(
+      "div"
+    );
+
+  report.className =
+    "conversation-report";
+
+  const heading =
+    document.createElement(
+      "h2"
+    );
+
+  heading.textContent =
+    "Teacher Report";
+
+  report.appendChild(
+    heading
+  );
+
+
+  // ==========================================================
+  // TABLE
+  // ==========================================================
+
+  const table =
+    document.createElement(
+      "table"
+    );
+
+  table.className =
+    "conversation-report-table";
+
+
+  const thead =
+    document.createElement(
+      "thead"
+    );
+
+  const headerRow =
+    document.createElement(
+      "tr"
+    );
+
+  [
+    "Question",
+    "Type",
+    "Attempts",
+    "Short Write Responses"
+  ]
+    .forEach(
+      headingText => {
+
+        const th =
+          document.createElement(
+            "th"
+          );
+
+        th.textContent =
+          headingText;
+
+        headerRow.appendChild(
+          th
+        );
+
+      }
+    );
+
+  thead.appendChild(
+    headerRow
+  );
+
+  table.appendChild(
+    thead
+  );
+
+
+  const tbody =
+    document.createElement(
+      "tbody"
+    );
+
+
+  conversationReport.forEach(
+    item => {
+
+      const tr =
+        document.createElement(
+          "tr"
+        );
+
+
+      const questionCell =
+        document.createElement(
+          "td"
+        );
+
+      questionCell.textContent =
+        item.questionNumber;
+
+      tr.appendChild(
+        questionCell
+      );
+
+
+      const typeCell =
+        document.createElement(
+          "td"
+        );
+
+      typeCell.textContent =
+        item.type;
+
+      tr.appendChild(
+        typeCell
+      );
+
+
+      const attemptsCell =
+        document.createElement(
+          "td"
+        );
+
+      attemptsCell.textContent =
+        item.attempts;
+
+      tr.appendChild(
+        attemptsCell
+      );
+
+
+      const responseCell =
+        document.createElement(
+          "td"
+        );
+
+
+      if (
+        item.type ===
+        "SHORT_WRITE"
+      ) {
+
+        item.responses.forEach(
+          response => {
+
+            const responseDiv =
+              document.createElement(
+                "div"
+              );
+
+            responseDiv.className =
+              "conversation-report-response";
+
+            responseDiv.textContent =
+              response.text;
+
+            responseCell.appendChild(
+              responseDiv
+            );
+
+          }
+        );
+
+      } else {
+
+        responseCell.textContent =
+          "—";
+
+      }
+
+
+      tr.appendChild(
+        responseCell
+      );
+
+      tbody.appendChild(
+        tr
+      );
+
+    }
+  );
+
+
+  table.appendChild(
+    tbody
+  );
+
+  report.appendChild(
+    table
+  );
+
+
+  // ==========================================================
+  // LONG WRITE RESPONSES
+  // ==========================================================
+
+  const longWrites =
+    conversationReport.filter(
+      item =>
+        item.type ===
+        "LONG_WRITE"
+    );
+
+
+  if (
+    longWrites.length
+  ) {
+
+    const longWriteHeading =
+      document.createElement(
+        "h2"
+      );
+
+    longWriteHeading.textContent =
+      "Long Write Responses";
+
+    report.appendChild(
+      longWriteHeading
+    );
+
+
+    longWrites.forEach(
+      item => {
+
+        const prompt =
+          document.createElement(
+            "h3"
+          );
+
+        prompt.textContent =
+          item.prompt;
+
+        report.appendChild(
+          prompt
+        );
+
+
+        item.responses.forEach(
+          response => {
+
+            const responseBox =
+              document.createElement(
+                "div"
+              );
+
+            responseBox.className =
+              "conversation-long-write-response";
+
+            responseBox.textContent =
+              response.text;
+
+            report.appendChild(
+              responseBox
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  conversationPanel.appendChild(
+    report
+  );
+
+}
+
+
+// ============================================================
 // BACK
-// ------------------------------------------------------------
+// ============================================================
 
 conversationSelectionBackBtn.addEventListener(
   "click",
@@ -1591,21 +2613,42 @@ conversationSelectionBackBtn.addEventListener(
       "hidden"
     );
 
-    if (typeof filterPanel !== "undefined") {
-      filterPanel.classList.remove("hidden");
+    conversationPanel.classList.add(
+      "hidden"
+    );
+
+    if (
+      typeof filterPanel !==
+      "undefined"
+    ) {
+
+      filterPanel.classList.remove(
+        "hidden"
+      );
+
     }
 
   }
 );
 
-conversationEndBtn.addEventListener("click", () => {
 
-  conversationPanel.classList.add("hidden");
+// ============================================================
+// END BUTTON
+// ============================================================
 
-  conversationSelectionPanel.classList.remove(
-    "hidden"
-  );
+conversationEndBtn.addEventListener(
+  "click",
+  () => {
 
-  loadConversationIndex();
+    conversationPanel.classList.add(
+      "hidden"
+    );
 
-});
+    conversationSelectionPanel.classList.remove(
+      "hidden"
+    );
+
+    loadConversationIndex();
+
+  }
+);
