@@ -1994,7 +1994,12 @@ function showConversationQuestion() {
   // ----------------------------------------------------------
 
   conversationPrompt.textContent =
-    question.prompt || "";
+    question.prompt
+      ? question.prompt.replace(
+          /\[([^\]]+)\]/g,
+          "$1"
+        )
+      : "";
 
 
   // ----------------------------------------------------------
