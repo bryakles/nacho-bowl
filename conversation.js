@@ -1452,53 +1452,51 @@ function parseSpreadsheetCSV(
 //
 // ============================================================
 
-function parseQuestionCell(
-  cell
-) {
+function parseQuestionCell(cell) {
 
-  const parts =
-    String(cell)
-      .split("|")
-      .map(
-        part =>
-          part.trim()
-      );
+  const text =
+    String(cell || "").trim();
+
+  if (!text) {
+    return null;
+  }
 
 
-  if (
-    !parts.length
-  ) {
+  // ----------------------------------------------------------
+  // QUESTION TYPE
+  // ----------------------------------------------------------
+
+  const firstSeparator =
+    text.indexOf("|");
+
+  if (firstSeparator === -1) {
+
+    console.warn(
+      "Invalid conversation question:",
+      cell
+    );
 
     return null;
 
   }
 
-
   const type =
-    parts[0]
+    text
+      .slice(0, firstSeparator)
+      .trim()
       .toUpperCase();
 
 
   const validTypes = [
-
     "YES_NO",
-
     "EITHER_OR",
-
     "MULTIPLE_CHOICE",
-
     "SHORT_WRITE",
-
     "LONG_WRITE"
-
   ];
 
 
-  if (
-    !validTypes.includes(
-      type
-    )
-  ) {
+  if (!validTypes.includes(type)) {
 
     console.warn(
       "Unknown conversation question type:",
@@ -1511,14 +1509,80 @@ function parseQuestionCell(
   }
 
 
+  // ----------------------------------------------------------
+  // REMAINING FIELDS
+  //
+  // We cannot simply split everything on "|"
+  // because OPTIONS itself may contain "|".
+  // ----------------------------------------------------------
+
+  const remaining =
+    text.slice(
+      firstSeparator + 1
+    );
+
+
+  const fields = {};
+
+  const fieldPattern =
+    /(?:^|\|)\s*(ASK|SHOW|TTS|OPTIONS|ANSWER)\s*:/gi;
+
+  const matches =
+    [...remaining.matchAll(
+      fieldPattern
+    )];
+
+
+  matches.forEach(
+    (
+      match,
+      index
+    ) => {
+
+      const fieldName =
+        match[1].toUpperCase();
+
+      const start =
+        match.index +
+        match[0].length;
+
+      const end =
+        index + 1 <
+        matches.length
+          ? matches[index + 1].index
+          : remaining.length;
+
+      fields[fieldName] =
+        remaining
+          .slice(
+            start,
+            end
+          )
+          .trim();
+
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // CREATE QUESTION
+  // ----------------------------------------------------------
+
   const question = {
 
     type,
 
     prompt:
-      parts[1] || "",
+      fields.ASK || "",
 
-    answer: "",
+    show:
+      fields.SHOW || "",
+
+    tts:
+      fields.TTS || "",
+
+    answer:
+      fields.ANSWER || "",
 
     acceptedKeywords: [],
 
@@ -1532,121 +1596,17 @@ function parseQuestionCell(
   };
 
 
-  // ==========================================================
-  // YES / NO
-  // ==========================================================
-
-  if (
-    type ===
-    "YES_NO"
-  ) {
-
-    question.answer =
-      parts[2] || "";
-
-    return question;
-
-  }
-
-
-  // ==========================================================
-  // EITHER / OR
-  // ==========================================================
-
-  if (
-    type ===
-    "EITHER_OR"
-  ) {
-
-    question.answer =
-      parts[2] || "";
-
-    return question;
-
-  }
-
-
-  // ==========================================================
-  // MULTIPLE CHOICE
-  // ==========================================================
-
-  if (
-    type ===
-    "MULTIPLE_CHOICE"
-  ) {
-
-    // Everything after the prompt except
-    // the final field is an option.
-    //
-    // Example:
-    //
-    // parts[2] = A. un chico
-    // parts[3] = B. una chica
-    // parts[4] = C. un mono
-    // parts[5] = A
-
-    for (
-      let i = 2;
-      i < parts.length - 1;
-      i++
-    ) {
-
-      if (
-        /^[A-Z]\.\s*/i.test(
-          parts[i]
-        )
-      ) {
-
-        question.options.push(
-          parts[i]
-        );
-
-      }
-
-    }
-
-
-    question.correctOption =
-      (
-        parts[
-          parts.length - 1
-        ] || ""
-      )
-        .trim()
-        .toUpperCase();
-
-
-    return question;
-
-  }
-
-
-  // ==========================================================
+  // ----------------------------------------------------------
   // SHORT WRITE
-  // ==========================================================
+  // ----------------------------------------------------------
 
   if (
     type ===
     "SHORT_WRITE"
   ) {
 
-    const answerText =
-      parts[2] || "";
-
-
-    // OR separates genuinely different
-    // acceptable answers.
-    //
-    // Example:
-    //
-    // un chico OR el chico OR George
-    //
-    // becomes:
-    //
-    // ["un chico", "el chico", "george"]
-
     question.acceptedKeywords =
-      answerText
+      question.answer
         .split(/\s+OR\s+/i)
         .map(
           answer =>
@@ -1654,19 +1614,36 @@ function parseQuestionCell(
               answer
             )
         )
-        .filter(
-          Boolean
-        );
-
-
-    return question;
+        .filter(Boolean);
 
   }
 
 
-  // ==========================================================
+  // ----------------------------------------------------------
+  // MULTIPLE CHOICE
+  // ----------------------------------------------------------
+
+  if (
+    type ===
+    "MULTIPLE_CHOICE"
+  ) {
+
+    question.options =
+      parseMultipleChoiceOptions(
+        fields.OPTIONS || ""
+      );
+
+    question.correctOption =
+      fields.ANSWER
+        .trim()
+        .toUpperCase();
+
+  }
+
+
+  // ----------------------------------------------------------
   // LONG WRITE
-  // ==========================================================
+  // ----------------------------------------------------------
 
   if (
     type ===
@@ -1676,8 +1653,6 @@ function parseQuestionCell(
     question.responseRequired =
       false;
 
-    return question;
-
   }
 
 
@@ -1685,6 +1660,24 @@ function parseQuestionCell(
 
 }
 
+function parseMultipleChoiceOptions(
+  optionsText
+) {
+
+  if (!optionsText) {
+    return [];
+  }
+
+
+  return optionsText
+    .split("|")
+    .map(
+      option =>
+        option.trim()
+    )
+    .filter(Boolean);
+
+}
 
 // ============================================================
 // HEADER
