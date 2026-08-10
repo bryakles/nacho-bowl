@@ -57,6 +57,15 @@ let currentQuestionIndex = 0;
 
 let conversationAttempts = 0;
 
+// Tracks whether the current concept has been mastered.
+// A concept is mastered only after every question in
+// that concept has been answered successfully.
+let currentConceptMastered = false;
+
+// Prevents an old retry timer from interfering with
+// a new question/conversation.
+let conversationRetryTimer = null;
+
 // Teacher report data
 let conversationReport = [];
 
@@ -731,17 +740,20 @@ async function loadConversationDocument(
     conversationRows =
       conversationData.rows;
 
-    currentConceptIndex =
-      0;
+    currentConceptIndex = 0;
 
-    currentQuestionIndex =
-      0;
-
-    conversationAttempts =
-      0;
-
-    conversationReport =
-      [];
+    currentQuestionIndex = 0;
+    
+    conversationAttempts = 0;
+    
+    currentConceptMastered = false;
+    
+    if (conversationRetryTimer) {
+      clearTimeout(conversationRetryTimer);
+      conversationRetryTimer = null;
+    }
+    
+    conversationReport = [];
 
 
     // ----------------------------------------------------------
@@ -1430,9 +1442,55 @@ function getCurrentQuestion() {
 
 }
 
+// ============================================================
+// RESET CURRENT CONCEPT
+// ============================================================
+//
+// When a student answers incorrectly, the current concept
+// restarts at Question 1.
+//
+// This does NOT reset the entire conversation.
+//
+// Attempts already recorded in conversationReport remain.
+// ============================================================
+
+function resetCurrentConcept() {
+
+  currentQuestionIndex = 0;
+
+  currentConceptMastered = false;
+
+  conversationAttempts = 0;
+
+}
 
 // ============================================================
 // SHOW QUESTION
+// ============================================================
+
+// ============================================================
+// SHOW CURRENT QUESTION
+// ============================================================
+//
+// Progression:
+//
+// Question correct
+//      ↓
+// Next question
+//
+// Question incorrect
+//      ↓
+// Restart current concept at Q1
+//
+// Final question correct
+//      ↓
+// Concept mastered
+//      ↓
+// Next concept
+//
+// Final question of final concept correct
+//      ↓
+// Conversation complete
 // ============================================================
 
 function showConversationQuestion() {
@@ -1455,7 +1513,32 @@ function showConversationQuestion() {
 
 
   // ----------------------------------------------------------
-  // MOVE PAST EMPTY CONCEPTS
+  // EMPTY CONCEPT
+  //
+  // If a row contains no usable questions, skip it rather
+  // than trapping the student.
+  // ----------------------------------------------------------
+
+  if (
+    !row.questions ||
+    row.questions.length === 0
+  ) {
+
+    currentConceptIndex++;
+
+    currentQuestionIndex = 0;
+
+    currentConceptMastered = false;
+
+    showConversationQuestion();
+
+    return;
+
+  }
+
+
+  // ----------------------------------------------------------
+  // SAFETY CHECK
   // ----------------------------------------------------------
 
   if (
@@ -1463,10 +1546,13 @@ function showConversationQuestion() {
     row.questions.length
   ) {
 
+    currentConceptMastered = true;
+
     currentConceptIndex++;
 
-    currentQuestionIndex =
-      0;
+    currentQuestionIndex = 0;
+
+    currentConceptMastered = false;
 
     showConversationQuestion();
 
@@ -1488,9 +1574,19 @@ function showConversationQuestion() {
   }
 
 
-  conversationAttempts =
-    0;
+  // ----------------------------------------------------------
+  // RESET PER-QUESTION ATTEMPT COUNTER
+  //
+  // The teacher report maintains the permanent attempt
+  // count. This variable is only for the current interaction.
+  // ----------------------------------------------------------
 
+  conversationAttempts = 0;
+
+
+  // ----------------------------------------------------------
+  // CLEAR OLD RESPONSE UI
+  // ----------------------------------------------------------
 
   clearConversationResponseAreas();
 
@@ -2302,31 +2398,40 @@ function checkConversationAnswer(
   }
 
 
-  // ----------------------------------------------------------
-  // INCORRECT
-  //
-  // The student does NOT advance.
-  //
-  // The current concept restarts at Q1.
-  //
-  // The attempt remains recorded.
-  // ----------------------------------------------------------
+ // ----------------------------------------------------------
+// INCORRECT
+//
+// The student does NOT advance.
+//
+// The current concept restarts at Q1.
+//
+// The attempt remains recorded.
+// ----------------------------------------------------------
 
-  conversationFeedback.textContent =
-    "No exactamente. Vamos a repetir esta idea.";
+conversationFeedback.textContent =
+  "No exactamente. Vamos a repetir esta idea.";
 
-  conversationFeedback.className =
-    "conversation-feedback incorrect";
+conversationFeedback.className =
+  "conversation-feedback incorrect";
 
 
+if (conversationRetryTimer) {
+
+  clearTimeout(
+    conversationRetryTimer
+  );
+
+}
+
+
+conversationRetryTimer =
   setTimeout(
     () => {
 
-      currentQuestionIndex =
-        0;
+      conversationRetryTimer =
+        null;
 
-      conversationAttempts =
-        0;
+      resetCurrentConcept();
 
       showConversationQuestion();
 
@@ -2702,11 +2807,19 @@ conversationNextBtn.addEventListener(
     }
 
 
+    // --------------------------------------------------------
+    // MOVE TO NEXT QUESTION
+    // --------------------------------------------------------
+
     currentQuestionIndex++;
 
 
     // --------------------------------------------------------
-    // END OF CONCEPT
+    // CONCEPT MASTERED
+    //
+    // Reaching the end of the question sequence means the
+    // student has successfully demonstrated mastery of
+    // this concept.
     // --------------------------------------------------------
 
     if (
@@ -2714,10 +2827,19 @@ conversationNextBtn.addEventListener(
       row.questions.length
     ) {
 
+      currentConceptMastered =
+        true;
+
+
+      // Move to the next concept.
+
       currentConceptIndex++;
 
       currentQuestionIndex =
         0;
+
+      currentConceptMastered =
+        false;
 
     }
 
