@@ -100,6 +100,186 @@
               Start Practice
             </button>
           </div>
+
+          <div class="conversation-launch-row">
+            <button
+              id="conversationBtn"
+              class="btn btn-secondary"
+              type="button"
+            >
+              💬 Conversations
+            </button>
+          </div>
+
+          <!-- CONVERSATION SELECTION PANEL -->
+          <section id="conversationSelectionPanel" class="panel hidden">
+          
+            <div class="practice-header">
+              <div>
+                <h2>💬 Conversations</h2>
+                <p class="filter-hint">
+                  Choose a conversation to practice.
+                </p>
+              </div>
+            </div>
+          
+            <div id="conversationList" class="conversation-list"></div>
+          
+            <button
+              id="conversationSelectionBackBtn"
+              class="btn btn-secondary"
+              type="button"
+            >
+              ← Back
+            </button>
+          
+          </section>
+
+          <!-- CONVERSATION PRACTICE PANEL -->
+          <section id="conversationPanel" class="panel hidden">
+          
+            <div class="practice-header">
+          
+              <div>
+                <h2 id="conversationTitle">Conversation</h2>
+          
+                <div class="practice-meta">
+                  <span
+                    id="conversationLevel"
+                    class="set-label"
+                  ></span>
+          
+                  <span
+                    id="conversationProgress"
+                    class="progress-label"
+                  ></span>
+                </div>
+              </div>
+          
+            </div>
+          
+          
+            <!-- SCENE -->
+            <div class="conversation-scene">
+          
+              <img
+                id="conversationSceneImage"
+                class="conversation-scene-image hidden"
+                alt=""
+              />
+          
+              <p
+                id="conversationSceneText"
+                class="conversation-scene-text"
+              ></p>
+          
+            </div>
+          
+          
+            <!-- QUESTION -->
+            <div class="conversation-question-area">
+          
+              <p
+                id="conversationPrompt"
+                class="conversation-prompt"
+              ></p>
+          
+              <button
+                id="conversationReplayBtn"
+                class="btn btn-ghost"
+                type="button"
+              >
+                🔊 Replay
+              </button>
+          
+            </div>
+          
+          
+            <!-- YES / NO / EITHER OR -->
+            <div
+              id="conversationYesNo"
+              class="conversation-answer-buttons hidden"
+            >
+          
+              <button
+                type="button"
+                class="btn btn-primary conversation-answer-btn"
+                data-answer="SÍ"
+              >
+                Sí
+              </button>
+          
+              <button
+                type="button"
+                class="btn btn-primary conversation-answer-btn"
+                data-answer="NO"
+              >
+                No
+              </button>
+          
+            </div>
+          
+          
+            <!-- MULTIPLE CHOICE -->
+            <div
+              id="conversationChoices"
+              class="conversation-choices hidden"
+            ></div>
+          
+          
+            <!-- WRITING -->
+            <div
+              id="conversationWriting"
+              class="conversation-writing hidden"
+            >
+          
+              <input
+                id="conversationWritingInput"
+                type="text"
+                placeholder="Type your answer..."
+                autocomplete="off"
+              />
+          
+              <button
+                id="conversationSubmitWriting"
+                class="btn btn-primary"
+                type="button"
+              >
+                Check
+              </button>
+          
+            </div>
+          
+          
+            <!-- FEEDBACK -->
+            <p
+              id="conversationFeedback"
+              class="conversation-feedback"
+            ></p>
+          
+          
+            <!-- NEXT -->
+            <div class="conversation-actions">
+          
+              <button
+                id="conversationNextBtn"
+                class="btn btn-primary hidden"
+                type="button"
+              >
+                Next →
+              </button>
+          
+              <button
+                id="conversationEndBtn"
+                class="btn btn-danger"
+                type="button"
+              >
+                End Conversation
+              </button>
+          
+            </div>
+          
+          </section>
       
       </section>
 
