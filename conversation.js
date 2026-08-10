@@ -40,9 +40,8 @@
 // GOOGLE SHEET
 // ============================================================
 
-const CONVERSATION_INDEX_URL =
+const CONVERSATION_SHEET_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vTXkS0P0pDGSxXKQqtbPpv5lQb03OkgJW4p8o9fHpTdmiSJBHN8klf8cOrWxd-3iv_5J2stOk0m-Z_t/pub?output=csv";
-
 
 // ============================================================
 // STATE
@@ -240,13 +239,17 @@ async function loadConversationIndex() {
 
     const response =
       await fetch(
-        CONVERSATION_INDEX_URL
+        CONVERSATION_SHEET_URL,
+        {
+          method: "GET",
+          cache: "no-store"
+        }
       );
 
     if (!response.ok) {
 
       throw new Error(
-        `Could not load conversation list (${response.status})`
+        `Could not load conversations (${response.status})`
       );
 
     }
@@ -254,21 +257,137 @@ async function loadConversationIndex() {
     const csv =
       await response.text();
 
-    conversationIndex =
-      parseConversationCSV(
+
+    // ----------------------------------------------------------
+    // Parse the entire conversation spreadsheet
+    // ----------------------------------------------------------
+
+    const rows =
+      parseSpreadsheetCSV(
         csv
       );
 
-    conversationIndex =
-      conversationIndex
-        .filter(
-          conversation =>
-            conversation.active === true
+
+    if (!rows.length) {
+
+      throw new Error(
+        "The conversation spreadsheet is empty."
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // First row contains:
+    //
+    // Title | Concept | Statement | Q1 | Q2 | ...
+    // ----------------------------------------------------------
+
+    const headers =
+      rows[0].map(
+        cell =>
+          String(cell).trim()
+      );
+
+
+    const titleIndex =
+      headers.findIndex(
+        header =>
+          header.toLowerCase() ===
+          "title"
+      );
+
+
+    if (
+      titleIndex === -1
+    ) {
+
+      throw new Error(
+        'The conversation spreadsheet must contain a "Title" column.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // Find unique conversation titles
+    //
+    // The first occurrence determines the order.
+    // ----------------------------------------------------------
+
+    const titles = [];
+
+    const seenTitles =
+      new Set();
+
+
+    for (
+      let r = 1;
+      r < rows.length;
+      r++
+    ) {
+
+      const title =
+        String(
+          rows[r][titleIndex] || ""
+        ).trim();
+
+
+      if (
+        !title ||
+        seenTitles.has(
+          title
         )
-        .sort(
-          (a, b) =>
-            a.order - b.order
-        );
+      ) {
+
+        continue;
+
+      }
+
+
+      seenTitles.add(
+        title
+      );
+
+      titles.push(
+        title
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // Build the conversation index
+    // ----------------------------------------------------------
+
+    conversationIndex =
+      titles.map(
+        (
+          title,
+          index
+        ) => ({
+
+          title,
+
+          level: "",
+
+          topic: "",
+
+          description:
+            `Practice conversation: ${title}`,
+
+          docURL: "",
+
+          active: true,
+
+          order:
+            index + 1,
+
+          imageURL: ""
+
+        })
+      );
+
 
     renderConversationList();
 
@@ -287,7 +406,6 @@ async function loadConversationIndex() {
   }
 
 }
-
 
 // ============================================================
 // PARSE CONVERSATION INDEX CSV
@@ -610,33 +728,9 @@ function selectConversation(
 ) {
 
   if (
-    !conversation.docURL
+    !conversation ||
+    !conversation.title
   ) {
-
-    conversationList.innerHTML =
-      `<p class="error-msg">
-        ⚠️ This conversation does not have a Google Doc URL.
-      </p>`;
-
-    return;
-
-  }
-
-  let docURL;
-
-  try {
-
-    docURL =
-      convertGoogleDocURL(
-        conversation.docURL
-      );
-
-  } catch (error) {
-
-    conversationList.innerHTML =
-      `<p class="error-msg">
-        ⚠️ Invalid Google Docs URL.
-      </p>`;
 
     return;
 
@@ -652,13 +746,269 @@ function selectConversation(
   );
 
 
-  loadConversationDocument(
-    conversation,
-    docURL
+  loadConversationFromSheet(
+    conversation.title
   );
 
 }
 
+async function loadConversationFromSheet(
+  selectedTitle
+) {
+
+  try {
+
+    const response =
+      await fetch(
+        CONVERSATION_SHEET_URL,
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `Could not load conversation (${response.status})`
+      );
+
+    }
+
+
+    const csv =
+      await response.text();
+
+
+    const rows =
+      parseSpreadsheetCSV(
+        csv
+      );
+
+
+    if (
+      !rows.length
+    ) {
+
+      throw new Error(
+        "The conversation spreadsheet is empty."
+      );
+
+    }
+
+
+    const headers =
+      rows[0].map(
+        cell =>
+          String(cell).trim()
+      );
+
+
+    const titleIndex =
+      headers.findIndex(
+        header =>
+          header.toLowerCase() ===
+          "title"
+      );
+
+
+    if (
+      titleIndex === -1
+    ) {
+
+      throw new Error(
+        'The conversation spreadsheet must contain a "Title" column.'
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // Keep only rows belonging to the selected conversation.
+    // ----------------------------------------------------------
+
+    const conversationRowsOnly =
+      rows
+        .slice(1)
+        .filter(
+          row =>
+            String(
+              row[titleIndex] || ""
+            ).trim() ===
+            selectedTitle
+        );
+
+
+    if (
+      !conversationRowsOnly.length
+    ) {
+
+      throw new Error(
+        `No rows found for "${selectedTitle}".`
+      );
+
+    }
+
+
+    // ----------------------------------------------------------
+    // Convert those spreadsheet rows into the format
+    // expected by the existing conversation engine.
+    // ----------------------------------------------------------
+
+    conversationData = {
+
+      title:
+        selectedTitle,
+
+      level: "",
+
+      topic: "",
+
+      scene: {
+
+        imageURL: "",
+
+        text: ""
+
+      },
+
+      rows: [],
+
+      endTeacher: ""
+
+    };
+
+
+    conversationRows =
+      [];
+
+
+    conversationRowsOnly.forEach(
+      spreadsheetRow => {
+
+        const title =
+          String(
+            spreadsheetRow[0] || ""
+          ).trim();
+
+        const concept =
+          String(
+            spreadsheetRow[1] || ""
+          ).trim();
+
+        const statement =
+          String(
+            spreadsheetRow[2] || ""
+          ).trim();
+
+
+        const questions = [];
+
+
+        for (
+          let c = 3;
+          c < spreadsheetRow.length;
+          c++
+        ) {
+
+          const cell =
+            String(
+              spreadsheetRow[c] || ""
+            ).trim();
+
+
+          if (!cell) {
+
+            continue;
+
+          }
+
+
+          const question =
+            parseQuestionCell(
+              cell
+            );
+
+
+          if (question) {
+
+            question.number =
+              questions.length + 1;
+
+            questions.push(
+              question
+            );
+
+          }
+
+        }
+
+
+        conversationRows.push({
+
+          title,
+
+          concept,
+
+          statement,
+
+          questions
+
+        });
+
+      }
+    );
+
+
+    // ----------------------------------------------------------
+    // Reset progress
+    // ----------------------------------------------------------
+
+    currentConceptIndex =
+      0;
+
+    currentQuestionIndex =
+      0;
+
+    conversationAttempts =
+      0;
+
+    conversationReport =
+      [];
+
+
+    // ----------------------------------------------------------
+    // Render
+    // ----------------------------------------------------------
+
+    renderConversationHeader();
+
+    renderConversationScene();
+
+    showConversationQuestion();
+
+
+  } catch (error) {
+
+    console.error(
+      "Conversation loading error:",
+      error
+    );
+
+
+    conversationPrompt.textContent =
+      "⚠️ Could not load this conversation.";
+
+    conversationFeedback.textContent =
+      error.message;
+
+    conversationFeedback.className =
+      "conversation-feedback error";
+
+  }
+
+}
 
 // ============================================================
 // GOOGLE DOC URL
