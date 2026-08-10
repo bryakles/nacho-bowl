@@ -1680,12 +1680,6 @@ function clearConversationResponseAreas() {
 
   }
 
-
-  if (
-    typeof conversationSpeaking !==
-    "undefined"
-  ) {
-
    if (
     typeof conversationWritingInput !==
     "undefined"
