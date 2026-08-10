@@ -122,27 +122,6 @@ const conversationWritingInput =
 const conversationSubmitWriting =
   document.getElementById("conversationSubmitWriting");
 
-const conversationSpeaking =
-  document.getElementById("conversationSpeaking");
-
-const conversationRecordBtn =
-  document.getElementById("conversationRecordBtn");
-
-const conversationStopBtn =
-  document.getElementById("conversationStopBtn");
-
-const conversationAudioPlayback =
-  document.getElementById("conversationAudioPlayback");
-
-const conversationRecordingActions =
-  document.getElementById("conversationRecordingActions");
-
-const conversationRecordAgainBtn =
-  document.getElementById("conversationRecordAgainBtn");
-
-const conversationDownloadBtn =
-  document.getElementById("conversationDownloadBtn");
-
 const conversationFeedback =
   document.getElementById("conversationFeedback");
 
