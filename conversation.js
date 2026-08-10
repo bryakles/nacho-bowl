@@ -1452,49 +1452,56 @@ function parseSpreadsheetCSV(
 //
 // ============================================================
 
+// ============================================================
+// PARSE QUESTION CELL
+//
+// Format:
+//
+// TYPE | SAY:... | SHOW:... | ASK:... | OPTIONS:... | ANSWER:...
+//
+// Fields are optional depending on question type.
+//
+// SAY     = spoken by TTS, not displayed
+// SHOW    = displayed, not spoken
+// ASK     = displayed AND spoken as the question
+// OPTIONS = answer choices for multiple choice
+// ANSWER  = correct answer
+//
+// Examples:
+//
+// YES_NO | ASK:¿Había un chico? | ANSWER:SÍ
+//
+// YES_NO | SHOW:Había un chico. | ASK:¿Había un chico? | ANSWER:SÍ
+//
+// MULTIPLE_CHOICE | ASK:¿Dónde estaba George? |
+// SHOW:George estaba en California. |
+// OPTIONS:A. California | B. Utah | C. España |
+// ANSWER:California
+//
+// ============================================================
+
 function parseQuestionCell(cell) {
 
-  const text =
-    String(cell || "").trim();
+  const parts =
+    String(cell)
+      .split("|")
+      .map(part => part.trim());
 
-  if (!text) {
+  if (!parts.length) {
     return null;
-  }
-
-
-  // ----------------------------------------------------------
-  // QUESTION TYPE
-  // ----------------------------------------------------------
-
-  const firstSeparator =
-    text.indexOf("|");
-
-  if (firstSeparator === -1) {
-
-    console.warn(
-      "Invalid conversation question:",
-      cell
-    );
-
-    return null;
-
   }
 
   const type =
-    text
-      .slice(0, firstSeparator)
-      .trim()
-      .toUpperCase();
-
+    parts[0].toUpperCase();
 
   const validTypes = [
     "YES_NO",
     "EITHER_OR",
     "MULTIPLE_CHOICE",
     "SHORT_WRITE",
-    "LONG_WRITE"
+    "LONG_WRITE",
+    "PHRASE"
   ];
-
 
   if (!validTypes.includes(type)) {
 
@@ -1505,84 +1512,24 @@ function parseQuestionCell(cell) {
     );
 
     return null;
-
   }
 
 
   // ----------------------------------------------------------
-  // REMAINING FIELDS
-  //
-  // We cannot simply split everything on "|"
-  // because OPTIONS itself may contain "|".
-  // ----------------------------------------------------------
-
-  const remaining =
-    text.slice(
-      firstSeparator + 1
-    );
-
-
-  const fields = {};
-
-  const fieldPattern =
-    /(?:^|\|)\s*(ASK|SHOW|TTS|OPTIONS|ANSWER)\s*:/gi;
-
-  const matches =
-    [...remaining.matchAll(
-      fieldPattern
-    )];
-
-
-  matches.forEach(
-    (
-      match,
-      index
-    ) => {
-
-      const fieldName =
-        match[1].toUpperCase();
-
-      const start =
-        match.index +
-        match[0].length;
-
-      const end =
-        index + 1 <
-        matches.length
-          ? matches[index + 1].index
-          : remaining.length;
-
-      fields[fieldName] =
-        remaining
-          .slice(
-            start,
-            end
-          )
-          .trim();
-
-    }
-  );
-
-
-  // ----------------------------------------------------------
-  // CREATE QUESTION
+  // BASIC QUESTION OBJECT
   // ----------------------------------------------------------
 
   const question = {
 
     type,
 
-    prompt:
-      fields.ASK || "",
+    say: "",
 
-    show:
-      fields.SHOW || "",
+    show: "",
 
-    tts:
-      fields.TTS || "",
+    prompt: "",
 
-    answer:
-      fields.ANSWER || "",
+    answer: "",
 
     acceptedKeywords: [],
 
@@ -1590,10 +1537,211 @@ function parseQuestionCell(cell) {
 
     correctOption: "",
 
-    responseRequired:
-      true
+    responseRequired: true
 
   };
+
+
+  // ----------------------------------------------------------
+  // PARSE FIELDS
+  // ----------------------------------------------------------
+
+  parts.slice(1).forEach(part => {
+
+    const colonIndex =
+      part.indexOf(":");
+
+    if (colonIndex === -1) {
+      return;
+    }
+
+    const field =
+      part
+        .slice(0, colonIndex)
+        .trim()
+        .toUpperCase();
+
+    const value =
+      part
+        .slice(colonIndex + 1)
+        .trim();
+
+
+    // --------------------------------------------------------
+    // SAY
+    // --------------------------------------------------------
+
+    if (field === "SAY") {
+
+      question.say =
+        value;
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // SHOW
+    // --------------------------------------------------------
+
+    if (field === "SHOW") {
+
+      question.show =
+        value;
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // ASK
+    // --------------------------------------------------------
+
+    if (field === "ASK") {
+
+      question.prompt =
+        value;
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // ANSWER
+    // --------------------------------------------------------
+
+    if (field === "ANSWER") {
+
+      question.answer =
+        value;
+
+      return;
+    }
+
+
+    // --------------------------------------------------------
+    // OPTIONS
+    //
+    // OPTIONS may contain additional "|" characters.
+    //
+    // Example:
+    //
+    // OPTIONS:A. California | B. Utah | C. España
+    //
+    // Because the cell is already split on "|", each
+    // subsequent field beginning with a letter + "." is
+    // treated as another option.
+    // --------------------------------------------------------
+
+    if (field === "OPTIONS") {
+
+      if (value) {
+
+        question.options.push(
+          value
+        );
+
+      }
+
+      return;
+    }
+
+  });
+
+
+  // ----------------------------------------------------------
+  // CLEAN MULTIPLE-CHOICE OPTIONS
+  //
+  // Because "|" separates spreadsheet fields, additional
+  // options appear as standalone pieces such as:
+  //
+  // B. Utah
+  // C. España
+  //
+  // ----------------------------------------------------------
+
+  if (
+    type ===
+    "MULTIPLE_CHOICE"
+  ) {
+
+    question.options = [];
+
+    parts.slice(1).forEach(part => {
+
+      const trimmed =
+        part.trim();
+
+      if (
+        /^[A-Z]\.\s*/i.test(
+          trimmed
+        )
+      ) {
+
+        question.options.push(
+          trimmed
+        );
+
+      }
+
+    });
+
+
+    // ANSWER: may have been parsed normally above.
+    // If the final standalone field is just a letter,
+    // support the older format too.
+
+    if (
+      !question.answer &&
+      /^[A-Z]$/i.test(
+        parts[parts.length - 1]
+      )
+    ) {
+
+      question.correctOption =
+        parts[
+          parts.length - 1
+        ]
+          .trim()
+          .toUpperCase();
+
+    } else {
+
+      question.correctOption =
+        question.answer
+          .trim()
+          .toUpperCase();
+
+    }
+
+    return question;
+  }
+
+
+  // ----------------------------------------------------------
+  // EITHER / OR
+  // ----------------------------------------------------------
+
+  if (
+    type ===
+    "EITHER_OR"
+  ) {
+
+    return question;
+  }
+
+
+  // ----------------------------------------------------------
+  // YES / NO
+  // ----------------------------------------------------------
+
+  if (
+    type ===
+    "YES_NO"
+  ) {
+
+    return question;
+  }
 
 
   // ----------------------------------------------------------
@@ -1608,36 +1756,40 @@ function parseQuestionCell(cell) {
     question.acceptedKeywords =
       question.answer
         .split(/\s+OR\s+/i)
-        .map(
-          answer =>
-            normalizeConversationAnswer(
-              answer
-            )
+        .map(answer =>
+          normalizeConversationAnswer(
+            answer
+          )
         )
         .filter(Boolean);
 
+    return question;
   }
 
 
   // ----------------------------------------------------------
-  // MULTIPLE CHOICE
+  // PHRASE
+  //
+  // PHRASE is treated as a short production question for now.
+  // The answer is matched using the same keyword system.
   // ----------------------------------------------------------
 
   if (
     type ===
-    "MULTIPLE_CHOICE"
+    "PHRASE"
   ) {
 
-    question.options =
-      parseMultipleChoiceOptions(
-        fields.OPTIONS || ""
-      );
+    question.acceptedKeywords =
+      question.answer
+        .split(/\s+OR\s+/i)
+        .map(answer =>
+          normalizeConversationAnswer(
+            answer
+          )
+        )
+        .filter(Boolean);
 
-    question.correctOption =
-      fields.ANSWER
-        .trim()
-        .toUpperCase();
-
+    return question;
   }
 
 
@@ -1653,30 +1805,11 @@ function parseQuestionCell(cell) {
     question.responseRequired =
       false;
 
+    return question;
   }
 
 
   return question;
-
-}
-
-function parseMultipleChoiceOptions(
-  optionsText
-) {
-
-  if (!optionsText) {
-    return [];
-  }
-
-
-  return optionsText
-    .split("|")
-    .map(
-      option =>
-        option.trim()
-    )
-    .filter(Boolean);
-
 }
 
 // ============================================================
@@ -1968,17 +2101,22 @@ function showConversationQuestion() {
 
 
   // ----------------------------------------------------------
-  // STATEMENT
+  // SHOW TEXT
+  //
+  // SHOW = text specifically attached to this question.
+  // If no SHOW field exists, fall back to the row statement.
   // ----------------------------------------------------------
-
+  
   if (
     typeof conversationSceneText !==
     "undefined"
   ) {
-
+  
     conversationSceneText.textContent =
-      row.statement || "";
-
+      question.show ||
+      row.statement ||
+      "";
+  
   }
 
 
@@ -1994,13 +2132,22 @@ function showConversationQuestion() {
 
   // ----------------------------------------------------------
   // TEXT TO SPEECH
+  //
+  // SAY = spoken independently
+  // ASK = spoken as the question
+  // SHOW = never spoken
   // ----------------------------------------------------------
-
- playSpanishText(
-  getConversationDisplayPrompt(
+  
+  const speechText = [
+    question.say,
     question.prompt
-  )
-);
+  ]
+    .filter(Boolean)
+    .join(" ");
+  
+  playSpanishText(
+    speechText
+  );
 
 
   // ----------------------------------------------------------
