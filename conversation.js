@@ -83,6 +83,77 @@ const conversationSelectionBackBtn =
 const conversationEndBtn =
   document.getElementById("conversationEndBtn");
 
+const conversationTitle =
+  document.getElementById("conversationTitle");
+
+const conversationLevel =
+  document.getElementById("conversationLevel");
+
+const conversationProgress =
+  document.getElementById("conversationProgress");
+
+const conversationScene =
+  document.getElementById("conversationScene");
+
+const conversationSceneImage =
+  document.getElementById("conversationSceneImage");
+
+const conversationSceneText =
+  document.getElementById("conversationSceneText");
+
+const conversationPrompt =
+  document.getElementById("conversationPrompt");
+
+const conversationReplayBtn =
+  document.getElementById("conversationReplayBtn");
+
+const conversationYesNo =
+  document.getElementById("conversationYesNo");
+
+const conversationChoices =
+  document.getElementById("conversationChoices");
+
+const conversationWriting =
+  document.getElementById("conversationWriting");
+
+const conversationWritingInput =
+  document.getElementById("conversationWritingInput");
+
+const conversationSubmitWriting =
+  document.getElementById("conversationSubmitWriting");
+
+const conversationSpeaking =
+  document.getElementById("conversationSpeaking");
+
+const conversationRecordBtn =
+  document.getElementById("conversationRecordBtn");
+
+const conversationStopBtn =
+  document.getElementById("conversationStopBtn");
+
+const conversationAudioPlayback =
+  document.getElementById("conversationAudioPlayback");
+
+const conversationRecordingActions =
+  document.getElementById("conversationRecordingActions");
+
+const conversationRecordAgainBtn =
+  document.getElementById("conversationRecordAgainBtn");
+
+const conversationDownloadBtn =
+  document.getElementById("conversationDownloadBtn");
+
+const conversationFeedback =
+  document.getElementById("conversationFeedback");
+
+const conversationScaffold =
+  document.getElementById("conversationScaffold");
+
+const conversationScaffoldText =
+  document.getElementById("conversationScaffoldText");
+
+const conversationNextBtn =
+  document.getElementById("conversationNextBtn");
 
 // ============================================================
 // OPEN CONVERSATIONS
@@ -1636,14 +1707,7 @@ function clearConversationResponseAreas() {
     "undefined"
   ) {
 
-    conversationSpeaking.classList.add(
-      "hidden"
-    );
-
-  }
-
-
-  if (
+   if (
     typeof conversationWritingInput !==
     "undefined"
   ) {
