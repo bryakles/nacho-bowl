@@ -1518,17 +1518,15 @@ function parseQuestionCell(cell) {
   // ----------------------------------------------------------
   // BASIC QUESTION OBJECT
   // ----------------------------------------------------------
-
+  
   const question = {
-
+  
     type,
-
-    say: "",
-
+  
+    ask: "",
+  
     show: "",
-
-    prompt: "",
-
+  
     answer: "",
 
     acceptedKeywords: [],
@@ -1566,20 +1564,6 @@ function parseQuestionCell(cell) {
         .slice(colonIndex + 1)
         .trim();
 
-
-    // --------------------------------------------------------
-    // SAY
-    // --------------------------------------------------------
-
-    if (field === "SAY") {
-
-      question.say =
-        value;
-
-      return;
-    }
-
-
     // --------------------------------------------------------
     // SHOW
     // --------------------------------------------------------
@@ -1596,12 +1580,12 @@ function parseQuestionCell(cell) {
     // --------------------------------------------------------
     // ASK
     // --------------------------------------------------------
-
+    
     if (field === "ASK") {
-
-      question.prompt =
+    
+      question.ask =
         value;
-
+    
       return;
     }
 
@@ -2113,42 +2097,40 @@ function showConversationQuestion() {
   ) {
   
     conversationSceneText.textContent =
-      question.show ||
-      row.statement ||
-      "";
+      conversationSceneText.textContent =
+        question.show || "";
   
   }
 
 
   // ----------------------------------------------------------
   // QUESTION PROMPT
+  //
+  // ASK is TTS only.
+  // It should NOT appear on screen.
+  // SHOW is handled by conversationSceneText above.
   // ----------------------------------------------------------
-
+  
   conversationPrompt.textContent =
-    getConversationDisplayPrompt(
-      question.prompt
-    );
-
-
+    "";
+  
+  
   // ----------------------------------------------------------
   // TEXT TO SPEECH
   //
-  // SAY = spoken independently
-  // ASK = spoken as the question
+  // ASK = spoken only
   // SHOW = never spoken
   // ----------------------------------------------------------
   
-  const speechText = [
-    question.say,
-    question.prompt
-  ]
-    .filter(Boolean)
-    .join(" ");
+  if (question.ask) {
   
-  playSpanishText(
-    speechText
-  );
-
+    playSpanishText(
+      getConversationDisplayPrompt(
+        question.ask
+      )
+    );
+  
+  }
 
   // ----------------------------------------------------------
   // QUESTION TYPE
@@ -2380,7 +2362,7 @@ function showEitherOr(question) {
     );
 
   const choices =
-    extractBracketChoices(question.prompt);
+    extractBracketChoices(question.ask);
 
   if (choices.length !== 2) {
 
@@ -3486,14 +3468,14 @@ conversationReplayBtn.addEventListener(
       getCurrentQuestion();
 
 
-    if (question) {
-
+    if (question && question.ask) {
+    
       playSpanishText(
         getConversationDisplayPrompt(
-          question.prompt
+          question.ask
         )
       );
-
+    
     }
 
   }
