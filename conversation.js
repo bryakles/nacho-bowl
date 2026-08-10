@@ -1994,21 +1994,20 @@ function showConversationQuestion() {
   // ----------------------------------------------------------
 
   conversationPrompt.textContent =
-    question.prompt
-      ? question.prompt.replace(
-          /\[([^\]]+)\]/g,
-          "$1"
-        )
-      : "";
+    getConversationDisplayPrompt(
+      question.prompt
+    );
 
 
   // ----------------------------------------------------------
   // TEXT TO SPEECH
   // ----------------------------------------------------------
 
-  playSpanishText(
+ playSpanishText(
+  getConversationDisplayPrompt(
     question.prompt
-  );
+  )
+);
 
 
   // ----------------------------------------------------------
@@ -2909,6 +2908,16 @@ function normalizeConversationAnswer(
 
 }
 
+function getConversationDisplayPrompt(prompt) {
+
+  return String(prompt || "")
+    .replace(
+      /\[([^\]]+)\]/g,
+      "$1"
+    )
+    .trim();
+
+}
 
 // ============================================================
 // RECORD QUESTION ATTEMPT
@@ -3340,7 +3349,9 @@ conversationReplayBtn.addEventListener(
     if (question) {
 
       playSpanishText(
-        question.prompt
+        getConversationDisplayPrompt(
+          question.prompt
+        )
       );
 
     }
