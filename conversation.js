@@ -2213,34 +2213,26 @@ function showYesNo() {
 //
 // ============================================================
 
-function showEitherOr(
-  question
-) {
+function showEitherOr(question) {
 
   conversationYesNo.classList.remove(
     "hidden"
   );
 
-
   const buttons =
-    conversationYesNo
-      .querySelectorAll(
-        ".conversation-answer-btn"
-      );
-
+    conversationYesNo.querySelectorAll(
+      ".conversation-answer-btn"
+    );
 
   const choices =
-    extractEitherOrChoices(
+    extractBracketChoices(
       question.prompt
     );
 
-
-  if (
-    choices.length !== 2
-  ) {
+  if (choices.length !== 2) {
 
     conversationFeedback.textContent =
-      "⚠️ Could not determine the two choices.";
+      "⚠️ This either/or question needs exactly two bracketed choices.";
 
     conversationFeedback.className =
       "conversation-feedback error";
@@ -2249,16 +2241,10 @@ function showEitherOr(
 
   }
 
-
   buttons.forEach(
-    (
-      button,
-      index
-    ) => {
+    (button, index) => {
 
-      if (
-        !choices[index]
-      ) {
+      if (!choices[index]) {
 
         button.classList.add(
           "hidden"
@@ -2267,7 +2253,6 @@ function showEitherOr(
         return;
 
       }
-
 
       button.classList.remove(
         "hidden"
@@ -2282,7 +2267,6 @@ function showEitherOr(
       button.dataset.answer =
         choices[index];
 
-
       button.onclick =
         () => {
 
@@ -2296,7 +2280,6 @@ function showEitherOr(
   );
 
 }
-
 
 // ============================================================
 // EXTRACT EITHER / OR CHOICES
