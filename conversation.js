@@ -2167,28 +2167,14 @@ function showYesNo() {
   conversationYesNo.classList.remove(
     "hidden"
   );
-  
-  conversationYesNo
-    .querySelectorAll(
-      ".conversation-answer-btn"
-    )
-    .forEach(
-      button => {
-        button.classList.remove("hidden");
-        button.disabled = false;
-      }
-    );
-
 
   const buttons =
-    conversationYesNo
-      .querySelectorAll(
-        ".conversation-answer-btn"
-      );
-
+    conversationYesNo.querySelectorAll(
+      ".conversation-answer-btn"
+    );
 
   buttons.forEach(
-    button => {
+    (button, index) => {
 
       button.classList.remove(
         "hidden"
@@ -2197,6 +2183,23 @@ function showYesNo() {
       button.disabled =
         false;
 
+      if (index === 0) {
+
+        button.textContent =
+          "Sí";
+
+        button.dataset.answer =
+          "SÍ";
+
+      } else {
+
+        button.textContent =
+          "No";
+
+        button.dataset.answer =
+          "NO";
+
+      }
 
       button.onclick =
         () => {
@@ -2211,7 +2214,6 @@ function showYesNo() {
   );
 
 }
-
 
 // ============================================================
 // EITHER / OR
