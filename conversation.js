@@ -2162,6 +2162,17 @@ function showYesNo() {
   conversationYesNo.classList.remove(
     "hidden"
   );
+  
+  conversationYesNo
+    .querySelectorAll(
+      ".conversation-answer-btn"
+    )
+    .forEach(
+      button => {
+        button.classList.remove("hidden");
+        button.disabled = false;
+      }
+    );
 
 
   const buttons =
@@ -2215,9 +2226,7 @@ function showYesNo() {
 
 function showEitherOr(question) {
 
-  conversationYesNo.classList.remove(
-    "hidden"
-  );
+  conversationYesNo.classList.remove("hidden");
 
   const buttons =
     conversationYesNo.querySelectorAll(
@@ -2225,9 +2234,7 @@ function showEitherOr(question) {
     );
 
   const choices =
-    extractBracketChoices(
-      question.prompt
-    );
+    extractBracketChoices(question.prompt);
 
   if (choices.length !== 2) {
 
@@ -2238,7 +2245,6 @@ function showEitherOr(question) {
       "conversation-feedback error";
 
     return;
-
   }
 
   buttons.forEach(
@@ -2246,38 +2252,52 @@ function showEitherOr(question) {
 
       if (!choices[index]) {
 
-        button.classList.add(
-          "hidden"
-        );
-
+        button.classList.add("hidden");
         return;
 
       }
 
-      button.classList.remove(
-        "hidden"
-      );
+      button.classList.remove("hidden");
+      button.disabled = false;
 
-      button.disabled =
-        false;
+      // THIS replaces Sí / No
+      button.textContent = choices[index];
 
-      button.textContent =
-        choices[index];
+      button.dataset.answer = choices[index];
 
-      button.dataset.answer =
-        choices[index];
+      button.onclick = () => {
 
-      button.onclick =
-        () => {
+        checkConversationAnswer(
+          choices[index]
+        );
 
-          checkConversationAnswer(
-            choices[index]
-          );
-
-        };
+      };
 
     }
   );
+
+}
+
+function extractBracketChoices(prompt) {
+
+  const matches =
+    String(prompt).match(
+      /\[([^\]]+)\]/g
+    );
+
+  if (!matches) {
+    return [];
+  }
+
+  return matches
+    .map(
+      match =>
+        match
+          .replace(/^\[/, "")
+          .replace(/\]$/, "")
+          .trim()
+    )
+    .filter(Boolean);
 
 }
 
