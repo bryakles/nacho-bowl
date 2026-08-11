@@ -2624,7 +2624,8 @@ function showStudySet(cards) {
   filterPanel.classList.add("hidden");
   practicePanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
-
+  conversationPanel.classList.add("hidden");
+  
   studySetPanel.classList.remove("hidden");
 
   studySetContainer.innerHTML = `
