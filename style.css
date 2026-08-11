@@ -714,6 +714,51 @@ body.teacher-lock-active {
 }
 
 /* ============================================================
+   CONVERSATION PRACTICE ENTRY
+   ============================================================ */
+
+.conversation-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  border-radius: var(--radius-md);
+}
+
+.conversation-entry-text h3 {
+  color: #15803d;
+  font-size: var(--font-size-lg);
+  margin-bottom: 0.3rem;
+}
+
+.conversation-entry-text p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.conversation-entry-btn {
+  flex-shrink: 0;
+  padding: 0.65rem 1rem;
+  border: 2px solid #22c55e;
+  border-radius: var(--radius-md);
+  background: #22c55e;
+  color: white;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.conversation-entry-btn:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+/* ============================================================
    RESULTS PANEL
    ============================================================ */
 /* ============================================================
@@ -1317,6 +1362,17 @@ body.teacher-lock-active {
   .answer-actions { flex-direction: column; }
   .filter-footer { flex-direction: column; align-items: flex-start; }
 
+@media (max-width: 480px) {
+  .conversation-entry {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .conversation-entry-btn {
+    width: 100%;
+  }
+}
+   
   .nacho-keyboard {
     gap: 0.25rem;
   }
