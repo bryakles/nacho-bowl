@@ -970,6 +970,83 @@ body.teacher-lock-active {
 }
 
 /* ============================================================
+   MANAGE STUDY SETS
+   ============================================================ */
+
+.manage-study-sets-btn {
+  margin-top: 0.75rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.manage-study-sets-btn:hover {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.manage-study-sets-box {
+  max-width: 500px;
+}
+
+.manage-study-set-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.manage-study-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.manage-study-set-name {
+  font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.manage-study-set-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.manage-study-set-actions button {
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.manage-rename-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.manage-delete-btn:hover {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* ============================================================
    NACHO BUILDER INTRO
    ============================================================ */
 
