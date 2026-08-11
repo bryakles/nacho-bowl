@@ -1173,7 +1173,7 @@ function renderManageStudySets() {
   list.className =
     "manage-study-set-list";
 
-  savedStudySets.forEach(savedSet => {
+  savedStudySets.forEach((savedSet, index) => {
 
     const row =
       document.createElement("div");
@@ -1204,6 +1204,88 @@ function renderManageStudySets() {
 
       </div>
     `;
+
+    // --------------------------------------------------------
+    // RENAME
+    // --------------------------------------------------------
+
+    row
+      .querySelector(".manage-rename-btn")
+      .addEventListener("click", () => {
+
+        const newName =
+          prompt(
+            "Enter a new name for this study set:",
+            savedSet.name
+          );
+
+        if (newName === null) {
+          return;
+        }
+
+        const trimmedName =
+          newName.trim();
+
+        if (!trimmedName) {
+          alert("Please enter a study set name.");
+          return;
+        }
+
+        savedStudySets[index].name =
+          trimmedName;
+
+        localStorage.setItem(
+          "nachoSavedStudySets",
+          JSON.stringify(savedStudySets)
+        );
+
+        // Refresh the manager
+        renderManageStudySets();
+
+        // Refresh the My Study Sets chips
+        loadMyStudySets();
+      });
+
+
+    // --------------------------------------------------------
+    // DELETE
+    // --------------------------------------------------------
+
+    row
+      .querySelector(".manage-delete-btn")
+      .addEventListener("click", () => {
+
+        const confirmed =
+          confirm(
+            `Delete "${savedSet.name}"? This cannot be undone.`
+          );
+
+        if (!confirmed) {
+          return;
+        }
+
+        savedStudySets.splice(index, 1);
+
+        localStorage.setItem(
+          "nachoSavedStudySets",
+          JSON.stringify(savedStudySets)
+        );
+
+        // If the deleted set was selected,
+        // clear that selection.
+        if (
+          selectedMyStudySet &&
+          selectedMyStudySet === savedSet
+        ) {
+          selectedMyStudySet = null;
+        }
+
+        // Refresh both interfaces
+        renderManageStudySets();
+        loadMyStudySets();
+        updateCardCountPreview();
+      });
+
 
     list.appendChild(row);
   });
