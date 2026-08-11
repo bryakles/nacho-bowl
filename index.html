@@ -74,6 +74,14 @@
           </div>
         </div>
         
+        <button
+          id="manageStudySetsBtn"
+          type="button"
+          class="manage-study-sets-btn"
+        >
+          ⚙️ Manage Study Sets
+        </button>
+        
         <div class="filter-group">
           <label>Practice Mode</label>
         
@@ -566,6 +574,27 @@
     </div>
   </div>
 
+  <!-- MANAGE STUDY SETS DIALOG -->
+  <div id="manageStudySetsDialog" class="dialog-overlay hidden">
+    <div class="dialog-box manage-study-sets-box">
+  
+      <h3>⚙️ Manage Study Sets</h3>
+  
+      <div id="manageStudySetsList"></div>
+  
+      <div class="dialog-actions">
+        <button
+          id="closeManageStudySetsBtn"
+          class="btn btn-ghost"
+          type="button"
+        >
+          Close
+        </button>
+      </div>
+  
+    </div>
+  </div>
+  
   <!-- TEACHER PASSWORD DIALOG -->
   <div id="teacherPasswordDialog" class="dialog-overlay hidden">
     <div class="dialog-box">
