@@ -2863,6 +2863,16 @@ function checkConversationAnswer(
     flagForReview
   );
 
+  console.log(
+    "SHORT_WRITE DEBUG:",
+    {
+      studentAnswer: cleanedAnswer,
+      correct,
+      flagForReview,
+      report: conversationReport
+    }
+  );
+
 
   // ----------------------------------------------------------
   // CORRECT
@@ -4094,12 +4104,26 @@ function createConversationReportText() {
         responses =
           item.responses
             .map(
-              response =>
-                `${
-                  response.accepted
-                    ? "✓ Accepted"
-                    : "⚠ Review"
-                }: ${response.text}`
+              response => {
+        
+                let label =
+                  "⚠ Review";
+        
+        
+                if (
+                  response.accepted &&
+                  !response.flagForReview
+                ) {
+        
+                  label =
+                    "✓ Accepted";
+        
+                }
+        
+        
+                return `${label}: ${response.text}`;
+        
+              }
             )
             .join(
               " | "
