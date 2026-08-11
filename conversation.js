@@ -76,6 +76,9 @@ let conversationReport = [];
 const conversationBtn =
   document.getElementById("conversationBtn");
 
+const homeOnlyContent =
+  document.getElementById("homeOnlyContent");
+
 const conversationSelectionPanel =
   document.getElementById("conversationSelectionPanel");
 
@@ -162,6 +165,10 @@ conversationBtn.addEventListener(
 
 async function openConversationSelection() {
 
+  if (homeOnlyContent) {
+    homeOnlyContent.classList.add("hidden");
+  }
+  
   if (
     typeof filterPanel !==
     "undefined"
@@ -4261,17 +4268,20 @@ conversationSelectionBackBtn.addEventListener(
     );
 
 
+    if (homeOnlyContent) {
+      homeOnlyContent.classList.remove("hidden");
+    }
+    
     if (
       typeof filterPanel !==
       "undefined"
     ) {
-
+    
       filterPanel.classList.remove(
         "hidden"
       );
-
+    
     }
-
   }
 );
 
