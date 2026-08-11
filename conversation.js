@@ -2863,17 +2863,6 @@ function checkConversationAnswer(
     flagForReview
   );
 
-  console.log(
-    "SHORT_WRITE DEBUG:",
-    {
-      studentAnswer: cleanedAnswer,
-      correct,
-      flagForReview,
-      report: conversationReport
-    }
-  );
-
-
   // ----------------------------------------------------------
   // CORRECT
   // ----------------------------------------------------------
