@@ -2769,6 +2769,8 @@ function checkConversationAnswer(
   let correct =
     false;
 
+  let flagForReview =
+  false;
 
   // ----------------------------------------------------------
   // YES / NO
@@ -2832,13 +2834,21 @@ function checkConversationAnswer(
     question.type ===
     "SHORT_WRITE"
   ) {
-
-    correct =
+  
+    const result =
       evaluateShortWrite(
         cleanedAnswer,
         question.acceptedKeywords
       );
-
+  
+  
+    correct =
+      result.correct;
+  
+  
+    flagForReview =
+      result.flagForReview;
+  
   }
 
 
@@ -2849,7 +2859,8 @@ function checkConversationAnswer(
   recordQuestionAttempt(
     question,
     cleanedAnswer,
-    correct
+    correct,
+    flagForReview
   );
 
 
@@ -2858,12 +2869,12 @@ function checkConversationAnswer(
   // ----------------------------------------------------------
 
   if (correct) {
-
+  
     conversationFeedback.textContent =
       "¡Muy bien! ✓";
-
-    conversationFeedback.className =
-      "conversation-feedback correct";
+  
+      conversationFeedback.className =
+        "conversation-feedback correct";
 
 
     disableCurrentConversationResponse();
@@ -2956,27 +2967,74 @@ function evaluateShortWrite(
 
 
   if (!student) {
-    return false;
+
+    return {
+      correct: false,
+      flagForReview: false
+    };
+
   }
 
 
-  return acceptedKeywords.some(
-    keyword => {
+  const exactMatch =
+    acceptedKeywords.some(
+      keyword => {
 
-      if (!keyword) {
-        return false;
+        if (!keyword) {
+          return false;
+        }
+
+        return (
+          student ===
+          keyword
+        );
+
       }
+    );
 
 
-      return student.includes(
-        keyword
-      );
+  if (exactMatch) {
 
-    }
-  );
+    return {
+      correct: true,
+      flagForReview: false
+    };
+
+  }
+
+
+  const containsAcceptedAnswer =
+    acceptedKeywords.some(
+      keyword => {
+
+        if (!keyword) {
+          return false;
+        }
+
+        return student.includes(
+          keyword
+        );
+
+      }
+    );
+
+
+  if (containsAcceptedAnswer) {
+
+    return {
+      correct: true,
+      flagForReview: true
+    };
+
+  }
+
+
+  return {
+    correct: false,
+    flagForReview: false
+  };
 
 }
-
 
 // ============================================================
 // NORMALIZED ANSWER COMPARISON
@@ -3063,7 +3121,8 @@ function getConversationDisplayPrompt(prompt) {
 function recordQuestionAttempt(
   question,
   studentAnswer,
-  accepted
+  accepted,
+  flagForReview = false
 ) {
 
   const existing =
@@ -3094,12 +3153,17 @@ function recordQuestionAttempt(
 
         text:
           studentAnswer,
-
+      
         accepted:
           Boolean(
             accepted
+          ),
+      
+        flagForReview:
+          Boolean(
+            flagForReview
           )
-
+      
       });
 
     }
@@ -3145,12 +3209,17 @@ function recordQuestionAttempt(
 
       text:
         studentAnswer,
-
+    
       accepted:
         Boolean(
           accepted
+        ),
+    
+      flagForReview:
+        Boolean(
+          flagForReview
         )
-
+    
     });
 
   }
