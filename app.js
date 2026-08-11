@@ -1107,6 +1107,110 @@ function loadMyStudySets() {
   });
 }
 
+document
+  .getElementById("manageStudySetsBtn")
+  .addEventListener("click", () => {
+    openManageStudySets();
+  });
+
+document
+  .getElementById("closeManageStudySetsBtn")
+  .addEventListener("click", () => {
+    document
+      .getElementById("manageStudySetsDialog")
+      .classList.add("hidden");
+  });
+
+function openManageStudySets() {
+
+  const dialog =
+    document.getElementById("manageStudySetsDialog");
+
+  if (!dialog) {
+    return;
+  }
+
+  renderManageStudySets();
+
+  dialog.classList.remove("hidden");
+}
+
+
+// ------------------------------------------------------------
+// RENDER MANAGE STUDY SETS
+// ------------------------------------------------------------
+
+function renderManageStudySets() {
+
+  const container =
+    document.getElementById("manageStudySetsList");
+
+  if (!container) {
+    return;
+  }
+
+  const savedStudySets =
+    JSON.parse(
+      localStorage.getItem("nachoSavedStudySets") || "[]"
+    );
+
+  container.innerHTML = "";
+
+  if (savedStudySets.length === 0) {
+
+    container.innerHTML = `
+      <p class="filter-hint">
+        You don't have any saved study sets yet.
+      </p>
+    `;
+
+    return;
+  }
+
+  const list =
+    document.createElement("div");
+
+  list.className =
+    "manage-study-set-list";
+
+  savedStudySets.forEach(savedSet => {
+
+    const row =
+      document.createElement("div");
+
+    row.className =
+      "manage-study-set-row";
+
+    row.innerHTML = `
+      <span class="manage-study-set-name">
+        ${savedSet.name}
+      </span>
+
+      <div class="manage-study-set-actions">
+
+        <button
+          type="button"
+          class="manage-rename-btn"
+        >
+          Rename
+        </button>
+
+        <button
+          type="button"
+          class="manage-delete-btn"
+        >
+          Delete
+        </button>
+
+      </div>
+    `;
+
+    list.appendChild(row);
+  });
+
+  container.appendChild(list);
+}
+
 // ------------------------------------------------------------
 // CARD DISPLAY / NAVIGATION
 // ------------------------------------------------------------
