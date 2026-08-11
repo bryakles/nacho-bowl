@@ -308,6 +308,12 @@ body.teacher-lock-active {
 
 .card-count-preview.has-cards { color: var(--color-success); font-weight: 600; }
 
+.section-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 1.25rem 0;
+}
+
 /* ============================================================
    PRACTICE PANEL
    ============================================================ */
