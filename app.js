@@ -2852,6 +2852,22 @@ function showStudySet(cards) {
     });
   }
 
+function updateHomeOnlyContent() {
+
+  const conversationHomeEntry =
+    document.getElementById("conversationHomeEntry");
+
+  if (!conversationHomeEntry) return;
+
+  const isHome =
+    !filterPanel.classList.contains("hidden");
+
+  conversationHomeEntry.classList.toggle(
+    "hidden",
+    !isHome
+  );
+}
+
 // ============================================================
 // STUDY SET SELECTION UI
 // ============================================================
