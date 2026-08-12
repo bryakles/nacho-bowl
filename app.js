@@ -2858,33 +2858,22 @@ function updateHomeOnlyContent() {
   const conversationHomeEntry =
     document.getElementById("conversationHomeEntry");
 
-  if (!conversationHomeEntry) return;
-
-  const isHome =
-    !filterPanel.classList.contains("hidden") &&
-    practicePanel.classList.contains("hidden") &&
-    studySetPanel.classList.contains("hidden") &&
-    nachoBuilderPanel.classList.contains("hidden") &&
-    conversationSelectionPanel.classList.contains("hidden") &&
-    conversationPanel.classList.contains("hidden") &&
-    resultsPanel.classList.contains("hidden");
-
-  console.log("HOME CHECK:", {
-    isHome,
-    filterHidden: filterPanel.classList.contains("hidden"),
-    practiceHidden: practicePanel.classList.contains("hidden"),
-    studySetHidden: studySetPanel.classList.contains("hidden"),
-    nachoBuilderHidden: nachoBuilderPanel.classList.contains("hidden"),
-    conversationSelectionHidden: conversationSelectionPanel.classList.contains("hidden"),
-    conversationHidden: conversationPanel.classList.contains("hidden"),
-    resultsHidden: resultsPanel.classList.contains("hidden")
-  });
-
-  if (isHome) {
-    conversationHomeEntry.classList.remove("hidden");
-  } else {
-    conversationHomeEntry.classList.add("hidden");
+  if (!conversationHomeEntry) {
+    console.log("NO conversationHomeEntry FOUND");
+    return;
   }
+
+  console.log(
+    "BEFORE:",
+    conversationHomeEntry.className
+  );
+
+  conversationHomeEntry.classList.add("hidden");
+
+  console.log(
+    "AFTER:",
+    conversationHomeEntry.className
+  );
 }
 
 // ============================================================
