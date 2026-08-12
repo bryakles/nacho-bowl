@@ -2625,10 +2625,11 @@ function showStudySet(cards) {
   currentStudySetCards = cards;
 
   filterPanel.classList.add("hidden");
-  practicePanel.classList.add("hidden");
+  practicePanel.classList.remove("hidden");
   resultsPanel.classList.add("hidden");
   conversationPanel.classList.add("hidden");
-  homeOnlyContent.classList.add("hidden");
+  
+  updateHomeOnlyContent();
   
   studySetPanel.classList.remove("hidden");
 
