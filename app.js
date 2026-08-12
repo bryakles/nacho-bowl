@@ -988,7 +988,8 @@ function beginPractice(filtered) {
   practicePanel.classList.remove("hidden");
   resultsPanel.classList.add("hidden");
   conversationPanel.classList.add("hidden");
-  homeOnlyContent.classList.add("hidden");
+  
+  updateHomeOnlyContent();
 
   practiceModeTitle.textContent =
     PRACTICE_MODES[practiceMode].label;
@@ -3269,7 +3270,8 @@ function startNachoBuilder(cards) {
   studySetPanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
   conversationPanel.classList.add("hidden");
-  homeOnlyContent.classList.add("hidden");
+  
+  updateHomeOnlyContent();
 
   nachoBuilderPanel.classList.remove("hidden");
 
