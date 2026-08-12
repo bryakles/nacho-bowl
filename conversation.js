@@ -76,8 +76,8 @@ let conversationReport = [];
 const conversationBtn =
   document.getElementById("conversationBtn");
 
-const conversationEntryPanel =
-  document.getElementById("conversationEntryPanel");
+const homeOnlyContent =
+  document.getElementById("homeOnlyContent");
 
 const conversationSelectionPanel =
   document.getElementById("conversationSelectionPanel");
@@ -146,6 +146,26 @@ const conversationNextBtn =
   document.getElementById("conversationNextBtn");
 
 // ============================================================
+// CONVERSATION AUTO-ACCENTS
+// ============================================================
+
+conversationWritingInput.addEventListener("input", () => {
+  const pos = conversationWritingInput.selectionStart;
+  const original = conversationWritingInput.value;
+
+  const converted =
+    original.replace(
+      /[AEIOUNY]/g,
+      ch => ACCENT_MAP[ch]
+    );
+
+  if (converted !== original) {
+    conversationWritingInput.value = converted;
+    conversationWritingInput.setSelectionRange(pos, pos);
+  }
+});
+
+// ============================================================
 // OPEN CONVERSATIONS
 // ============================================================
 
@@ -165,7 +185,11 @@ conversationBtn.addEventListener(
 
 async function openConversationSelection() {
 
-  conversationEntryPanel.classList.add("hidden");
+  saveCurrentPanel("conversationSelection");
+
+  if (homeOnlyContent) {
+    homeOnlyContent.classList.add("hidden");
+  }
   
   if (
     typeof filterPanel !==
@@ -606,38 +630,16 @@ function renderConversationList() {
       card.type =
         "button";
 
+      const levelMatch =
+        conversation.title.match(/^[0-5]/);
+      
+      const conversationLevel =
+        levelMatch
+          ? levelMatch[0]
+          : "default";
+      
       card.className =
-        "conversation-list-card";
-
-
-      // --------------------------------------------------------
-      // IMAGE
-      // --------------------------------------------------------
-
-      if (
-        conversation.imageURL
-      ) {
-
-        const image =
-          document.createElement(
-            "img"
-          );
-
-        image.src =
-          conversation.imageURL;
-
-        image.alt =
-          conversation.title;
-
-        image.className =
-          "conversation-list-image";
-
-        card.appendChild(
-          image
-        );
-
-      }
-
+        `conversation-list-card conversation-level-${conversationLevel}`;
 
       // --------------------------------------------------------
       // CONTENT
@@ -652,34 +654,34 @@ function renderConversationList() {
         "conversation-list-content";
 
 
-      const title =
-        document.createElement(
-          "h3"
+      const level =
+        conversation.title.match(/^[0-5]/)?.[0] || "";
+      
+      const titleText =
+        conversation.title.replace(
+          /^[0-5]\s*—\s*/,
+          ""
         );
-
-      title.textContent =
-        conversation.title;
-
-
+      
       const meta =
         document.createElement(
           "div"
         );
-
+      
       meta.className =
         "conversation-list-meta";
-
+      
       meta.textContent =
-        `Level ${conversation.level} • ${conversation.topic}`;
-
-
-      const description =
+        `Level ${level}:`;
+      
+      
+      const title =
         document.createElement(
-          "p"
+          "h3"
         );
-
-      description.textContent =
-        conversation.description;
+      
+      title.textContent =
+        titleText;
 
 
       content.appendChild(
@@ -688,10 +690,6 @@ function renderConversationList() {
 
       content.appendChild(
         meta
-      );
-
-      content.appendChild(
-        description
       );
 
       card.appendChild(
@@ -1504,8 +1502,8 @@ function parseQuestionCell(cell) {
     "EITHER_OR",
     "MULTIPLE_CHOICE",
     "SHORT_WRITE",
+    "SHORT_SPEAK",
     "LONG_WRITE",
-    "PHRASE"
   ];
 
   if (!validTypes.includes(type)) {
@@ -1754,33 +1752,6 @@ function parseQuestionCell(cell) {
 
     return question;
   }
-
-
-  // ----------------------------------------------------------
-  // PHRASE
-  //
-  // PHRASE is treated as a short production question for now.
-  // The answer is matched using the same keyword system.
-  // ----------------------------------------------------------
-
-  if (
-    type ===
-    "PHRASE"
-  ) {
-
-    question.acceptedKeywords =
-      question.answer
-        .split(/\s+OR\s+/i)
-        .map(answer =>
-          normalizeConversationAnswer(
-            answer
-          )
-        )
-        .filter(Boolean);
-
-    return question;
-  }
-
 
   // ----------------------------------------------------------
   // LONG WRITE
@@ -2040,16 +2011,6 @@ function showConversationQuestion() {
 
 
   // ----------------------------------------------------------
-  // RESET PER-QUESTION ATTEMPT COUNTER
-  //
-  // The teacher report maintains the permanent attempt
-  // count. This variable is only for the current interaction.
-  // ----------------------------------------------------------
-
-  conversationAttempts = 0;
-
-
-  // ----------------------------------------------------------
   // CLEAR OLD RESPONSE UI
   // ----------------------------------------------------------
 
@@ -2176,6 +2137,15 @@ function showConversationQuestion() {
       break;
 
 
+    case "SHORT_SPEAK":
+
+      showShortSpeak(
+        question
+      );
+
+      break;
+
+
     case "LONG_WRITE":
 
       showLongWriting();
@@ -2197,6 +2167,525 @@ function showConversationQuestion() {
 
 }
 
+function showShortSpeak(
+  question
+) {
+
+  // ----------------------------------------------------------
+  // SHORT SPEAK
+  //
+  // Student records their response.
+  // There is NO answer checking.
+  // Students can:
+  // - record
+  // - stop
+  // - listen
+  // - record again
+  // - download the recording
+  //
+  // Recordings use WebM format.
+  // ----------------------------------------------------------
+
+  // Clear only the standard response controls.
+  // Do not clear the recording UI we are about to create.
+
+
+  // ----------------------------------------------------------
+  // PROMPT
+  // ----------------------------------------------------------
+
+  conversationPrompt.textContent =
+    "";
+
+
+  if (
+    question.ask
+  ) {
+
+    playSpanishText(
+      getConversationDisplayPrompt(
+        question.ask
+      )
+    );
+
+  }
+
+
+  // ----------------------------------------------------------
+  // CREATE RECORDING UI
+  // ----------------------------------------------------------
+
+  const recorderContainer =
+    document.createElement(
+      "div"
+    );
+
+  recorderContainer.className =
+    "short-speak-container";
+
+
+  // ----------------------------------------------------------
+  // RECORD BUTTON
+  // ----------------------------------------------------------
+
+  const recordButton =
+    document.createElement(
+      "button"
+    );
+
+  recordButton.type =
+    "button";
+
+  recordButton.textContent =
+    "🎙️ Start Recording";
+
+  recordButton.className =
+    "btn btn-primary conversation-button";
+
+
+  // ----------------------------------------------------------
+  // STOP BUTTON
+  // ----------------------------------------------------------
+
+  const stopButton =
+    document.createElement(
+      "button"
+    );
+
+  stopButton.type =
+    "button";
+
+  stopButton.textContent =
+    "⏹️ Stop";
+
+  stopButton.className =
+    "btn btn-primary conversation-button";
+
+  stopButton.disabled =
+    true;
+
+
+  // ----------------------------------------------------------
+  // AUDIO PLAYER
+  // ----------------------------------------------------------
+
+  const audio =
+    document.createElement(
+      "audio"
+    );
+
+  audio.controls =
+    true;
+
+  audio.style.display =
+    "none";
+
+  // ----------------------------------------------------------
+  // DOWNLOAD BUTTON
+  // ----------------------------------------------------------
+
+  const downloadButton =
+    document.createElement(
+      "button"
+    );
+
+  downloadButton.type =
+    "button";
+
+  downloadButton.textContent =
+    "💾 Download Recording";
+
+  downloadButton.className =
+    "btn btn-primary conversation-button";
+
+  downloadButton.disabled =
+    true;
+
+  // ----------------------------------------------------------
+  // STATUS
+  // ----------------------------------------------------------
+
+  const status =
+    document.createElement(
+      "div"
+    );
+
+  status.className =
+    "short-speak-status";
+
+  status.textContent =
+    "Ready to record.";
+
+
+  // ----------------------------------------------------------
+  // ADD TO PAGE
+  // ----------------------------------------------------------
+
+  recorderContainer.appendChild(
+    status
+  );
+
+  recorderContainer.appendChild(
+    recordButton
+  );
+
+  recorderContainer.appendChild(
+    stopButton
+  );
+
+  recorderContainer.appendChild(
+    audio
+  );
+
+  recorderContainer.appendChild(
+    downloadButton
+  );
+
+  conversationFeedback
+    .parentNode
+    .insertBefore(
+      recorderContainer,
+      conversationFeedback
+    );
+
+
+  // ----------------------------------------------------------
+  // RECORDING VARIABLES
+  // ----------------------------------------------------------
+
+  let mediaRecorder =
+    null;
+
+  let audioChunks =
+    [];
+
+  let audioBlob =
+    null;
+
+  let recordingDownloaded =
+  false;
+
+  // ----------------------------------------------------------
+  // CREATE REPORT ENTRY FOR THIS SHORT SPEAK QUESTION
+  // ----------------------------------------------------------
+  
+  recordQuestionAttempt(
+    question,
+    "",
+    false
+  );
+
+  // ----------------------------------------------------------
+  // DOWNLOAD FILENAME
+  // ----------------------------------------------------------
+  
+  function getShortSpeakFilename() {
+
+  const studentName =
+    currentUser?.name ||
+    "Student";
+
+  const title =
+    conversationTitle?.textContent?.trim() ||
+    "Conversation";
+
+  const date =
+    new Date()
+      .toISOString()
+      .slice(0, 10);
+
+  return (
+    `${sanitizeFilenamePart(studentName)} - ` +
+    `${sanitizeFilenamePart(title)} - ` +
+    `${date}.webm`
+  );
+}
+
+
+function sanitizeFilenamePart(text) {
+
+  return String(text)
+    .trim()
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/\s+/g, " ");
+
+}
+  
+  
+   // ----------------------------------------------------------
+  // START RECORDING
+  // ----------------------------------------------------------
+
+  recordButton.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        const stream =
+          await navigator
+            .mediaDevices
+            .getUserMedia({
+              audio: true
+            });
+
+
+        audioChunks =
+          [];
+
+
+        mediaRecorder =
+          new MediaRecorder(
+            stream,
+            {
+              mimeType:
+                "audio/webm"
+            }
+          );
+
+
+        mediaRecorder.addEventListener(
+          "dataavailable",
+          event => {
+
+            if (
+              event.data.size >
+              0
+            ) {
+
+              audioChunks.push(
+                event.data
+              );
+
+            }
+
+          }
+        );
+
+
+        mediaRecorder.addEventListener(
+          "stop",
+          () => {
+
+            audioBlob =
+              new Blob(
+                audioChunks,
+                {
+                  type:
+                    "audio/webm"
+                }
+              );
+
+
+            const audioURL =
+              URL.createObjectURL(
+                audioBlob
+              );
+
+
+            audio.src =
+              audioURL;
+            
+            audio.style.display =
+              "block";
+            
+            downloadButton.disabled =
+              false;
+
+            conversationNextBtn.classList.remove(
+              "hidden"
+            );
+            
+            status.textContent =
+              "Recording ready. Listen before downloading.";
+            
+            recordButton.disabled =
+              false;
+            
+            stopButton.disabled =
+              true;
+
+
+            stream
+              .getTracks()
+              .forEach(
+                track =>
+                  track.stop()
+              );
+
+          }
+        );
+
+
+        mediaRecorder.start();
+
+
+        status.textContent =
+          "🔴 Recording...";
+
+
+        recordButton.disabled =
+          true;
+
+        stopButton.disabled =
+          false;
+
+
+        audio.style.display =
+          "none";
+
+      }
+
+      catch (
+        error
+      ) {
+
+        console.error(
+          error
+        );
+
+        status.textContent =
+          "⚠️ Microphone access was not available.";
+
+      }
+
+    }
+  );
+
+
+  // ----------------------------------------------------------
+  // STOP RECORDING
+  // ----------------------------------------------------------
+
+  stopButton.addEventListener(
+    "click",
+    () => {
+
+      if (
+        mediaRecorder &&
+        mediaRecorder.state !==
+        "inactive"
+      ) {
+
+        mediaRecorder.stop();
+
+      }
+
+    }
+  );
+
+  // ----------------------------------------------------------
+  // DOWNLOAD RECORDING
+  // ----------------------------------------------------------
+  
+  downloadButton.addEventListener(
+  "click",
+  () => {
+
+    if (!audioBlob) {
+      return;
+    }
+
+    const downloadURL =
+      URL.createObjectURL(
+        audioBlob
+      );
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+    link.href =
+      downloadURL;
+
+    link.download =
+      getShortSpeakFilename();
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    link.remove();
+
+    URL.revokeObjectURL(
+      downloadURL
+    );
+
+
+    // --------------------------------------------------------
+    // RECORD THAT THE STUDENT DOWNLOADED THE RECORDING
+    // --------------------------------------------------------
+
+    recordingDownloaded =
+      true;
+
+
+    status.textContent =
+      "Recording downloaded ✓";
+
+
+    // --------------------------------------------------------
+    // SAVE SHORT SPEAK ATTEMPT
+    // --------------------------------------------------------
+
+    const question =
+      getCurrentQuestion();
+
+    if (question) {
+
+      const reportItem =
+        conversationReport.find(
+          item =>
+            item.conceptIndex ===
+              currentConceptIndex &&
+            item.questionIndex ===
+              currentQuestionIndex &&
+            item.type ===
+              "SHORT_SPEAK"
+        );
+      
+      if (reportItem) {
+      
+        reportItem.responses = [
+          {
+            text:
+              "Recording downloaded",
+      
+            accepted:
+              true,
+      
+            downloaded:
+              true
+          }
+        ];
+      
+      }
+
+    }
+
+
+    // --------------------------------------------------------
+    // ALLOW STUDENT TO MOVE ON
+    // --------------------------------------------------------
+
+    conversationFeedback.textContent =
+      "Recording downloaded ✓ You may continue.";
+
+    conversationFeedback.className =
+      "conversation-feedback correct";
+
+
+    conversationNextBtn.classList.remove(
+      "hidden"
+    );
+
+  }
+);
+
+}
 
 // ============================================================
 // CLEAR RESPONSE AREAS
@@ -2277,6 +2766,21 @@ function clearConversationResponseAreas() {
 
     conversationSubmitWriting.disabled =
       false;
+
+  }
+  
+  // ----------------------------------------------------------
+  // REMOVE OLD RECORDING UI
+  // ----------------------------------------------------------
+
+  const oldRecorder =
+    conversationPanel.querySelector(
+      ".short-speak-container"
+    );
+
+  if (oldRecorder) {
+
+    oldRecorder.remove();
 
   }
 
@@ -2720,18 +3224,11 @@ function checkConversationAnswer(
     return;
   }
 
-
-  // ----------------------------------------------------------
-  // COUNT ATTEMPT
-  // ----------------------------------------------------------
-
-  conversationAttempts++;
-
-
   // ----------------------------------------------------------
   // LONG WRITE
   //
   // Save response and allow student to continue.
+  // LONG_WRITE does NOT count as correct/incorrect.
   // ----------------------------------------------------------
 
   if (
@@ -2774,7 +3271,8 @@ function checkConversationAnswer(
     false;
 
   let flagForReview =
-  false;
+    false;
+
 
   // ----------------------------------------------------------
   // YES / NO
@@ -2838,26 +3336,26 @@ function checkConversationAnswer(
     question.type ===
     "SHORT_WRITE"
   ) {
-  
+
     const result =
       evaluateShortWrite(
         cleanedAnswer,
         question.acceptedKeywords
       );
-  
-  
+
+
     correct =
       result.correct;
-  
-  
+
+
     flagForReview =
       result.flagForReview;
-  
+
   }
 
 
   // ----------------------------------------------------------
-  // RECORD THE ATTEMPT
+  // RECORD ATTEMPT
   // ----------------------------------------------------------
 
   recordQuestionAttempt(
@@ -2867,17 +3365,18 @@ function checkConversationAnswer(
     flagForReview
   );
 
+
   // ----------------------------------------------------------
   // CORRECT
   // ----------------------------------------------------------
 
   if (correct) {
-  
+
     conversationFeedback.textContent =
       "¡Muy bien! ✓";
-  
-      conversationFeedback.className =
-        "conversation-feedback correct";
+
+    conversationFeedback.className =
+      "conversation-feedback correct";
 
 
     disableCurrentConversationResponse();
@@ -2892,50 +3391,172 @@ function checkConversationAnswer(
 
   }
 
-
- // ----------------------------------------------------------
-// INCORRECT
-//
-// The student does NOT advance.
-//
-// The current concept restarts at Q1.
-//
-// The attempt remains recorded.
-// ----------------------------------------------------------
-
-conversationFeedback.textContent =
-  "No exactamente. Vamos a repetir esta idea.";
-
-conversationFeedback.className =
-  "conversation-feedback incorrect";
-
-
-if (conversationRetryTimer) {
-
-  clearTimeout(
-    conversationRetryTimer
+  // ----------------------------------------------------------
+  // INCORRECT
+  //
+  // The incorrect answer counts as one strike
+  // for the CURRENT CONCEPT.
+  //
+  // On the SECOND strike, the student immediately
+  // returns to Question 1 of this concept.
+  // ----------------------------------------------------------
+  
+  conversationAttempts++;
+  
+  conversationFeedback.textContent =
+    `No exactamente. La respuesta correcta es: ${
+      getConversationCorrectAnswerText(
+        question
+      )
+    }`;
+  
+  conversationFeedback.className =
+    "conversation-feedback incorrect";
+  
+  
+  disableCurrentConversationResponse();
+  
+  
+  // ----------------------------------------------------------
+  // SECOND STRIKE
+  // ----------------------------------------------------------
+  
+  if (
+    conversationAttempts >= 2
+  ) {
+  
+    conversationFeedback.textContent =
+      `No exactamente. La respuesta correcta es: ${
+        getConversationCorrectAnswerText(
+          question
+        )
+      }<br><br>Vamos a practicar esta idea otra vez.`;
+  
+    conversationFeedback.className =
+      "conversation-feedback incorrect";
+  
+  
+    // Restart this concept.
+    currentQuestionIndex = 0;
+  
+    conversationAttempts = 0;
+  
+    currentConceptMastered = false;
+  
+  
+    // Give the student a moment to see the feedback
+    // before restarting the concept.
+    conversationRetryTimer =
+      setTimeout(
+        () => {
+  
+          conversationRetryTimer =
+            null;
+  
+          showConversationQuestion();
+  
+        },
+        1500
+      );
+  
+  
+    return;
+  
+  }
+  
+  
+  // ----------------------------------------------------------
+  // FIRST STRIKE
+  //
+  // Allow the student to continue normally.
+  // ----------------------------------------------------------
+  
+  conversationNextBtn.classList.remove(
+    "hidden"
   );
 
 }
 
+function getConversationCorrectAnswerText(
+  question
+) {
 
-conversationRetryTimer =
-  setTimeout(
-    () => {
+  if (
+    question.type ===
+    "YES_NO"
+  ) {
 
-      conversationRetryTimer =
-        null;
+    return question.answer;
 
-      resetCurrentConcept();
+  }
 
-      showConversationQuestion();
 
-    },
-    900
+  if (
+    question.type ===
+    "EITHER_OR"
+  ) {
+
+    return question.answer;
+
+  }
+
+
+  if (
+    question.type ===
+    "MULTIPLE_CHOICE"
+  ) {
+
+    const correctOption =
+      question.options.find(
+        option => {
+
+          const match =
+            option
+              .trim()
+              .match(
+                /^([A-Z])\./i
+              );
+
+          return (
+            match &&
+            match[1]
+              .toUpperCase() ===
+              question.correctOption
+          );
+
+        }
+      );
+
+
+    return (
+      correctOption ||
+      question.correctOption
+    );
+
+  }
+
+
+  if (
+    question.type ===
+    "SHORT_WRITE"
+  ) {
+
+    return (
+      question.answer ||
+      question.acceptedKeywords.join(
+        " / "
+      )
+    );
+
+  }
+
+
+  return (
+    question.answer ||
+    "—"
   );
 
 }
-
 
 // ============================================================
 // SHORT WRITE EVALUATION
@@ -3227,7 +3848,25 @@ function recordQuestionAttempt(
 
   }
 
-
+  if (
+    question.type ===
+    "SHORT_SPEAK"
+  ) {
+  
+    responses.push({
+  
+      text:
+        "Recording not downloaded",
+  
+      accepted:
+        false,
+  
+      downloaded:
+        false
+  
+    });
+  
+  }
   if (
     question.type ===
       "LONG_WRITE"
@@ -3248,31 +3887,49 @@ function recordQuestionAttempt(
 
   conversationReport.push({
 
-    conceptIndex:
-      currentConceptIndex,
+  conversation:
+    conversationData.title || "",
 
-    concept:
-      getCurrentConversationRow()
-        ?.concept || "",
+  studentName:
+    typeof currentStudentName !== "undefined"
+      ? currentStudentName
+      : "",
 
-    questionIndex:
-      currentQuestionIndex,
+  username:
+    typeof currentUsername !== "undefined"
+      ? currentUsername
+      : "",
 
-    questionNumber:
-      currentQuestionIndex + 1,
+  dateTime:
+    new Date().toLocaleString(),
 
-    type:
-      question.type,
+  conceptIndex:
+    currentConceptIndex,
 
-    prompt:
-      question.prompt,
+  concept:
+    getCurrentConversationRow()
+      ?.concept || "",
 
-    attempts:
-      1,
+  questionIndex:
+    currentQuestionIndex,
 
-    responses
+  questionNumber:
+    currentQuestionIndex + 1,
 
-  });
+  type:
+    question.type,
+
+  prompt:
+    question.ask ||
+    question.show ||
+    "",
+
+  attempts:
+    1,
+
+  responses
+
+});
 
 }
 
@@ -3378,11 +4035,7 @@ conversationNextBtn.addEventListener(
 
 
     // --------------------------------------------------------
-    // CONCEPT MASTERED
-    //
-    // Reaching the end of the question sequence means the
-    // student has successfully demonstrated mastery of
-    // this concept.
+    // CONCEPT COMPLETE
     // --------------------------------------------------------
 
     if (
@@ -3390,15 +4043,57 @@ conversationNextBtn.addEventListener(
       row.questions.length
     ) {
 
+      // ------------------------------------------------------
+      // TWO OR MORE STRIKES
+      //
+      // Repeat this concept from Question 1.
+      // ------------------------------------------------------
+
+      if (
+        conversationAttempts >= 2
+      ) {
+
+        conversationFeedback.textContent =
+          "Vamos a practicar esta idea otra vez.";
+
+        conversationFeedback.className =
+          "conversation-feedback incorrect";
+
+
+        currentQuestionIndex =
+          0;
+
+        conversationAttempts =
+          0;
+
+        currentConceptMastered =
+          false;
+
+
+        showConversationQuestion();
+
+        return;
+
+      }
+
+
+      // ------------------------------------------------------
+      // ZERO OR ONE STRIKE
+      //
+      // Concept is complete.
+      // Move permanently to the next concept.
+      // ------------------------------------------------------
+
       currentConceptMastered =
         true;
 
 
-      // Move to the next concept.
-
       currentConceptIndex++;
 
       currentQuestionIndex =
+        0;
+
+      conversationAttempts =
         0;
 
       currentConceptMastered =
@@ -3682,7 +4377,7 @@ function renderConversationReport() {
     "Question",
     "Type",
     "Attempts",
-    "Student Short_Write Responses"
+    "Student Response"
   ]
     .forEach(
       headingText => {
@@ -3797,77 +4492,93 @@ function renderConversationReport() {
         item.type ===
         "SHORT_WRITE"
       ) {
-
+      
         item.responses.forEach(
           response => {
-
+      
             const responseDiv =
               document.createElement(
                 "div"
               );
-
+      
             responseDiv.className =
               "conversation-report-response";
-
-
+      
+      
             const marker =
               document.createElement(
                 "span"
               );
-
-
+      
+      
             if (
               response.accepted
             ) {
-
+      
               marker.textContent =
                 "✓ Accepted ";
-
+      
               marker.className =
                 "conversation-report-accepted";
-
+      
             } else {
-
+      
               marker.textContent =
                 "⚠ Review ";
-
+      
               marker.className =
                 "conversation-report-flagged";
-
+      
             }
-
-
+      
+      
             responseDiv.appendChild(
               marker
             );
-
-
+      
+      
             const text =
               document.createElement(
                 "span"
               );
-
+      
             text.textContent =
               response.text;
-
-
+      
+      
             responseDiv.appendChild(
-              text
-            );
-
-
+              text );
+      
+      
             responseCell.appendChild(
               responseDiv
             );
-
+      
           }
         );
-
+      
+      
+      } else if (
+        item.type ===
+        "SHORT_SPEAK"
+      ) {
+      
+        const downloaded =
+          item.responses.some(
+            response =>
+              response.downloaded === true
+          );
+      
+        responseCell.textContent =
+          downloaded
+            ? "🎙️ Recording downloaded ✓"
+            : "⚠️ Recording NOT downloaded";
+      
       } else {
-
+      
         responseCell.textContent =
           "—";
-
+      
       }
 
 
@@ -4264,21 +4975,8 @@ conversationSelectionBackBtn.addEventListener(
       "hidden"
     );
 
+    showFilterPanel();
 
-    if (conversationEntryPanel) {
-      conversationEntryPanel.classList.remove("hidden");
-    }
-    
-    if (
-      typeof filterPanel !==
-      "undefined"
-    ) {
-    
-      filterPanel.classList.remove(
-        "hidden"
-      );
-    
-    }
   }
 );
 
