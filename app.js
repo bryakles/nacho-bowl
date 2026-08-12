@@ -2862,7 +2862,13 @@ function updateHomeOnlyContent() {
   if (!conversationHomeEntry) return;
 
   const isHome =
-    !filterPanel.classList.contains("hidden");
+    !filterPanel.classList.contains("hidden") &&
+    practicePanel.classList.contains("hidden") &&
+    studySetPanel.classList.contains("hidden") &&
+    nachoBuilderPanel.classList.contains("hidden") &&
+    conversationSelectionPanel.classList.contains("hidden") &&
+    conversationPanel.classList.contains("hidden") &&
+    resultsPanel.classList.contains("hidden");
 
   conversationHomeEntry.classList.toggle(
     "hidden",
