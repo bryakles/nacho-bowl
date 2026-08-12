@@ -3288,10 +3288,10 @@ function startNachoBuilder(cards) {
   studySetPanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
   conversationPanel.classList.add("hidden");
-  
-  updateHomeOnlyContent();
 
   nachoBuilderPanel.classList.remove("hidden");
+
+  updateHomeOnlyContent();
 
   nachoBuilderGuessedLetters.clear();
   nachoBuilderWrongGuesses = 0;
@@ -3306,9 +3306,9 @@ function startNachoBuilder(cards) {
   const randomCard = cards[Math.floor(Math.random() * cards.length)];
 
   nachoBuilderCurrentSpanish = randomCard.spanish;
-  
+
   nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
-  
+
   console.log("Nacho Builder word:", nachoBuilderWord);
   console.log("Original card:", randomCard);
 
