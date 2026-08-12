@@ -144,6 +144,30 @@ let sessionStartLength = 0;
 let practiceActive = false;
 let lastFilterSettings = null;  // For "practice again" button
 
+const savedFilterSettings =
+  localStorage.getItem("nachoLastFilterSettings");
+
+if (savedFilterSettings) {
+  try {
+    const saved = JSON.parse(savedFilterSettings);
+
+    selectedLevels = new Set(saved.levels || []);
+    selectedUnits = new Set(saved.units || []);
+    selectedSets = new Set(saved.sets || []);
+
+    lastFilterSettings = {
+      levels: new Set(selectedLevels),
+      units: new Set(selectedUnits),
+      sets: new Set(selectedSets)
+    };
+  } catch (error) {
+    console.error(
+      "Could not restore filter settings:",
+      error
+    );
+  }
+}
+
 let studySetSortColumn = "spanish";
 let studySetSortDirection = "asc";
 
@@ -540,12 +564,51 @@ function showPracticeScreen() {
   updateFooterNachos();
 }
 
+function saveCurrentPanel(panelName) {
+  localStorage.setItem("nachoCurrentPanel", panelName);
+}
+
+function loadFilterSettings() {
+  const saved =
+    localStorage.getItem("nachoLastFilterSettings");
+
+  if (!saved) {
+    return;
+  }
+
+  try {
+    const settings = JSON.parse(saved);
+
+    selectedLevels = new Set(settings.levels || []);
+    selectedUnits = new Set(settings.units || []);
+    selectedSets = new Set(settings.sets || []);
+
+    lastFilterSettings = {
+      levels: new Set(selectedLevels),
+      units: new Set(selectedUnits),
+      sets: new Set(selectedSets)
+    };
+
+  } catch (error) {
+    console.error(
+      "Could not restore filter settings:",
+      error
+    );
+  }
+}
+
 function showFilterPanel() {
+  saveCurrentPanel("filter");
+  
   filterPanel.classList.remove("hidden");
   practicePanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
 
+  loadFilterSettings();
+
   renderLevelChips();
+  renderUnitChips();
+  renderSetChips();
   loadMyStudySets();
   updateCardCountPreview();
 }
@@ -619,6 +682,15 @@ function renderLevelChips() {
           selectedUnits.clear();
           selectedSets.clear();
 
+          localStorage.setItem(
+            "nachoLastFilterSettings",
+            JSON.stringify({
+              levels: [...selectedLevels],
+              units: [...selectedUnits],
+              sets: [...selectedSets]
+            })
+          );
+
           renderUnitChips();
           renderSetChips();
           updateCardCountPreview();
@@ -684,6 +756,15 @@ function renderUnitChips() {
 
           // Reset set selections when units change.
           selectedSets.clear();
+
+          localStorage.setItem(
+            "nachoLastFilterSettings",
+            JSON.stringify({
+              levels: [...selectedLevels],
+              units: [...selectedUnits],
+              sets: [...selectedSets]
+            })
+          );
 
           renderSetChips();
           updateCardCountPreview();
@@ -758,6 +839,15 @@ function renderSetChips() {
           toggleSelection(
             selectedSets,
             set
+          );
+
+          localStorage.setItem(
+            "nachoLastFilterSettings",
+            JSON.stringify({
+              levels: [...selectedLevels],
+              units: [...selectedUnits],
+              sets: [...selectedSets]
+            })
           );
 
           updateCardCountPreview();
@@ -843,6 +933,24 @@ startPracticeBtn.addEventListener("click", () => {
     sets: new Set(selectedSets),
   };
 
+  localStorage.setItem(
+  "nachoLastFilterSettings",
+  JSON.stringify({
+    levels: [...selectedLevels],
+    units: [...selectedUnits],
+    sets: [...selectedSets]
+  })
+);
+  
+  localStorage.setItem(
+    "nachoLastFilterSettings",
+    JSON.stringify({
+      levels: [...selectedLevels],
+      units: [...selectedUnits],
+      sets: [...selectedSets]
+    })
+  );
+
   if (practiceMode === "nacho-builder") {
     startNachoBuilder(filtered);
     return;
@@ -871,7 +979,7 @@ nachoNextWordBtn.addEventListener("click", () => {
 
 nachoBackBtn.addEventListener("click", () => {
   nachoBuilderPanel.classList.add("hidden");
-  filterPanel.classList.remove("hidden");
+  showFilterPanel();
 });
 
 function openTeacherSettings() {
@@ -963,6 +1071,9 @@ function shuffleArray(arr) {
 }
 
 function beginPractice(filtered) {
+
+  saveCurrentPanel("practice");
+  
   console.log("beginPractice() called");
   console.log("MODE:", practiceMode);
   console.log(filtered.map(card => card.spanish));
@@ -972,14 +1083,28 @@ function beginPractice(filtered) {
   sessionStartMode = practiceMode;
   sessionStartLength = maxCardsPerSession;
 
+  localStorage.setItem(
+    "nachoPracticeMode",
+    practiceMode
+  );
+  
+  localStorage.setItem(
+    "nachoPracticeLength",
+    maxCardsPerSession
+  );
+
   if (practiceMode === "ordered-answer") {
     practiceCards = [...filtered].slice(0, maxCardsPerSession);
   } else {
     practiceCards = shuffleArray(filtered).slice(0, maxCardsPerSession);
   }
-
-  resetPracticeState();
-  practiceActive = true;
+  
+  localStorage.setItem(
+    "nachoPracticeCards",
+    JSON.stringify(practiceCards)
+  );
+  
+  resetPracticeState();  practiceActive = true;
 
   sessionModeLabel =
     PRACTICE_MODES[practiceMode]?.label || practiceMode;
@@ -987,9 +1112,6 @@ function beginPractice(filtered) {
   filterPanel.classList.add("hidden");
   practicePanel.classList.remove("hidden");
   resultsPanel.classList.add("hidden");
-  conversationPanel.classList.add("hidden");
-  
-  updateHomeOnlyContent();
 
   practiceModeTitle.textContent =
     PRACTICE_MODES[practiceMode].label;
@@ -2254,12 +2376,12 @@ nextBtn.addEventListener(
   advanceCard
 );
 
-// Return from study set
+// Return from study set to filter/home screen
 backFromStudySet.addEventListener(
   "click",
   () => {
     studySetPanel.classList.add("hidden");
-    filterPanel.classList.remove("hidden");
+    showFilterPanel();
   }
 );
 
@@ -2622,15 +2744,28 @@ let currentStudySetCards = [];
 
 function showStudySet(cards) {
 
+  saveCurrentPanel("studySet");
+
+  loadFilterSettings();
+
   currentStudySetCards = cards;
 
+  localStorage.setItem(
+    "nachoCurrentStudySetCards",
+    JSON.stringify(cards)
+  );
+
+  localStorage.setItem(
+    "nachoCurrentPanel",
+    "studySet"
+  );
+
   filterPanel.classList.add("hidden");
-  practicePanel.classList.remove("hidden");
+  practicePanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
-  conversationPanel.classList.add("hidden");
-  
-  updateHomeOnlyContent();
-  
+  conversationSelectionPanel?.classList.add("hidden");
+  conversationPanel?.classList.add("hidden");
+
   studySetPanel.classList.remove("hidden");
 
   studySetContainer.innerHTML = `
@@ -2853,28 +2988,6 @@ function showStudySet(cards) {
       block: "start"
     });
   }
-
-function updateHomeOnlyContent() {
-  const conversationHomeEntry =
-    document.getElementById("conversationHomeEntry");
-
-  if (!conversationHomeEntry) {
-    console.log("NO conversationHomeEntry FOUND");
-    return;
-  }
-
-  console.log(
-    "BEFORE:",
-    conversationHomeEntry.className
-  );
-
-  conversationHomeEntry.classList.add("hidden");
-
-  console.log(
-    "AFTER:",
-    conversationHomeEntry.className
-  );
-}
 
 // ============================================================
 // STUDY SET SELECTION UI
@@ -3272,40 +3385,61 @@ const spanishKeyboard = [
 
 function startNachoBuilder(cards) {
 
+  saveCurrentPanel("nachoBuilder");
+  
+  loadFilterSettings();
+  
   filterPanel.classList.add("hidden");
   practicePanel.classList.add("hidden");
   studySetPanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
-  conversationPanel.classList.add("hidden");
+  conversationSelectionPanel?.classList.add("hidden");
+  conversationPanel?.classList.add("hidden");
 
   nachoBuilderPanel.classList.remove("hidden");
-
-  updateHomeOnlyContent();
 
   nachoBuilderGuessedLetters.clear();
   nachoBuilderWrongGuesses = 0;
 
   updateNachoPracticeSets();
-
   updateNachoBuilderBowl();
   updateNachoBuilderStrikes();
 
-  nachoBuilderCurrentSet = [...lastFilterSettings.sets].join(", ");
+  nachoBuilderCurrentSet =
+    selectedSets.size
+      ? [...selectedSets].join(", ")
+      : "";
 
-  const randomCard = cards[Math.floor(Math.random() * cards.length)];
+    const randomCard =
+    cards[Math.floor(Math.random() * cards.length)];
 
-  nachoBuilderCurrentSpanish = randomCard.spanish;
+  nachoBuilderCurrentSpanish =
+    randomCard.spanish;
 
-  nachoBuilderWord = removeSpanishArticle(randomCard.spanish).toLowerCase();
+  nachoBuilderWord =
+    removeSpanishArticle(randomCard.spanish).toLowerCase();
+
+  localStorage.setItem(
+    "nachoBuilderCurrentSpanish",
+    nachoBuilderCurrentSpanish
+  );
+
+  localStorage.setItem(
+    "nachoBuilderCards",
+    JSON.stringify(cards)
+  );
+
+  localStorage.setItem(
+    "nachoCurrentPanel",
+    "nachoBuilder"
+  );
 
   console.log("Nacho Builder word:", nachoBuilderWord);
   console.log("Original card:", randomCard);
 
   renderNachoBuilderWord();
-  console.log("Rendering Nacho Keyboard");
   renderNachoBuilderKeyboard();
   updateNachoBuilderBowl();
-
 }
 
 function removeSpanishArticle(word) {
@@ -3346,11 +3480,16 @@ function renderNachoBuilderWord() {
 }
 
 function updateNachoPracticeSets() {
-  const selectedSetNames = [...lastFilterSettings.sets];
+  const selectedSetNames =
+    lastFilterSettings?.sets
+      ? [...lastFilterSettings.sets]
+      : [];
 
   nachoPracticeSets.innerHTML = `
     <strong>Practicing:</strong>
-    ${selectedSetNames.join(" · ")}
+    ${selectedSetNames.length
+      ? selectedSetNames.join(" · ")
+      : "Saved practice set"}
   `;
 }
 
@@ -3604,17 +3743,224 @@ function updateNachoBuilderStrikes() {
 // INIT
 // ============================================================
 loadTeacherSettings();
+
 loadData().then(() => {
-  const savedUsername = localStorage.getItem("nachoCurrentUser");
+  const savedUsername =
+    localStorage.getItem("nachoCurrentUser");
 
-  if (savedUsername) {
-    const user = allAccounts.find(
-      a => a.username === savedUsername
-    );
+  if (!savedUsername) {
+    return;
+  }
 
-    if (user) {
-      currentUser = user;
-      showPracticeScreen();
+  const user = allAccounts.find(
+    a => a.username === savedUsername
+  );
+
+  if (!user) {
+    return;
+  }
+
+  currentUser = user;
+
+  const savedPanel =
+    localStorage.getItem("nachoCurrentPanel");
+
+  if (savedPanel === "filter") {
+    showFilterPanel();
+    return;
+  }
+
+  // ----------------------------------------------------------
+  // RESTORE PRACTICE SCREEN
+  // ----------------------------------------------------------
+
+  practiceScreen.classList.remove("hidden");
+  loginScreen.classList.add("hidden");
+
+  welcomeName.textContent =
+    currentUser.name;
+
+  renderModeChips();
+  renderAttemptHistory();
+  updateFooterNachos();
+
+  // ----------------------------------------------------------
+  // RESTORE STUDY SET
+  // ----------------------------------------------------------
+
+  if (savedPanel === "studySet") {
+
+    const savedStudySetCards =
+      localStorage.getItem("nachoCurrentStudySetCards");
+
+    if (savedStudySetCards) {
+
+      const cards =
+        JSON.parse(savedStudySetCards);
+
+      filterPanel.classList.add("hidden");
+      practicePanel.classList.add("hidden");
+      resultsPanel.classList.add("hidden");
+      conversationSelectionPanel?.classList.add("hidden");
+      conversationPanel?.classList.add("hidden");
+
+      showStudySet(cards);
+
+    } else {
+
+      showFilterPanel();
+
+    }
+
+    return;
+  }
+
+
+  // ----------------------------------------------------------
+  // RESTORE CONVERSATIONS
+  // ----------------------------------------------------------
+
+  if (savedPanel === "conversationSelection") {
+  
+    filterPanel.classList.add("hidden");
+    practicePanel.classList.add("hidden");
+    studySetPanel.classList.add("hidden");
+    resultsPanel.classList.add("hidden");
+    nachoBuilderPanel.classList.add("hidden");
+    conversationPanel?.classList.add("hidden");
+  
+    conversationSelectionPanel?.classList.remove("hidden");
+  
+    loadConversationIndex();
+  
+    return;
+  }
+  
+  // ----------------------------------------------------------
+  // RESTORE NACHO BUILDER
+  // ----------------------------------------------------------
+
+  if (savedPanel === "nachoBuilder") {
+
+    const savedNachoCards =
+      localStorage.getItem("nachoBuilderCards");
+
+    const savedNachoSpanish =
+      localStorage.getItem("nachoBuilderCurrentSpanish");
+
+    if (savedNachoCards && savedNachoSpanish) {
+
+      const cards =
+        JSON.parse(savedNachoCards);
+
+      filterPanel.classList.add("hidden");
+      practicePanel.classList.add("hidden");
+      studySetPanel.classList.add("hidden");
+      resultsPanel.classList.add("hidden");
+      conversationSelectionPanel?.classList.add("hidden");
+      conversationPanel?.classList.add("hidden");
+
+      nachoBuilderPanel.classList.remove("hidden");
+
+      nachoBuilderGuessedLetters.clear();
+      nachoBuilderWrongGuesses = 0;
+
+      nachoBuilderCurrentSpanish =
+        savedNachoSpanish;
+
+      nachoBuilderWord =
+        removeSpanishArticle(
+          savedNachoSpanish
+        ).toLowerCase();
+
+      updateNachoBuilderBowl();
+      updateNachoBuilderStrikes();
+
+      renderNachoBuilderWord();
+      renderNachoBuilderKeyboard();
+
+    } else {
+
+      showFilterPanel();
+
+    }
+
+    return;
+  }
+
+  // ----------------------------------------------------------
+  // RESTORE PRACTICE SESSION
+  // ----------------------------------------------------------
+
+  if (savedPanel === "practice") {
+
+    const savedPracticeCards =
+      localStorage.getItem("nachoPracticeCards");
+
+    const savedPracticeMode =
+      localStorage.getItem("nachoPracticeMode");
+
+    const savedPracticeLength =
+      localStorage.getItem("nachoPracticeLength");
+
+    if (
+      savedPracticeCards &&
+      savedPracticeMode
+    ) {
+
+      practiceCards =
+        JSON.parse(savedPracticeCards);
+
+      practiceMode =
+        savedPracticeMode;
+
+      maxCardsPerSession =
+        Number(savedPracticeLength) ||
+        practiceCards.length;
+
+      sessionStartMode =
+        practiceMode;
+
+      sessionStartLength =
+        maxCardsPerSession;
+
+      resetPracticeState();
+      practiceActive = true;
+
+      sessionModeLabel =
+        PRACTICE_MODES[practiceMode]?.label ||
+        practiceMode;
+
+      filterPanel.classList.add("hidden");
+      practicePanel.classList.remove("hidden");
+      studySetPanel.classList.add("hidden");
+      resultsPanel.classList.add("hidden");
+      conversationSelectionPanel?.classList.add("hidden");
+      conversationPanel?.classList.add("hidden");
+
+      practiceModeTitle.textContent =
+        PRACTICE_MODES[practiceMode]?.label ||
+        practiceMode;
+
+      const setNames = [
+        ...new Set(
+          practiceCards.map(c => c.setName)
+        )
+      ].join(", ");
+
+      practiceSetLabel.textContent =
+        setNames;
+
+      updateStats();
+      showNextCard();
+
+      return;
     }
   }
+
+  // ----------------------------------------------------------
+  // DEFAULT: FILTER SCREEN
+  // ----------------------------------------------------------
+
+  showFilterPanel();
 });
