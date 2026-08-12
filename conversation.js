@@ -76,8 +76,8 @@ let conversationReport = [];
 const conversationBtn =
   document.getElementById("conversationBtn");
 
-const homeOnlyContent =
-  document.getElementById("homeOnlyContent");
+const conversationEntryPanel =
+  document.getElementById("conversationEntryPanel");
 
 const conversationSelectionPanel =
   document.getElementById("conversationSelectionPanel");
@@ -165,9 +165,7 @@ conversationBtn.addEventListener(
 
 async function openConversationSelection() {
 
-  if (homeOnlyContent) {
-    homeOnlyContent.classList.add("hidden");
-  }
+  conversationEntryPanel.classList.add("hidden");
   
   if (
     typeof filterPanel !==
@@ -4267,8 +4265,8 @@ conversationSelectionBackBtn.addEventListener(
     );
 
 
-    if (homeOnlyContent) {
-      homeOnlyContent.classList.remove("hidden");
+    if (conversationEntryPanel) {
+      conversationEntryPanel.classList.remove("hidden");
     }
     
     if (
