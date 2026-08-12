@@ -2855,7 +2855,6 @@ function showStudySet(cards) {
   }
 
 function updateHomeOnlyContent() {
-
   const conversationHomeEntry =
     document.getElementById("conversationHomeEntry");
 
@@ -2870,10 +2869,22 @@ function updateHomeOnlyContent() {
     conversationPanel.classList.contains("hidden") &&
     resultsPanel.classList.contains("hidden");
 
-  conversationHomeEntry.classList.toggle(
-    "hidden",
-    !isHome
-  );
+  console.log("HOME CHECK:", {
+    isHome,
+    filterHidden: filterPanel.classList.contains("hidden"),
+    practiceHidden: practicePanel.classList.contains("hidden"),
+    studySetHidden: studySetPanel.classList.contains("hidden"),
+    nachoBuilderHidden: nachoBuilderPanel.classList.contains("hidden"),
+    conversationSelectionHidden: conversationSelectionPanel.classList.contains("hidden"),
+    conversationHidden: conversationPanel.classList.contains("hidden"),
+    resultsHidden: resultsPanel.classList.contains("hidden")
+  });
+
+  if (isHome) {
+    conversationHomeEntry.classList.remove("hidden");
+  } else {
+    conversationHomeEntry.classList.add("hidden");
+  }
 }
 
 // ============================================================
