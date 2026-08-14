@@ -1,7 +1,39 @@
 // ============================================================
 // CONFIGURATION
 // ============================================================
-const CARDS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQwlCOUR8nLtmiCUgissCCNAnnpn5hbMM1dLjEKHO0OohmbdvbTldfI__y3TGA39DPb-ZYeVPHCD_Fb/pub?output=csv";
+const CARDS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQdtcoqgPsn4JIkFDVYhyaFFtxjhpdI4zkI0kJw5745vTFTzdwQ6wc8czNPQznrHEroZ7_SasZ5EAnd/pub";
+
+const LANGUAGE_CARD_TABS = {
+
+  Spanish: {
+    "Primary": "0",
+    "Spanish 1": "205808895",
+    "Spanish 2": "1458645106",
+    "Spanish 3": "2121606325",
+    "IB Spanish HL1": "178791964",
+    "IB Spanish HL2": "901279306"
+  },
+
+  French: {
+    "French 1": "1705935107",
+    "French 2": "261179956",
+    "French 3": "1787215808",
+    "IB French HL1": "1119347960",
+    "IB French HL2": "1193572625"
+  },
+
+  Korean: {
+    "Korean 1": "1877065019"
+  }
+
+};
+
+function getCardTabsForLanguage(language) {
+  return LANGUAGE_CARD_TABS[language] || {};
+}
+
+const CARDS_SHEET_URL = CARDS_CSV_URL;
+
 const ACCOUNTS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQOW8Q53UWa4lEsH1Sk9P_8KmWatSJCqjoCVpTA_uJ-XHH0HGsNzAaqyeuL-sBCNatAC4uAMhhlB6o3/pub?output=csv";
 const BORED_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJaLVNNtFXTgvxl_BVwGz4efup2RNkgyjdOBcW_DNS7Erg9slS40p8u95XN2p5j0M3iIDoPCswGQMv/pub?output=csv";
 const HISTORY_STORAGE_KEY = "spanish-practice-history-v1";
@@ -121,6 +153,7 @@ let allCards = [];       // All cards loaded from Google Sheet
 let allAccounts = [];    // All accounts loaded from Google Sheet
 let boredCards = [];     // Bored button emoji cards
 let currentUser = null;  // Logged-in student { name, username, password }
+let teacherSettings = {};
 
 let selectedLevels = new Set();
 let selectedUnits = new Set();
@@ -182,46 +215,118 @@ const practiceModes = {
   "nacho-builder": "🌮 Nacho Builder",
 };
 
-const TEACHER_PASSWORD = "nacho5";
 const TEACHER_SETTINGS_KEY = "nachoBowlTeacherSettings";
 
-function loadTeacherSettings() {
-  const saved = localStorage.getItem(TEACHER_SETTINGS_KEY);
+const TEACHER_SETTINGS_API =
+  "https://script.google.com/macros/s/AKfycbw275NX6F4cyt7jxhoVVHvoBQY6s1HrOsnsL5ws9AoEh2kK2Q6_hCEAmthwPt-TL9G3/exec"
 
-  if (saved) {
-    const settings = JSON.parse(saved);
-
-    Object.keys(settings).forEach(mode => {
-      if (PRACTICE_MODES[mode]) {
-        PRACTICE_MODES[mode].enabled = settings[mode];
-      }
-    });
-  }
-
-  updateTeacherLockIndicator();
-}
-
-function saveTeacherSettings() {
-  const settings = {};
-
+async function loadTeacherSettings() {
+  // Start with everything ON
   Object.keys(PRACTICE_MODES).forEach(mode => {
-    settings[mode] = PRACTICE_MODES[mode].enabled;
+    PRACTICE_MODES[mode].enabled = true;
   });
 
-  localStorage.setItem(
-    TEACHER_SETTINGS_KEY,
-    JSON.stringify(settings)
-  );
+  if (!currentUser) {
+    return;
+  }
+
+  let teacherKey = currentUser.accountType;
+
+  // Student C → Teacher C
+  if (teacherKey.startsWith("Student ")) {
+    teacherKey =
+      teacherKey.replace("Student ", "Teacher ");
+  }
+
+  const languageKey =
+    currentUser.language;
+
+  const period =
+    currentUser.period?.[0];
+
+  try {
+    const url =
+      `${TEACHER_SETTINGS_API}` +
+      `?action=getSettings` +
+      `&teacher=${encodeURIComponent(teacherKey)}` +
+      `&language=${encodeURIComponent(languageKey)}` +
+      `&period=${encodeURIComponent(period)}`;
+
+    const response =
+      await fetch(url);
+
+    const result =
+      await response.json();
+
+    console.log("TEACHER SETTINGS LOADED:", result.settings);
+
+    if (result.success && result.settings) {
+
+      Object.keys(result.settings).forEach(mode => {
+
+        if (PRACTICE_MODES[mode]) {
+          PRACTICE_MODES[mode].enabled =
+            result.settings[mode];
+        }
+
+      });
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Could not load teacher settings:",
+      error
+    );
+  }
 }
 
-function updateTeacherLockIndicator() {
-  const anyLocked = Object.values(PRACTICE_MODES)
-    .some(mode => !mode.enabled);
+async function saveTeacherSettings(
+  teacherKey,
+  languageKey,
+  period,
+  settings
+) {
+  if (
+    !teacherKey ||
+    !languageKey ||
+    !period ||
+    !settings
+  ) {
+    return;
+  }
 
-  document.body.classList.toggle(
-    "teacher-lock-active",
-    anyLocked
-  );
+  try {
+    const response = await fetch(
+      TEACHER_SETTINGS_API,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          action: "saveSettings",
+          teacher: teacherKey,
+          language: languageKey,
+          period: period,
+          settings: settings
+        })
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (!result.success) {
+      console.error(
+        "Teacher settings were not saved:",
+        result.error
+      );
+    }
+
+  } catch (error) {
+    console.error(
+      "Could not save teacher settings:",
+      error
+    );
+  }
 }
 
 // ============================================================
@@ -243,12 +348,38 @@ let nachoBuilderCurrentBowl = "";
 const loginScreen      = document.getElementById("loginScreen");
 const practiceScreen   = document.getElementById("practiceScreen");
 const loginForm        = document.getElementById("loginForm");
+
+const landingPanel     = document.getElementById("landingPanel");
+const landingWelcomeTarget =
+  document.getElementById("landingWelcomeTarget");
+const landingWelcomeEnglish =
+  document.getElementById("landingWelcomeEnglish");
+
+const studySetsNavBtn =
+  document.getElementById("studySetsNavBtn");
+
+const conversationNavBtn =
+  document.getElementById("conversationNavBtn");
+
+const conjugationNavBtn =
+  document.getElementById("conjugationNavBtn");
+
+const studySetsDescription =
+  document.getElementById("studySetsDescription");
+
+const conversationDescription =
+  document.getElementById("conversationDescription");
+
+const conjugationDescription =
+  document.getElementById("conjugationDescription");
+
 const usernameInput    = document.getElementById("usernameInput");
 const passwordInput    = document.getElementById("passwordInput");
 const loginError       = document.getElementById("loginError");
 const loadingMsg       = document.getElementById("loadingMsg");
 const welcomeName      = document.getElementById("welcomeName");
 const signOutBtn       = document.getElementById("signOutBtn");
+const homeBtn = document.getElementById("homeBtn");
 
 const filterPanel      = document.getElementById("filterPanel");
 const practicePanel    = document.getElementById("practicePanel");
@@ -268,12 +399,6 @@ const teacherModeBtn = document.getElementById("teacherModeBtn");
 const teacherDialog = document.getElementById("teacherDialog");
 const teacherModeList = document.getElementById("teacherModeList");
 const closeTeacherBtn = document.getElementById("closeTeacherBtn");
-
-const teacherPasswordDialog = document.getElementById("teacherPasswordDialog");
-const teacherPasswordInput = document.getElementById("teacherPasswordInput");
-const teacherPasswordSubmit = document.getElementById("teacherPasswordSubmit");
-const teacherPasswordCancel = document.getElementById("teacherPasswordCancel");
-const teacherPasswordError = document.getElementById("teacherPasswordError");
 
 const practiceSetLabel = document.getElementById("practiceSetLabel");
 const practiceProgress = document.getElementById("practiceProgress");
@@ -342,6 +467,86 @@ const historyContent = document.getElementById("historyContent");
 const boredEmoji = document.getElementById("boredEmoji");
 const boredWord = document.getElementById("boredWord");
 
+const landingFoodDecor =
+  document.getElementById("landingFoodDecor");
+
+const landingFoodFooter =
+  document.getElementById("landingFoodFooter");
+
+const loadingScreen =
+  document.getElementById("loadingScreen");
+
+const loadingMessage =
+  document.getElementById("loadingMessage");
+
+const loadingTacos =
+  document.getElementById("loadingTacos");
+
+const loadingProgressBar =
+  document.getElementById("loadingProgressBar");
+
+const loadingPercent =
+  document.getElementById("loadingPercent");
+
+// ============================================================
+// LOADING SCREEN
+// ============================================================
+
+const loadingMessages = [
+  "Warming up the kitchen...",
+  "Melting the cheese...",
+  "Adding a little spice...",
+  "Slicing the avocado...",
+  "Stacking your tacos...",
+  "Loading the good stuff...",
+  "Checking the salsa...",
+  "Almost ready...",
+  "Serving up Nacho Bowl..."
+];
+
+function updateLoadingProgress(percent, messageIndex = null) {
+
+  const safePercent =
+    Math.max(0, Math.min(100, percent));
+
+  loadingProgressBar.style.width =
+    `${safePercent}%`;
+
+  loadingPercent.textContent =
+    `${Math.round(safePercent)}%`;
+
+  const tacoCount =
+    Math.max(1, Math.ceil(safePercent / 12.5));
+
+  loadingTacos.textContent =
+    "🌮".repeat(tacoCount);
+
+  if (messageIndex !== null) {
+    loadingMessage.textContent =
+      loadingMessages[messageIndex];
+  }
+}
+
+
+function finishLoadingScreen() {
+
+  updateLoadingProgress(100);
+
+  loadingMessage.textContent =
+    "🌮 Nacho Bowl is ready!";
+
+  setTimeout(() => {
+
+    loadingScreen.classList.add("hidden");
+
+  }, 350);
+}
+
+function finishPageLoading() {
+  updateLoadingProgress(100, 8);
+  finishLoadingScreen();
+}
+
 // ============================================================
 // CSV PARSING
 // ============================================================
@@ -368,25 +573,63 @@ function parseCSV(text) {
 
 function parseCards(csvText) {
   const rows = parseCSV(csvText);
+
   return rows
-    .filter(r => r.spanish && r.english)
+    .filter(r =>
+      (r.spanish || r.french || r.korean) &&
+      r.english
+    )
     .map(r => ({
-      spanish:  r.spanish,
-      english:  r.english,
-      setName:  r["card set"] || "",
-      level:    r.level || "",
-      unit:     r.unit || "",
+      spanish:
+        r.spanish ||
+        r.french ||
+        r.korean ||
+        "",
+
+      english:
+        r.english,
+
+      setName:
+        r["card set"] || "",
+
+      level:
+        r.level || "",
+
+      unit:
+        r.unit || "",
     }));
 }
 
 function parseAccounts(csvText) {
   const rows = parseCSV(csvText);
+
   return rows
     .filter(r => r.username && r.password)
     .map(r => ({
-      name:     r["student name"] || r.name || r.username,
-      username: r.username.trim().toLowerCase(),
-      password: r.password.trim(),
+      name:
+        r.name ||
+        r["student name"] ||
+        r.username,
+
+      username:
+        r.username
+          .trim()
+          .toLowerCase(),
+
+      password:
+        r.password.trim(),
+
+      accountType:
+        r["account type"]?.trim() || "",
+
+      language:
+        r.language?.trim() || "",
+
+      period:
+        (r.period || "")
+          .split(",")
+          .map(p => p.trim())
+          .filter(Boolean)
     }));
 }
 
@@ -406,55 +649,498 @@ function parseBoredCards(csvText) {
 // ============================================================
 // DATA LOADING
 // ============================================================
-const CARDS_CACHE_KEY    = "spanish-cards-cache-v1";
+const CARDS_CACHE_KEY    = "nachoCardsCache_";
 const ACCOUNTS_CACHE_KEY = "spanish-accounts-cache-v1";
 const BORED_CACHE_KEY = "spanish-bored-cache-v1";
 
 async function loadData() {
+  
+  allCards = [];
+  
+  console.log(
+    "LOAD DATA CALLED"
+  );
+  
   loadingMsg.classList.remove("hidden");
 
-  // Try loading from network first, fall back to cache
-  let cardsText    = null;
+  let cardsText = null;
   let accountsText = null;
-  let boredText    = null;
+  let boredText = null;
 
-  try {
-    const [cardsRes, accountsRes, boredRes] = await Promise.all([
-      fetch(CARDS_CSV_URL),
-      fetch(ACCOUNTS_CSV_URL),
-      fetch(BORED_CSV_URL),
-    ]);
+  // ----------------------------------------------------------
+  // USE CACHE FIRST
+  // ----------------------------------------------------------
+  
+  accountsText =
+    localStorage.getItem(ACCOUNTS_CACHE_KEY);
+  
+  boredText =
+    localStorage.getItem(BORED_CACHE_KEY);
+  
+  console.log(
+    "CACHED ACCOUNTS LENGTH:",
+    accountsText ? accountsText.length : 0
+  );
+  
+  console.log(
+    "CACHED ACCOUNTS START:",
+    accountsText
+      ? accountsText.substring(0, 300)
+      : "NO CACHE"
+  );
+  
+  boredText =
+    localStorage.getItem(BORED_CACHE_KEY);
 
-    [cardsText, accountsText, boredText] = await Promise.all([
-      cardsRes.text(),
-      accountsRes.text(),
-      boredRes.text(),
-    ]);
+  // ----------------------------------------------------------
+  // IF CACHE EXISTS, LOAD IT IMMEDIATELY
+  // ----------------------------------------------------------
+
+  if (accountsText) {
+  
+    allAccounts =
+      parseAccounts(accountsText);
+  
+    boredCards =
+      parseBoredCards(boredText || "");
+  
+    // --------------------------------------------------------
+    // DETERMINE USER LANGUAGE
+    // --------------------------------------------------------
     
-    // Save fresh data to cache
-    localStorage.setItem(CARDS_CACHE_KEY, cardsText);
-    localStorage.setItem(ACCOUNTS_CACHE_KEY, accountsText);
-    localStorage.setItem(BORED_CACHE_KEY, boredText);
-  } catch (err) {
-    // Network failed — try cache
-    cardsText    = localStorage.getItem(CARDS_CACHE_KEY);
-    accountsText = localStorage.getItem(ACCOUNTS_CACHE_KEY);
-    boredText    = localStorage.getItem(BORED_CACHE_KEY);
+    const savedUsername =
+      localStorage.getItem("nachoCurrentUser");
     
-    if (cardsText && accountsText) {
-      loadingMsg.textContent = "⚠️ Offline — using last saved data.";
-    } else {
-      loadingMsg.textContent = "Could not load data. Check your internet connection.";
-      return;
+    let language =
+      "Spanish";
+    
+    console.log(
+      "LOAD DATA LANGUAGE:",
+      language
+    );
+    
+    if (savedUsername) {
+    
+      const user =
+        allAccounts.find(
+          a =>
+            String(a.username).trim().toLowerCase() ===
+            String(savedUsername).trim().toLowerCase()
+        );
+    
+      if (user && user.language) {
+    
+        language =
+          user.language;
+    
+        console.log(
+          "LOAD DATA USER LANGUAGE:",
+          user.language
+        );
+      }
+    
     }
+    
+    // --------------------------------------------------------
+    // LOAD CACHED TABS FOR THIS LANGUAGE
+    // --------------------------------------------------------
+  
+    console.log(
+      "ABOUT TO LOAD TABS:",
+      language
+    );
+    
+    const tabs =
+      getCardTabsForLanguage(language);
+
+    console.log(
+      "LANGUAGE TABS:",
+      language,
+      Object.entries(tabs)
+    );
+
+    for (const [level, gid] of Object.entries(tabs)) {
+
+      const cachedCards =
+        localStorage.getItem(
+          `${CARDS_CACHE_KEY}${level}`
+        );
+    
+      console.log(
+        "CACHED TAB:",
+        level,
+        cachedCards ? cachedCards.length : 0
+      );
+    
+      if (level === "French 1") {
+        console.log(
+          "FRENCH 1 CACHE CONTENT:",
+          cachedCards
+        );
+      }
+    }
+  
+    allCards = [];
+  
+    for (const [level, gid] of Object.entries(tabs)) {
+  
+      const cachedCards =
+        localStorage.getItem(
+          `${CARDS_CACHE_KEY}${level}`
+        );
+  
+      if (cachedCards) {
+  
+        const cards =
+          parseCards(cachedCards);
+
+        console.log(
+          "PARSED CARDS:",
+          level,
+          cards
+        );
+  
+        cards.forEach(card => {
+          card.level = level;
+        });
+  
+        allCards.push(...cards);
+
+        console.log(
+          "CARD LANGUAGE CHECK:",
+          level,
+          cards.length,
+          cards.slice(0, 3)
+        );
+      }
+    }
+  
+    loadingMsg.textContent = "";
+  
+    // --------------------------------------------------------
+    // REFRESH DATA IN BACKGROUND
+    // --------------------------------------------------------
+  
+    try {
+  
+      const [accountsRes, boredRes] =
+        await Promise.all([
+          fetch(ACCOUNTS_CSV_URL),
+          fetch(BORED_CSV_URL)
+        ]);
+  
+      if (!accountsRes.ok) {
+        throw new Error(
+          `Accounts request failed: ${accountsRes.status}`
+        );
+      }
+  
+      if (!boredRes.ok) {
+        throw new Error(
+          `Bored request failed: ${boredRes.status}`
+        );
+      }
+  
+      const freshAccountsText =
+        await accountsRes.text();
+  
+      const freshBoredText =
+        await boredRes.text();
+  
+      const freshAccounts =
+        parseAccounts(freshAccountsText);
+  
+      let freshLanguage =
+        language;
+  
+      if (savedUsername) {
+  
+        const user =
+          freshAccounts.find(
+            a =>
+              String(a.username).trim().toLowerCase() ===
+              String(savedUsername).trim().toLowerCase()
+          );
+  
+        if (user && user.language) {
+          freshLanguage = user.language;
+        }
+      }
+  
+      // ------------------------------------------------------
+      // LOAD ALL TABS FOR USER'S LANGUAGE
+      // ------------------------------------------------------
+  
+      const freshTabs =
+        getCardTabsForLanguage(freshLanguage);
+  
+      const cardResults =
+        await Promise.all(
+          Object.entries(freshTabs).map(
+            async ([level, gid]) => {
+  
+              const response =
+                await fetch(
+                  `${CARDS_SHEET_URL}?output=csv&gid=${gid}`
+                );
+  
+              if (!response.ok) {
+                throw new Error(
+                  `Cards request failed for ${level}: ${response.status}`
+                );
+              }
+  
+              const text =
+                await response.text();
+  
+              return {
+                level,
+                text
+              };
+            }
+          )
+        );
+  
+      // ------------------------------------------------------
+      // CACHE ALL TABS
+      // ------------------------------------------------------
+  
+      cardResults.forEach(
+        ({ level, text }) => {
+  
+          localStorage.setItem(
+            `${CARDS_CACHE_KEY}${level}`,
+            text
+          );
+  
+        }
+      );
+  
+      localStorage.setItem(
+        ACCOUNTS_CACHE_KEY,
+        freshAccountsText
+      );
+  
+      localStorage.setItem(
+        BORED_CACHE_KEY,
+        freshBoredText
+      );
+  
+      // ------------------------------------------------------
+      // USE FRESH DATA
+      // ------------------------------------------------------
+  
+      allCards = [];
+  
+      cardResults.forEach(
+        ({ level, text }) => {
+  
+          const cards =
+            parseCards(text);
+  
+          cards.forEach(card => {
+            card.level = level;
+          });
+  
+          allCards.push(...cards);
+
+          console.log(
+            "CARD LANGUAGE CHECK:",
+            level,
+            cards.length,
+            cards.slice(0, 3)
+          );
+  
+        }
+      );
+  
+      allAccounts =
+        freshAccounts;
+  
+      boredCards =
+        parseBoredCards(freshBoredText);
+  
+    } catch (err) {
+  
+      console.warn(
+        "Background data refresh failed. Using cached data.",
+        err
+      );
+    }
+  
+    return;
   }
 
-  allCards    = parseCards(cardsText);
-  allAccounts = parseAccounts(accountsText);
-  boredCards  = parseBoredCards(boredText);
-  if (!loadingMsg.textContent.startsWith("⚠️")) {
+  // ----------------------------------------------------------
+  // NO CACHE — LOAD FROM NETWORK
+  // ----------------------------------------------------------
+  
+  try {
+  
+    const [
+      accountsRes,
+      boredRes
+    ] = await Promise.all([
+      fetch(ACCOUNTS_CSV_URL),
+      fetch(BORED_CSV_URL)
+    ]);
+  
+    if (!accountsRes.ok) {
+      throw new Error(
+        `Accounts request failed: ${accountsRes.status}`
+      );
+    }
+  
+    if (!boredRes.ok) {
+      throw new Error(
+        `Bored request failed: ${boredRes.status}`
+      );
+    }
+  
+    accountsText =
+      await accountsRes.text();
+  
+    boredText =
+      await boredRes.text();
+  
+    allAccounts =
+      parseAccounts(accountsText);
+  
+    boredCards =
+      parseBoredCards(boredText);
+  
+    // --------------------------------------------------------
+    // DETERMINE USER LANGUAGE
+    // --------------------------------------------------------
+  
+    const savedUsername =
+      localStorage.getItem("nachoCurrentUser");
+  
+    let language =
+      "Spanish";
+  
+    if (savedUsername) {
+  
+      const user =
+        allAccounts.find(
+          a =>
+            String(a.username).trim().toLowerCase() ===
+            String(savedUsername).trim().toLowerCase()
+        );
+  
+      if (user && user.language) {
+        language =
+          user.language;
+      }
+    }
+  
+    // --------------------------------------------------------
+    // LOAD ALL TABS FOR USER LANGUAGE
+    // --------------------------------------------------------
+  
+    console.log(
+      "ABOUT TO LOAD TABS:",
+      language
+    );
+    
+    const tabs =
+      getCardTabsForLanguage(language);
+  
+    const cardResults =
+      await Promise.all(
+        Object.entries(tabs).map(
+          async ([level, gid]) => {
+  
+            const response =
+              await fetch(
+                `${CARDS_SHEET_URL}?output=csv&gid=${gid}`
+              );
+  
+            if (!response.ok) {
+              throw new Error(
+                `Cards request failed for ${level}: ${response.status}`
+              );
+            }
+  
+            const text =
+              await response.text();
+  
+            return {
+              level,
+              text
+            };
+          }
+        )
+      );
+  
+    // --------------------------------------------------------
+    // CACHE DATA
+    // --------------------------------------------------------
+  
+    localStorage.setItem(
+      ACCOUNTS_CACHE_KEY,
+      accountsText
+    );
+  
+    localStorage.setItem(
+      BORED_CACHE_KEY,
+      boredText
+    );
+  
+    cardResults.forEach(
+      ({ level, text }) => {
+  
+        localStorage.setItem(
+          `${CARDS_CACHE_KEY}${level}`,
+          text
+        );
+  
+      }
+    );
+  
+    // --------------------------------------------------------
+    // BUILD ALL CARDS
+    // --------------------------------------------------------
+  
+    allCards = [];
+  
+    cardResults.forEach(
+      ({ level, text }) => {
+  
+        const cards =
+          parseCards(text);
+  
+        cards.forEach(card => {
+          card.level = level;
+        });
+  
+        allCards.push(...cards);
+
+        console.log(
+          "CARD LANGUAGE CHECK:",
+          level,
+          cards.length,
+          cards.slice(0, 3)
+        );
+  
+      }
+    );
+  
     loadingMsg.textContent = "";
+  
+  } catch (err) {
+  
+    loadingMsg.textContent =
+      "Could not load data. Check your internet connection.";
+  
+    console.error(
+      "Initial data load failed:",
+      err
+    );
+  
+    return;
   }
+
 }
 
 function getRandomBoredCard() {
@@ -480,25 +1166,74 @@ function getRandomBoredCard() {
 // ============================================================
 // AUTH
 // ============================================================
-loginForm.addEventListener("submit", (e) => {
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const username = usernameInput.value.trim().toLowerCase();
-  const password = passwordInput.value.trim();
-  const user = allAccounts.find(a => a.username === username && a.password === password);
+
+  const username =
+    usernameInput.value.trim().toLowerCase();
+
+  const password =
+    passwordInput.value.trim();
+
+  const user =
+    allAccounts.find(
+      a =>
+        a.username === username &&
+        a.password === password
+    );
+
   if (!user) {
-    loginError.textContent = "Username or password not found.";
+    loginError.textContent =
+      "Username or password not found.";
+
     loginError.classList.remove("hidden");
+
     return;
   }
+
   loginError.classList.add("hidden");
+
   currentUser = user;
-  localStorage.setItem("nachoCurrentUser", user.username);
+
+  localStorage.setItem(
+    "nachoCurrentUser",
+    user.username
+  );
+
+  console.log(
+    "RESTORED ACCOUNT LANGUAGE:",
+    currentUser.language,
+    "TYPE:",
+    currentUser.accountType
+  );
+
+  console.log(
+    "SAVED USER:",
+    localStorage.getItem("nachoCurrentUser")
+  );
+
+  await loadData();
+
+  await loadTeacherSettings();
+
+  console.log(
+    "CURRENT ACCOUNT OBJECT:",
+    allAccounts.find(
+      a =>
+        String(a.username).trim().toLowerCase() ===
+        String(
+          localStorage.getItem("nachoCurrentUser")
+        ).trim().toLowerCase()
+    )
+  );
+
   showPracticeScreen();
 });
 
 signOutBtn.addEventListener("click", () => {
   currentUser = null;
   localStorage.removeItem("nachoCurrentUser");
+  localStorage.removeItem("nachoCurrentPanel");
 
   usernameInput.value = "";
   passwordInput.value = "";
@@ -517,38 +1252,179 @@ boredBtn.addEventListener("click", () => {
 });
 
 teacherModeBtn.addEventListener("click", () => {
-  teacherPasswordInput.value = "";
-  teacherPasswordError.classList.add("hidden");
-  teacherPasswordDialog.classList.remove("hidden");
-  teacherPasswordInput.focus();
-});
-
-
-teacherPasswordSubmit.addEventListener("click", () => {
-  const password = teacherPasswordInput.value.trim();
-
-  if (password !== TEACHER_PASSWORD) {
-    teacherPasswordError.classList.remove("hidden");
+  if (
+    !currentUser ||
+    !currentUser.accountType.startsWith("Teacher")
+  ) {
     return;
   }
 
-  teacherPasswordDialog.classList.add("hidden");
-  teacherPasswordInput.value = "";
   openTeacherSettings();
 });
 
-teacherPasswordInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    teacherPasswordSubmit.click();
-  }
-});
-
-teacherPasswordCancel.addEventListener("click", () => {
-  teacherPasswordDialog.classList.add("hidden");
-});
 
 closeTeacherBtn.addEventListener("click", () => {
   teacherDialog.classList.add("hidden");
+});
+
+// ============================================================
+// LANDING PAGE
+// ============================================================
+const LANDING_LANGUAGE_CONTENT = {
+
+  Spanish: {
+    welcome:
+      "¡Hola, {name}! ¿Qué quieres practicar hoy?",
+  
+    foodDecor:
+      "🧀 🌮 🌶️",
+  
+    foodFooter:
+      "🌮 🥑 🌶️ 🧀",
+  
+    description: {
+      studySets:
+        "Practice vocabulary and phrases",
+  
+      conversation:
+        "Practice Spanish through conversations",
+  
+      conjugation:
+        "Practice Spanish verb conjugation"
+    }
+  },
+
+  French: {
+    welcome:
+      "Bonjour, {name} ! Qu'est-ce que tu veux pratiquer aujourd'hui ?",
+  
+    foodDecor:
+      "🥐 🥖 🧀",
+  
+    foodFooter:
+      "🥐 🥖 🧀 🍰",
+  
+    description: {
+      studySets:
+        "Practice vocabulary and phrases",
+  
+      conversation:
+        "Practice French through conversations",
+  
+      conjugation:
+        "Practice French verb conjugation"
+    }
+  },
+
+  Korean: {
+    welcome:
+      "안녕하세요, {name} 님! 오늘은 무엇을 연습하고 싶으신가요?",
+  
+    foodDecor:
+      "🍚 🍜 🥢",
+  
+    foodFooter:
+      "🍚 🍜 🥟 🥢",
+  
+    description: {
+      studySets:
+        "Practice vocabulary and phrases",
+  
+      conversation:
+        "Practice Korean through conversations",
+  
+      conjugation:
+        "Practice Korean verb conjugation"
+    }
+  }
+
+};
+
+function showLandingPage() {
+
+  // Never show the landing page without a logged-in user
+  if (!currentUser) {
+    return;
+  }
+
+  saveCurrentPanel("landing");
+
+  loginScreen.classList.add("hidden");
+  practiceScreen.classList.remove("hidden");
+
+  const language =
+    currentUser.language;
+
+  console.log("LANDING LANGUAGE:", currentUser?.language);
+  console.log("LANDING USER:", currentUser);
+
+  const content =
+    LANDING_LANGUAGE_CONTENT[language] ||
+    LANDING_LANGUAGE_CONTENT.Spanish;
+
+    landingFoodDecor.textContent =
+      content.foodDecor;
+    
+    landingFoodFooter.textContent =
+      content.foodFooter;
+    
+      const name =
+        currentUser.name;
+    
+      landingWelcomeTarget.textContent =
+        content.welcome.replace("{name}", name);
+    
+      landingWelcomeEnglish.textContent =
+        "What would you like to practice today?";
+    
+      studySetsDescription.textContent =
+        content.description.studySets;
+    
+      conversationDescription.textContent =
+        content.description.conversation;
+    
+      conjugationDescription.textContent =
+        content.description.conjugation;
+
+  landingPanel.classList.remove("hidden");
+
+  filterPanel.classList.add("hidden");
+  practicePanel.classList.add("hidden");
+  resultsPanel.classList.add("hidden");
+  conversationSelectionPanel.classList.add("hidden");
+  conversationPanel.classList.add("hidden");
+}
+
+// ============================================================
+// LANDING PAGE NAVIGATION
+// ============================================================
+
+homeBtn.addEventListener("click", () => {
+
+  console.log("HOME BUTTON CLICKED");
+
+  showLandingPage();
+
+});;
+
+studySetsNavBtn.addEventListener("click", () => {
+  showFilterPanel();
+});
+
+conversationNavBtn.addEventListener("click", () => {
+  console.log("CONVERSATION NAV CLICKED");
+
+  if (typeof openConversationSelection === "function") {
+    openConversationSelection();
+  } else {
+    console.error(
+      "openConversationSelection is not available."
+    );
+  }
+});
+
+conjugationNavBtn.addEventListener("click", () => {
+  alert("Conjugation practice is coming soon!");
 });
 
 // ============================================================
@@ -557,11 +1433,16 @@ closeTeacherBtn.addEventListener("click", () => {
 function showPracticeScreen() {
   loginScreen.classList.add("hidden");
   practiceScreen.classList.remove("hidden");
-  welcomeName.textContent = currentUser.name;
-  showFilterPanel();
-  renderModeChips();
+
+  welcomeName.textContent =
+    currentUser.name;
+
   renderAttemptHistory();
   updateFooterNachos();
+
+  loadTeacherSettings();
+
+  showLandingPage();
 }
 
 function saveCurrentPanel(panelName) {
@@ -599,20 +1480,25 @@ function loadFilterSettings() {
 
 function showFilterPanel() {
   saveCurrentPanel("filter");
-  
+
+  landingPanel.classList.add("hidden");
+
   filterPanel.classList.remove("hidden");
   practicePanel.classList.add("hidden");
   resultsPanel.classList.add("hidden");
+
+  conversationSelectionPanel.classList.add("hidden");
+  conversationPanel.classList.add("hidden");
 
   loadFilterSettings();
 
   renderLevelChips();
   renderUnitChips();
   renderSetChips();
+  renderModeChips();
   loadMyStudySets();
   updateCardCountPreview();
 }
-
 // ============================================================
 // FILTER CHIPS
 // ============================================================
@@ -620,20 +1506,30 @@ function renderModeChips() {
   modeOptions.innerHTML = "";
 
   Object.keys(PRACTICE_MODES).forEach(mode => {
-    if (!PRACTICE_MODES[mode].enabled) return;
+    if (!PRACTICE_MODES[mode].enabled) {
+      return;
+    }
 
     const chip = document.createElement("button");
+
     chip.type = "button";
-    chip.className = "mode-chip" + (practiceMode === mode ? " active" : "");
+    chip.className =
+      "mode-chip" +
+      (practiceMode === mode ? " active" : "");
+
     chip.dataset.mode = mode;
-    chip.textContent = PRACTICE_MODES[mode].label;
+
+    chip.textContent =
+      PRACTICE_MODES[mode].label;
 
     chip.addEventListener("click", () => {
       practiceMode = mode;
 
-      document.querySelectorAll(".mode-chip").forEach(c => {
-        c.classList.remove("active");
-      });
+      document
+        .querySelectorAll(".mode-chip")
+        .forEach(c => {
+          c.classList.remove("active");
+        });
 
       chip.classList.add("active");
     });
@@ -982,58 +1878,185 @@ nachoBackBtn.addEventListener("click", () => {
   showFilterPanel();
 });
 
-function openTeacherSettings() {
+async function openTeacherSettings() {
+
   teacherModeList.innerHTML = "";
 
+  if (
+    !currentUser ||
+    !currentUser.accountType.startsWith("Teacher")
+  ) {
+    return;
+  }
+
+  const teacherKey =
+    currentUser.accountType;
+
+  const languageKey =
+    currentUser.language;
+
+  const periods =
+    currentUser.period || [];
+
+  // ----------------------------------------------------------
+  // GET ALL SETTINGS WITH ONE REQUEST
+  // ----------------------------------------------------------
+
+  let periodSettings = {};
+
+  try {
+
+    const url =
+      `${TEACHER_SETTINGS_API}` +
+      `?action=getSettings` +
+      `&teacher=${encodeURIComponent(teacherKey)}` +
+      `&language=${encodeURIComponent(languageKey)}`;
+
+    const response =
+      await fetch(url);
+
+    const result =
+      await response.json();
+
+    if (result.success && result.settings) {
+      periodSettings =
+        result.settings;
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Could not load teacher settings:",
+      error
+    );
+  }
+
+  // ----------------------------------------------------------
+  // TABLE
+  // ----------------------------------------------------------
+
+  const table =
+    document.createElement("table");
+
+  table.className =
+    "teacher-settings-table";
+
+  // ----------------------------------------------------------
+  // HEADER
+  // ----------------------------------------------------------
+
+  const thead =
+    document.createElement("thead");
+
+  const headerRow =
+    document.createElement("tr");
+
+  const periodHeader =
+    document.createElement("th");
+
+  periodHeader.textContent =
+    "Period";
+
+  headerRow.appendChild(periodHeader);
+
   Object.keys(PRACTICE_MODES).forEach(mode => {
-    const row = document.createElement("div");
-    row.className = "teacher-toggle-row";
 
-    const label = document.createElement("span");
-    label.textContent = PRACTICE_MODES[mode].label;
+    const th =
+      document.createElement("th");
 
-    const button = document.createElement("button");
-    button.className = PRACTICE_MODES[mode].enabled
-      ? "toggle-on"
-      : "toggle-off";
+    th.textContent =
+      PRACTICE_MODES[mode].label;
 
-    button.textContent = PRACTICE_MODES[mode].enabled
-      ? "ON"
-      : "OFF";
+    headerRow.appendChild(th);
+  });
 
-    button.addEventListener("click", () => {
-      PRACTICE_MODES[mode].enabled = !PRACTICE_MODES[mode].enabled;
-    
-      saveTeacherSettings();
-      updateTeacherLockIndicator();
-    
-      if (!PRACTICE_MODES[mode].enabled && practiceMode === mode) {
-        const nextMode = Object.keys(PRACTICE_MODES)
-          .find(m => PRACTICE_MODES[m].enabled);
-      
-        if (nextMode) {
-          practiceMode = nextMode;
-        }
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // ----------------------------------------------------------
+  // BODY
+  // ----------------------------------------------------------
+
+  const tbody =
+    document.createElement("tbody");
+
+  periods.forEach(period => {
+
+    const row =
+      document.createElement("tr");
+
+    const periodCell =
+      document.createElement("td");
+
+    periodCell.textContent =
+      `Period ${period}`;
+
+    row.appendChild(periodCell);
+
+    const existingSettings =
+      periodSettings[period] || {};
+
+    Object.keys(PRACTICE_MODES).forEach(mode => {
+
+      const cell =
+        document.createElement("td");
+
+      const button =
+        document.createElement("button");
+
+      let enabled =
+        existingSettings[mode] ?? true;
+
+      function updateButton() {
+
+        button.className =
+          enabled
+            ? "toggle-on"
+            : "toggle-off";
+
+        button.textContent =
+          enabled
+            ? "ON"
+            : "OFF";
       }
-      
-      button.className = PRACTICE_MODES[mode].enabled
-        ? "toggle-on"
-        : "toggle-off";
 
-      button.textContent = PRACTICE_MODES[mode].enabled
-        ? "ON"
-        : "OFF";
+      updateButton();
 
-      renderModeChips();
-      updateCardCountPreview();
+      button.addEventListener(
+        "click",
+        async () => {
+
+          enabled = !enabled;
+
+          updateButton();
+
+          const settings = {
+            ...existingSettings,
+            [mode]: enabled
+          };
+
+          existingSettings[mode] =
+            enabled;
+
+          await saveTeacherSettings(
+            teacherKey,
+            languageKey,
+            period,
+            settings
+          );
+        }
+      );
+
+      cell.appendChild(button);
+      row.appendChild(cell);
     });
 
-    row.appendChild(label);
-    row.appendChild(button);
-
-    console.log("Adding teacher row:", PRACTICE_MODES[mode].label);
-    teacherModeList.appendChild(row);
+    tbody.appendChild(row);
   });
+
+  table.appendChild(tbody);
+
+  teacherModeList.appendChild(table);
 
   teacherDialog.classList.remove("hidden");
 }
@@ -3742,31 +4765,114 @@ function updateNachoBuilderStrikes() {
 // ============================================================
 // INIT
 // ============================================================
-loadTeacherSettings();
 
-loadData().then(() => {
+updateLoadingProgress(10, 0);
+
+setTimeout(() => {
+  loadData().then(async () => {
+  
   const savedUsername =
     localStorage.getItem("nachoCurrentUser");
 
+  console.log(
+    "RESTORE USER:",
+    savedUsername
+  );
+
   if (!savedUsername) {
+    console.log("NO SAVED USER");
+  
+    finishPageLoading();
     return;
   }
 
+  console.log(
+    "ACCOUNTS LOADED:",
+    allAccounts.length
+  );
+
+  updateLoadingProgress(40, 1);
+
   const user = allAccounts.find(
-    a => a.username === savedUsername
+    a =>
+      String(a.username).trim().toLowerCase() ===
+      String(savedUsername).trim().toLowerCase()
+  );
+
+  console.log(
+    "RESTORED USER OBJECT:",
+    user
   );
 
   if (!user) {
+    console.log(
+      "SAVED USER NOT FOUND IN ACCOUNTS:",
+      savedUsername
+    );
+  
+    finishPageLoading();
     return;
   }
 
   currentUser = user;
 
+  updateLoadingProgress(70, 5);
+  
+  console.log(
+    "USER RESTORED:",
+    currentUser.username,
+    "LANGUAGE:",
+    currentUser.language
+  );
+
+  welcomeName.textContent =
+    currentUser.name;
+  
+  try {
+    await loadTeacherSettings();
+  } catch (error) {
+    console.error(
+      "Teacher settings failed during restore:",
+      error
+    );
+  }
+  
+  renderAttemptHistory();
+  updateFooterNachos();
+  renderModeChips();
+
+  landingPanel.classList.add("hidden");
+
+  console.log(
+    "USER RESTORED:",
+    currentUser.username,
+    "LANGUAGE:",
+    currentUser.language
+  );
+  
   const savedPanel =
     localStorage.getItem("nachoCurrentPanel");
+  
+  console.log(
+    "SAVED PANEL:",
+    savedPanel
+  );
 
+  if (savedPanel === "landing") {
+  
+    showLandingPage();
+  
+    finishPageLoading();
+    return;
+  }
+  
   if (savedPanel === "filter") {
+    practiceScreen.classList.remove("hidden");
+    loginScreen.classList.add("hidden");
+  
     showFilterPanel();
+  
+    finishPageLoading();
     return;
   }
 
@@ -3774,15 +4880,24 @@ loadData().then(() => {
   // RESTORE PRACTICE SCREEN
   // ----------------------------------------------------------
 
-  practiceScreen.classList.remove("hidden");
-  loginScreen.classList.add("hidden");
-
-  welcomeName.textContent =
-    currentUser.name;
-
-  renderModeChips();
-  renderAttemptHistory();
-  updateFooterNachos();
+    practiceScreen.classList.remove("hidden");
+    loginScreen.classList.add("hidden");
+  
+    welcomeName.textContent =
+      currentUser.name;
+  
+    try {
+      await loadTeacherSettings();
+    } catch (error) {
+      console.error(
+        "Teacher settings failed during restore:",
+        error
+      );
+    }
+  
+    renderModeChips();
+    renderAttemptHistory();
+    updateFooterNachos();
 
   // ----------------------------------------------------------
   // RESTORE STUDY SET
@@ -3812,16 +4927,16 @@ loadData().then(() => {
 
     }
 
+    finishPageLoading();
     return;
   }
-
 
   // ----------------------------------------------------------
   // RESTORE CONVERSATIONS
   // ----------------------------------------------------------
 
   if (savedPanel === "conversationSelection") {
-  
+
     filterPanel.classList.add("hidden");
     practicePanel.classList.add("hidden");
     studySetPanel.classList.add("hidden");
@@ -3833,6 +4948,7 @@ loadData().then(() => {
   
     loadConversationIndex();
   
+    finishPageLoading();
     return;
   }
   
@@ -3885,6 +5001,7 @@ loadData().then(() => {
 
     }
 
+    finishPageLoading();
     return;
   }
 
@@ -3954,13 +5071,18 @@ loadData().then(() => {
       updateStats();
       showNextCard();
 
+      finishPageLoading();
       return;
     }
   }
 
   // ----------------------------------------------------------
-  // DEFAULT: FILTER SCREEN
+  // DEFAULT: LANDING PAGE
   // ----------------------------------------------------------
-
-  showFilterPanel();
-});
+  
+  showLandingPage();
+  
+  finishPageLoading();
+  
+    });
+  }, 50);
