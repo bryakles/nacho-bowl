@@ -166,26 +166,19 @@ conversationWritingInput.addEventListener("input", () => {
 });
 
 // ============================================================
-// OPEN CONVERSATIONS
-// ============================================================
-
-conversationBtn.addEventListener(
-  "click",
-  () => {
-
-    openConversationSelection();
-
-  }
-);
-
-
-// ============================================================
 // OPEN CONVERSATION SELECTION
 // ============================================================
 
 async function openConversationSelection() {
 
   saveCurrentPanel("conversationSelection");
+
+    if (
+      typeof landingPanel !==
+      "undefined"
+    ) {
+      landingPanel.classList.add("hidden");
+    }
 
   if (homeOnlyContent) {
     homeOnlyContent.classList.add("hidden");
