@@ -4,9 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🌮 Nacho Bowl: Language Practice</title>
-  <link rel="stylesheet" href="style.css?v=14" />
+  <link rel="stylesheet" href="style.css?v=13" />
 </head>
 <body>
+
+  <!-- LOADING SCREEN -->
+  <div id="loadingScreen" class="loading-screen">
+
+    <div class="loading-card">
+
+      <div class="loading-logo">🌮</div>
+
+      <h1>Nacho Bowl</h1>
+
+      <p id="loadingMessage" class="loading-message">
+        Warming up the kitchen...
+      </p>
+
+      <div id="loadingTacos" class="loading-tacos">
+        🌮
+      </div>
+
+      <div class="loading-progress-track">
+        <div
+          id="loadingProgressBar"
+          class="loading-progress-bar"
+          style="width: 0%;"
+        ></div>
+      </div>
+
+      <div id="loadingPercent" class="loading-percent">
+        0%
+      </div>
+
+    </div>
+
+  </div>
+
 
   <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="screen">
@@ -24,118 +58,234 @@
     </div>
   </div>
 
-  <!-- PRACTICE SCREEN -->
-  <div id="practiceScreen" class="screen hidden">
-
-    <header class="top-bar">
-      <div class="top-bar-left">
-        <span class="logo-small">🌮</span>
-        <span id="welcomeName" class="welcome-name"></span>
-      </div>
-      <button id="signOutBtn" class="btn btn-ghost">Sign Out</button>
-      </header>
-    <main class="practice-main">
-
-      <!-- FILTER PANEL -->
-      <section id="filterPanel" class="panel">
-        <h2>Choose What to Practice</h2>
-      
-        <div class="filter-grid">
-          <div class="filter-group">
-            <label>Level</label>
-            <div id="levelOptions" class="chip-group"></div>
-          </div>
-      
-          <div class="filter-group">
-            <label>Unit</label>
-            <div id="unitOptions" class="chip-group">
-              <span class="filter-hint">Select a level first</span>
-            </div>
-          </div>
-      
-          <div class="filter-group">
-            <label>Study Set</label>
-            <div id="setOptions" class="chip-group set-chip-group">
-              <span class="filter-hint">Select a unit first</span>
-            </div>
-          </div>
+    <!-- PRACTICE SCREEN -->
+    <div id="practiceScreen" class="screen hidden">
+  
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <span class="logo-small">🌮</span>
+          <span id="welcomeName" class="welcome-name"></span>
         </div>
-
-        <!-- MY STUDY SETS -->
-        <div class="filter-group my-study-sets-group">
-          <label>My Study Sets</label>
-          <div
-            id="myStudySetOptions"
-            class="chip-group my-study-set-chips"
+      
+        <div class="top-bar-right">
+          <button
+            id="homeBtn"
+            class="btn btn-ghost"
+            type="button"
           >
-            <span class="filter-hint">
-              No saved study sets yet
-            </span>
+            🏠 Home
+          </button>
+      
+          <button
+            id="signOutBtn"
+            class="btn btn-ghost"
+            type="button"
+          >
+            Sign Out
+          </button>
+        </div>
+      
+      </header>
+  
+      <!-- LANDING PAGE -->
+      <section id="landingPanel" class="landing-panel hidden">
+      
+        <div class="landing-hero">
+      
+          <div id="landingFoodDecor" class="landing-food-decor">
+            🧀 🌮 🌶️
           </div>
+      
+          <h1 id="landingWelcomeTarget"></h1>
+      
+          <p
+            id="landingWelcomeEnglish"
+            class="landing-welcome-english"
+          ></p>
+      
         </div>
-        
-        <button
-          id="manageStudySetsBtn"
-          type="button"
-          class="manage-study-sets-btn"
+      
+      
+        <div class="landing-options">
+      
+          <!-- STUDY SETS -->
+          <button
+            id="studySetsNavBtn"
+            class="landing-option"
+            type="button"
+          >
+            <div class="landing-option-icon">🧀</div>
+      
+            <div class="landing-option-content">
+              <h2>Study Sets</h2>
+      
+              <p id="studySetsDescription">
+                Practice vocabulary and phrases
+              </p>
+            </div>
+      
+            <div class="landing-option-arrow">→</div>
+          </button>
+      
+      
+          <!-- CONVERSATION -->
+          <button
+            id="conversationNavBtn"
+            class="landing-option"
+            type="button"
+          >
+            <div class="landing-option-icon">💬</div>
+      
+            <div class="landing-option-content">
+              <h2>Conversation</h2>
+      
+              <p id="conversationDescription">
+                Practice Spanish through conversations
+              </p>
+            </div>
+      
+            <div class="landing-option-arrow">→</div>
+          </button>
+      
+      
+          <!-- CONJUGATION -->
+          <button
+            id="conjugationNavBtn"
+            class="landing-option"
+            type="button"
+          >
+            <div class="landing-option-icon">🔤</div>
+      
+            <div class="landing-option-content">
+              <h2>Conjugation</h2>
+      
+              <p id="conjugationDescription">
+                Practice Spanish verb conjugation
+              </p>
+            </div>
+      
+            <div class="landing-option-arrow">→</div>
+          </button>
+      
+        </div>
+      
+      
+        <div
+          id="landingFoodFooter"
+          class="landing-food-footer"
         >
-          ⚙️ Manage Study Sets
-        </button>
-        
-        <div class="section-divider"></div>
-        
-        <div class="filter-group">
-          <label>Practice Mode</label>
-        
-          <div id="modeOptions" class="mode-chips"></div>
+          🌮 🥑 🌶️ 🧀
         </div>
-          
+      
+      </section>
+  
+      <!-- STUDY SETS CONTENT -->
+      <main class="practice-main">
+      
+        <!-- FILTER PANEL -->
+        <section id="filterPanel" class="panel hidden">
+      
+          <h2>Choose What to Practice</h2>
+      
+          <div class="filter-grid">
+      
+            <div class="filter-group">
+              <label>Level</label>
+              <div id="levelOptions" class="chip-group"></div>
+            </div>
+      
+            <div class="filter-group">
+              <label>Unit</label>
+              <div id="unitOptions" class="chip-group">
+                <span class="filter-hint">Select a level first</span>
+              </div>
+            </div>
+      
+            <div class="filter-group">
+              <label>Study Set</label>
+              <div id="setOptions" class="chip-group set-chip-group">
+                <span class="filter-hint">Select a unit first</span>
+              </div>
+            </div>
+      
+          </div>
+      
+          <!-- MY STUDY SETS -->
+          <div class="filter-group my-study-sets-group">
+            <label>My Study Sets</label>
+      
+            <div
+              id="myStudySetOptions"
+              class="chip-group my-study-set-chips"
+            >
+              <span class="filter-hint">
+                No saved study sets yet
+              </span>
+            </div>
+          </div>
+      
+          <button
+            id="manageStudySetsBtn"
+            type="button"
+            class="manage-study-sets-btn"
+          >
+            ⚙️ Manage Study Sets
+          </button>
+      
+          <div class="section-divider"></div>
+      
+          <div class="filter-group">
+            <label>Practice Mode</label>
+            <div id="modeOptions" class="mode-chips"></div>
+          </div>
+      
           <div class="mode-row">
             <label>Session Length:</label>
+      
             <div class="session-chips">
-              <button class="session-chip" data-count="10">
+              <button
+                class="session-chip"
+                data-count="10"
+              >
                 Quick (10)
               </button>
-              <button class="session-chip active" data-count="25">
+      
+              <button
+                class="session-chip active"
+                data-count="25"
+              >
                 Standard (25)
               </button>
             </div>
           </div>
-          
+      
           <div class="filter-footer-bottom">
-            <span id="cardCountPreview" class="card-count-preview">No cards selected</span>
-          
-            <button id="startPracticeBtn" class="btn btn-primary" disabled>
+      
+            <span
+              id="cardCountPreview"
+              class="card-count-preview"
+            >
+              No cards selected
+            </span>
+      
+            <button
+              id="startPracticeBtn"
+              class="btn btn-primary"
+              disabled
+            >
               Start Practice
             </button>
-
-            <!-- HOME-ONLY CONTENT -->
-            <div id="homeOnlyContent">
-            
-              <!-- CONVERSATIONS -->
-              <div class="section-divider"></div>
-              
-              <div class="conversation-entry">
-                <div class="conversation-entry-text">
-                  <h3>💬 Conversations</h3>
-                  <p>Practice Spanish through real-world conversations.</p>
-                </div>
-              
-                <button
-                  id="conversationBtn"
-                  type="button"
-                  class="conversation-entry-btn"
-                >
-                  Practice Conversations →
-                </button>
-              </div>
-        
+      
           </div>
-          
-          </section>
-
-      <!-- CONVERSATION SELECTION PANEL -->
-      <section id="conversationSelectionPanel" class="panel hidden">
+      
+        </section>
+      
+      
+        <!-- CONVERSATION SELECTION PANEL -->
+        <section
+          id="conversationSelectionPanel"
+          class="panel hidden"
+        >
       
         <div class="practice-header">
           <div>
@@ -667,7 +817,7 @@
     </div>
   </div>
 
-  <script src="conversation.js?v=14"></script>
-  <script src="app.js?v=14"></script>
+  <script src="conversation.js?v=1"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
